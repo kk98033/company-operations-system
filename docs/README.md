@@ -4,6 +4,7 @@
 - `資料模型與業務規則.md`：核心關聯、數量、金額、狀態與並行。
 - `測試與驗收計畫.md`：每步驗證、E2E、列印、還原及 UAT。
 - `舊資料移轉計畫.md`：亂碼、staging、mapping、核對及切換。
+- `舊系統資料Import對照與分批計畫.md`：實際舊表、初步筆數、新表 mapping、平行 Import Slice 與核對門檻。
 - `本機開發與Git備份規範.md`：commit、tag、bundle、remote 與回復。
 - `風險與決策紀錄.md`：目前風險、已定決策及 ADR 入口。
 - `decisions/`：重大架構與業務決策。
