@@ -1,0 +1,48 @@
+# Secrets and local environments
+.env
+.env.*
+!.env.example
+.venv/
+venv/
+
+# Frontend
+node_modules/
+dist/
+.vite/
+coverage/
+
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+htmlcov/
+
+# Local databases and runtime data
+*.db
+*.sqlite*
+*.dump
+*.bak
+*.mdf
+*.ldf
+storage/*
+!storage/.gitkeep
+
+# Attachments, imports and generated documents
+uploads/
+imports/raw/
+imports/staging/
+generated/
+artifacts/
+playwright-report/
+test-results/
+
+# Editors and operating systems
+.DS_Store
+.idea/
+.vscode/
+*.swp
+
+# Local Git bundles live outside the repository
+*.bundle
