@@ -1,0 +1,1 @@
+"""Company system backend application."""

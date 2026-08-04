@@ -18,6 +18,8 @@ __pycache__/
 .mypy_cache/
 .ruff_cache/
 htmlcov/
+*.egg-info/
+*.tsbuildinfo
 
 # Local databases and runtime data
 *.db
