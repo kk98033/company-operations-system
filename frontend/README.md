@@ -19,13 +19,15 @@ npm run dev
 
 目前可用頁面：
 
-- `/`：Phase 0 工程首頁。
-- `/style-preview`：A 平面工業 ERP、B 現代桌面 ERP、C Bootstrap 企業版的互動比較；全部使用假資料，尚未選定正式風格。
+- `/`：Phase 0 工程首頁，使用正式 ADR-010 UI。
+- `/ui-patterns`：總覽、清單、表單與詳細資料的正式共用版型；全部使用假資料。
+- `/style-preview`：A／B／C 的歷史比較證據；不是正式 UI，不得加入業務功能。
 
 ## 驗證指令
 
 ```bash
 npm run lint
+npm run check:ui
 npm run typecheck
 npm run test
 npm run build
@@ -39,11 +41,13 @@ npm run build
 src/
 ├─ app/          Router、Providers、ErrorBoundary 與桌面版 Layout
 ├─ pages/        首頁與共用狀態頁；業務頁面後續移入 features
-├─ styles/       可替換的 Design Tokens 與全域樣式
+├─ ui/           ADR-010 跨模組共用元件與開發規則
+├─ styles/       正式 Design Tokens、殼層、共用元件及歷史預覽樣式
 └─ test/         Vitest 與 Testing Library 共用設定
 ```
 
 - 後端資料一律由 TanStack Query 管理。
 - 不在前端自行決定庫存、稅額、單號或權限結果。
-- 本機介面只使用專案 CSS tokens；依架構基準導入 Ant Design 時，不得混用第二套完整 UI framework。
+- 正式介面已依 ADR-010 鎖定 A 平面工業架構＋C 表單清晰度；只使用專案 tokens 與共用元件。
+- `npm run lint` 會同時執行 UI conformance；新頁面不得自創另一套視覺。
 - 業務功能必須依 `../03_最終實作計畫.md` 的 Slice 順序新增。

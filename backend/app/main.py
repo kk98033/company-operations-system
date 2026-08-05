@@ -7,15 +7,19 @@ from collections.abc import Sequence
 from fastapi import FastAPI
 
 from app.api.v1.router import build_v1_router
+from app.core.config import AppSettings, load_settings
 from app.core.errors import register_exception_handlers
 from app.core.readiness import ReadinessCheck, database_not_configured
 
 
 def create_app(
     *,
+    settings: AppSettings | None = None,
     readiness_checks: Sequence[ReadinessCheck] | None = None,
 ) -> FastAPI:
-    """Create an isolated app, allowing tests to inject dependency checks."""
+    """Create an isolated app with validated settings and injected checks."""
+
+    configured_settings = settings or load_settings()
 
     app = FastAPI(
         title="公司管理系統 API",
@@ -23,6 +27,7 @@ def create_app(
         docs_url="/docs",
         redoc_url=None,
     )
+    app.state.settings = configured_settings
     register_exception_handlers(app)
 
     configured_checks = (

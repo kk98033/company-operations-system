@@ -3,10 +3,11 @@ from fastapi.testclient import TestClient
 
 from app.core.errors import ApplicationError
 from app.main import create_app
+from tests.settings_factory import make_test_settings
 
 
 def test_unknown_route_uses_error_envelope() -> None:
-    client = TestClient(create_app())
+    client = TestClient(create_app(settings=make_test_settings()))
 
     response = client.get("/api/v1/does-not-exist")
 
@@ -21,7 +22,7 @@ def test_unknown_route_uses_error_envelope() -> None:
 
 
 def test_validation_error_uses_error_envelope() -> None:
-    app = create_app()
+    app = create_app(settings=make_test_settings())
 
     @app.get("/_test/validated")
     def validated(limit: int = Query(ge=1)) -> dict[str, int]:
@@ -38,7 +39,7 @@ def test_validation_error_uses_error_envelope() -> None:
 
 
 def test_expected_application_error_uses_error_envelope() -> None:
-    app = create_app()
+    app = create_app(settings=make_test_settings())
 
     @app.get("/_test/conflict")
     def conflict() -> None:
@@ -63,7 +64,7 @@ def test_expected_application_error_uses_error_envelope() -> None:
 
 
 def test_unexpected_error_does_not_expose_exception() -> None:
-    app = create_app()
+    app = create_app(settings=make_test_settings())
 
     @app.get("/_test/crash")
     def crash() -> None:

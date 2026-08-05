@@ -1,6 +1,6 @@
 # Backend
 
-FastAPI 後端專案骨架。現階段只提供統一 API 錯誤格式與存活／就緒健康檢查，尚未建立業務資料表、登入或權限。
+FastAPI 後端專案骨架。現階段提供可驗證的環境設定、統一 API 錯誤格式與存活／就緒健康檢查，尚未建立業務資料表、登入或權限。
 
 ## 環境
 
@@ -36,10 +36,40 @@ python -m pip install -e ".[dev]"
 ## 啟動
 
 ```bash
+cd company-system
+cp .env.example .env
+# 只需更換 POSTGRES_PASSWORD；DATABASE_URL 會引用同一組 PostgreSQL 變數
 cd backend
 source .venv/bin/activate
 uvicorn app.main:app --reload --host 127.0.0.1 --port 8000
 ```
+
+後端在建立 FastAPI app 前就會載入專案根目錄的 `.env`。`.env.example` 的 `DATABASE_URL` 由 `POSTGRES_USER`、`POSTGRES_PASSWORD`、host、port 與 database name 展開，避免同一密碼改兩次後不一致。系統環境變數優先於 `.env`；缺少必要值、格式錯誤或資料庫環境不符時，啟動會立即失敗，不會先用不安全的預設值繼續執行。
+
+若 `.env` 是 Slice 0.2 之前建立的舊檔，請先把其中的 `DATABASE_URL` 更新成目前 `.env.example` 的變數引用寫法，再設定 `POSTGRES_PASSWORD`；不要只改密碼卻保留舊的完整範例 DSN。`.env` 是本機私密設定且不納入 Git，程式不會自動覆寫。
+
+### 必要環境變數
+
+| 變數 | 用途 | 規則 |
+|---|---|---|
+| `APP_ENV` | 執行環境 | 僅允許 `development`、`test`、`production` |
+| `APP_HOST` | 本機 API 綁定位址 | 不可為空 |
+| `APP_PORT` | 本機 API port | 1–65535 |
+| `DATABASE_URL` | PostgreSQL DSN | 必須含帳號與密碼，資料庫名稱與帳號都要隔離；視為 Secret，錯誤訊息不回顯連線值 |
+
+### 資料庫環境隔離
+
+`DATABASE_URL` 目前僅允許 PostgreSQL，而且資料庫名稱與資料庫帳號都必須含有和 `APP_ENV` 對應的獨立標記：
+
+| `APP_ENV` | 資料庫與帳號命名規則 | 範例 |
+|---|---|---|
+| `development` | 含 `_dev` 或 `-dev` | `company_system_dev` |
+| `test` | 含 `_test` 或 `-test` | `company_system_test` |
+| `production` | 含 `_prod` 或 `-prod` | `company_system_prod` |
+
+比對的是 DSN path 中實際的資料庫名稱，以及 DSN username，不會用整段 URL 做寬鬆字串搜尋。名稱或帳號只能出現當前環境標記；`company_system_dev_test` 這類混合標記也會被拒絕。因此即使密碼含 `test`，測試環境仍不能連到 `company_system_dev`。`.env.example` 的範例密碼也會被拒絕。
+
+日後 SQLAlchemy 只可透過 `AppSettings.database_url_value()` 取得 DSN，不可自行再讀取 `os.environ`。
 
 可開啟：
 
@@ -54,14 +84,21 @@ uvicorn app.main:app --reload --host 127.0.0.1 --port 8000
 ```bash
 cd backend
 source .venv/bin/activate
-pytest
+python -m pytest
 ```
 
 如要看較完整的輸出：
 
 ```bash
-pytest -ra
+python -m pytest -ra
 ```
+
+設定測試包含：
+
+- 必要變數缺少時同次列出所有缺項。
+- process environment 正確覆寫 `.env`。
+- development、test、production 的資料庫名稱與帳號都不得交叉或混用環境標記。
+- 驗證失敗與 `repr` 不得曝露 DSN 內的密碼。
 
 ## API 錯誤格式
 
@@ -84,10 +121,20 @@ pytest -ra
 ```text
 app/
 ├─ api/v1/       # v1 router 與 health endpoints
-├─ core/         # 例外、錯誤 response、readiness 檢查
+├─ core/
+│  ├─ config/   # 設定模型、載入順序、資料庫環境防呆
+│  ├─ errors.py # 統一例外與 API error response
+│  └─ readiness.py # 可注入的就緒檢查
 └─ main.py       # FastAPI app factory 與預設 app
 tests/            # API 與核心元件測試
 ```
+
+命名與模組原則：
+
+- Python 模組、函式與變數使用 `snake_case`，class 使用 `PascalCase`。
+- 每個模組只負責一類工作；`models.py` 不讀檔案，`loader.py` 不處理業務規則。
+- 其他模組從 `app.core.config` 公開介面匯入，不依賴內部檔案位置。
+- 測試用 settings 由 `tests/settings_factory.py` 統一建立，不在每個 API 測試重複 DSN。
 
 核心原則：
 

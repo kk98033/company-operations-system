@@ -16,6 +16,7 @@ required_files=(
   "docs/舊資料移轉計畫.md"
   "docs/舊系統資料Import對照與分批計畫.md"
   "docs/本機開發與Git備份規範.md"
+  "docs/程式碼與檔案命名規範.md"
   "docs/風險與決策紀錄.md"
   "docs/progress/實作進度紀錄.md"
 )

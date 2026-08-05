@@ -18,15 +18,16 @@
 3. [03_最終實作計畫.md](03_最終實作計畫.md)
 4. [04_開工前確認清單.md](04_開工前確認清單.md)
 5. [UI 設計系統與通用版型](docs/UI設計系統與通用版型.md)
-6. [需求追蹤矩陣](docs/需求追蹤矩陣.md)
-7. [資料模型與業務規則](docs/資料模型與業務規則.md)
-8. [測試與驗收計畫](docs/測試與驗收計畫.md)
-9. [舊資料移轉計畫](docs/舊資料移轉計畫.md)
-10. [舊系統資料 Import 對照與分批計畫](docs/舊系統資料Import對照與分批計畫.md)
-11. [舊資料來源基線報告](docs/舊資料來源基線報告.md)
-12. [本機開發與 Git 備份規範](docs/本機開發與Git備份規範.md)
-13. [風險與決策紀錄](docs/風險與決策紀錄.md)
-14. [詳細實作進度紀錄](docs/progress/實作進度紀錄.md)
+6. [程式碼與檔案命名規範](docs/程式碼與檔案命名規範.md)
+7. [需求追蹤矩陣](docs/需求追蹤矩陣.md)
+8. [資料模型與業務規則](docs/資料模型與業務規則.md)
+9. [測試與驗收計畫](docs/測試與驗收計畫.md)
+10. [舊資料移轉計畫](docs/舊資料移轉計畫.md)
+11. [舊系統資料 Import 對照與分批計畫](docs/舊系統資料Import對照與分批計畫.md)
+12. [舊資料來源基線報告](docs/舊資料來源基線報告.md)
+13. [本機開發與 Git 備份規範](docs/本機開發與Git備份規範.md)
+14. [風險與決策紀錄](docs/風險與決策紀錄.md)
+15. [詳細實作進度紀錄](docs/progress/實作進度紀錄.md)
 
 原始分析證據保留在專案外層的 `../analysis/` 與 `../extraction/`。新版程式不得直接修改這些原始分析或匯出資料。
 
@@ -45,6 +46,7 @@
 11. 所有正式 React 頁面必須選用 [ADR-010 通用版型](docs/UI設計系統與通用版型.md) 與 `frontend/src/ui/` 共用元件；禁止自行建立另一套頁首、卡片、表格、表單、狀態或按鈕視覺。
 12. 現有版型無法滿足需求時，不得直接在 feature 內做一次性 UI；必須先證明缺口，再擴充成跨模組可用的共用元件，沿用既有 Tokens，補齊 RWD、鍵盤、狀態及測試後才可使用。
 13. `npm run lint` 必須同時通過 UI conformance check；禁止 inline style、舊版 UI class、玻璃模糊、浮卡陰影及未使用 token 的圓角。`/style-preview` 是唯一歷史比較例外，不是正式 UI。
+14. 程式碼、檔案、API、資料庫、測試、CSS、文件與 Import 必須遵守命名規範及單檔責任門檻；禁止新增巨型 `utils`、`helpers`、`types` 或把多個 domain 塞進同一檔案。
 
 ## 4. 目前進度
 
@@ -53,9 +55,9 @@
 | 最後更新日期 | 2026-08-05 |
 | 計畫版本 | v1.0 |
 | 架構版本 | v1.2（ADR-010：統一 UI 設計方向） |
-| 目前階段 | Phase 0 工程骨架與正式 UI 基準已建立；P0 業務決策仍待公司確認 |
-| 目前切片 | UI-GOVERNANCE-001 已完成；下一個工程切片仍為 0.2 |
-| 實作完成度 | Phase 0：3／10 完成；Import I-0：2／3 完成；業務功能 0% |
+| 目前階段 | Phase 0 工程骨架、設定安全與正式 UI 基準已建立；P0 業務決策仍待公司確認 |
+| 目前切片 | Slice 0.2 已完成；下一個工程切片為 0.4 |
+| 實作完成度 | Phase 0：4／10 完成；Import I-0：2／3 完成；業務功能 0% |
 | 規劃文件完成度 | 100% |
 | 最新中型進度備份 | Git tag `checkpoint-foundation-batch-1`；bundle 位於專案外層 `git-backups/` |
 | 正式遠端 Git 備份 | 尚未設定，開工前需建立私人 repository |
@@ -83,6 +85,8 @@
 - 完成 UI-BASELINE-001：單一 248px／72px 側欄、平面 Design Tokens、首頁，以及 `/ui-patterns` 的總覽、清單查詢、新增／編輯、詳細資料四種可操作版型；共用 PageHeader、KPI、Section、FilterBar、Field、DataTableFrame、StatusLabel 與 DefinitionGrid。
 - 建立完整 [UI 設計系統與通用版型](docs/UI設計系統與通用版型.md)：包含八類版型、狀態、列印、響應式、鍵盤、URL 狀態、Do／Don't 與逐頁驗收清單；4 個前端測試檔、8 個測試、lint、typecheck、build、文件檢查及實際 1366／1280／390px 瀏覽器驗證通過。
 - 完成 UI-GOVERNANCE-001：404、路由錯誤與 React 崩潰頁改用共用 `SystemState`；新增 `check:ui` 並接入 `npm run lint`，自動阻擋脫離 ADR-010 的正式頁面、舊 class、inline style、玻璃模糊、浮卡陰影、非 token 圓角及缺少 RWD 基準。
+- 完成 Slice 0.2：後端設定拆為 `config/models.py`、`loader.py`、`database_guard.py`；必要變數與非法值 fail-fast，development／test／production 的 DB 名稱及帳號雙向隔離，Secret 與驗證錯誤不洩漏 DSN；37 個後端測試與 branch coverage 100% 通過。
+- 建立 [程式碼與檔案命名規範](docs/程式碼與檔案命名規範.md)：定義 React／TypeScript、FastAPI／Python、SQL／Alembic、API／JSON、測試、CSS、文件及 Import 命名，加入單檔責任、拆檔門檻與 review checklist。
 
 ### 進行中
 
@@ -92,12 +96,13 @@
 
 ### 接下來要做
 
-1. 執行單一 Slice 0.2：加入後端 settings、必要環境變數驗證，以及 test 不得誤連 dev DB 的測試。
-2. 完成 Slice 0.4／0.5：加入 SQLAlchemy session、真實 DB readiness 與 Alembic 空白基線；只建工程／Import 基礎 schema，不建正式業務表。
+1. 執行單一 Slice 0.4：補齊 FastAPI app、統一錯誤、live／ready 的剩餘驗收與開發文件，不提前建立業務 API。
+2. 執行 Slice 0.5：加入 SQLAlchemy session、真實 DB readiness 與 Alembic 空白基線；只建工程／Import 基礎 schema，不建正式業務表。
 3. 執行 Import I-0.3：建立 `import_runs`、staging、mapping 與 errors 基礎，仍不得寫入正式客戶表。
-4. 補完 Slice 0.7 的自動 accessibility error 基線；正式頁面一律沿用 ADR-010 共用元件，不再重新選視覺方向。
-5. 依 Slice 0.8 建立各主模組可點擊空白路由及跨模組導覽原型，仍只使用明確標示的假資料。
-6. 逐項請公司完成 `04_開工前確認清單.md` 的 P0-01～P0-10，之後才開始不可逆的業務 schema。
+4. 執行 Slice 0.7a：在第一個業務前端頁前拆分超過門檻的共用 TSX／CSS，保留 public API、ADR-010 視覺、RWD 與 conformance 強度。
+5. 執行 Slice 0.7b：補完自動 accessibility error、鍵盤及 Windows 常用尺寸基線。
+6. 依 Slice 0.8 建立各主模組可點擊空白路由及跨模組導覽原型，仍只使用明確標示的假資料。
+7. 逐項請公司完成 `04_開工前確認清單.md` 的 P0-01～P0-10，之後才開始不可逆的業務 schema。
 
 ### 尚待確認但不影響閱讀計畫
 
@@ -151,7 +156,7 @@
 
 ```bash
 cp .env.example .env
-# 將 .env 的本機 PostgreSQL 密碼換掉後：
+# 將 .env 的 POSTGRES_PASSWORD 換成本機專用值後；DATABASE_URL 會引用同一組變數：
 docker compose up -d postgres
 
 cd backend
@@ -159,6 +164,8 @@ python3.12 -m venv .venv
 .venv/bin/python -m pip install -e '.[dev]'
 .venv/bin/uvicorn app.main:app --reload --host 127.0.0.1 --port 8000
 ```
+
+若 `.env` 是 Slice 0.2 前建立的舊檔，需先將其中的 `DATABASE_URL` 同步為目前 `.env.example` 的變數引用寫法，再設定 `POSTGRES_PASSWORD`；程式不會覆寫本機私密設定。
 
 另一個終端啟動前端：
 

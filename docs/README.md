@@ -8,5 +8,6 @@
 - `本機開發與Git備份規範.md`：commit、tag、bundle、remote 與回復。
 - `風險與決策紀錄.md`：目前風險、已定決策及 ADR 入口。
 - `UI設計系統與通用版型.md`：正式 UI Tokens、全站殼層、八類通用版型、響應式、無障礙與逐頁檢查表。
+- `程式碼與檔案命名規範.md`：React／TypeScript、FastAPI／Python、SQL／Alembic、API／JSON、測試、CSS、文件與 Import 的命名、單檔責任、拆檔門檻與 review checklist。
 - `decisions/`：重大架構與業務決策。
 - `progress/實作進度紀錄.md`：不可覆蓋的實作歷史。

@@ -2,13 +2,19 @@ from fastapi.testclient import TestClient
 
 from app.core.readiness import ReadinessCheckResult
 from app.main import create_app
+from tests.settings_factory import make_test_settings
 
 
 def test_live_reports_alive_without_dependency_checks() -> None:
     def exploding_check() -> ReadinessCheckResult:
         raise RuntimeError("must not run from live")
 
-    client = TestClient(create_app(readiness_checks=[exploding_check]))
+    client = TestClient(
+        create_app(
+            settings=make_test_settings(),
+            readiness_checks=[exploding_check],
+        )
+    )
 
     response = client.get("/api/v1/health/live")
 
@@ -20,7 +26,7 @@ def test_live_reports_alive_without_dependency_checks() -> None:
 
 
 def test_default_ready_explicitly_reports_database_not_configured() -> None:
-    client = TestClient(create_app())
+    client = TestClient(create_app(settings=make_test_settings()))
 
     response = client.get("/api/v1/health/ready")
 
@@ -46,7 +52,12 @@ def test_ready_reports_success_when_injected_checks_pass() -> None:
     def database_ok() -> ReadinessCheckResult:
         return ReadinessCheckResult(name="database", status="ok")
 
-    client = TestClient(create_app(readiness_checks=[database_ok]))
+    client = TestClient(
+        create_app(
+            settings=make_test_settings(),
+            readiness_checks=[database_ok],
+        )
+    )
 
     response = client.get("/api/v1/health/ready")
 
@@ -61,7 +72,12 @@ def test_ready_converts_check_exception_to_safe_failure() -> None:
     def database_check() -> ReadinessCheckResult:
         raise RuntimeError("postgres password must not leak")
 
-    client = TestClient(create_app(readiness_checks=[database_check]))
+    client = TestClient(
+        create_app(
+            settings=make_test_settings(),
+            readiness_checks=[database_check],
+        )
+    )
 
     response = client.get("/api/v1/health/ready")
 
