@@ -1,6 +1,6 @@
 # Backend
 
-FastAPI 後端專案骨架。現階段提供可驗證的環境設定、統一 API 錯誤格式與存活／就緒健康檢查，尚未建立業務資料表、登入或權限。
+FastAPI 後端專案骨架。現階段提供可驗證的環境設定、統一 API 錯誤格式、存活／就緒健康檢查與可組合的列表 API 契約，尚未建立業務資料表、登入或權限。
 
 ## 環境
 
@@ -79,6 +79,8 @@ uvicorn app.main:app --reload --host 127.0.0.1 --port 8000
 
 目前尚未連接資料庫，因此 `ready` 會明確回傳 HTTP 503 與 `database: not_configured`。Slice 0.5 建立 SQLAlchemy session 後，會注入真實資料庫檢查。`live` 不檢查外部相依，仍會回傳 HTTP 200。
 
+development 與 test 環境會開啟 `/docs` 及 `/openapi.json`；production 環境會同時關閉這兩個入口，避免對外暴露 API 結構。OpenAPI 中的共通 4xx、422 與 500，以及真正可能未就緒 endpoint 的 503，均宣告為同一 `ErrorResponse` envelope；`live` 不會錯誤宣告 503。
+
 ## 測試
 
 ```bash
@@ -116,11 +118,66 @@ python -m pytest -ra
 
 `details` 可為 `null`、清單或物件；前端應先依 `code` 判斷錯誤類型，不可解析 `message` 文字當作業務規則。
 
+輸入驗證錯誤只會回傳欄位位置、穩定類型與固定安全文案，不回顯 Pydantic 的 `input`、`ctx`、`url` 或 validator 自訂文字。未預期錯誤的 log 只記錄 exception type，不記錄例外文字或 stack trace；需向前端公開的細節必須明確使用 `ApplicationError`。
+
+## 列表 API 契約
+
+`app.api.contracts` 提供不依賴資料庫的共用 primitive：
+
+| 契約 | 規則 |
+|---|---|
+| `PageParams` | `page` 預設 1、上限 1,000,000；`page_size` 預設 25、上限 100，並提供 zero-based `offset` |
+| `SortParams[DomainSortField]` | `sort_by` 必須使用 endpoint 所屬 domain 定義的 `StrEnum`；不接受裸字串或任意 SQL 欄位 |
+| `KeywordParams` | 通用 `keyword` 上限 100 字元，前後空白會移除，全空白視為未篩選 |
+| `DateRangeParams` | 通用含頭含尾 `date_from` / `date_to`，禁止起日晚於迄日；FastAPI 請透過 `parse_date_range_params` dependency 使用 |
+| `PaginationMeta` | 回傳總筆數、總頁數、前／後頁狀態 |
+| `ListResponse[Item, FilterSummary]` | 回傳 `items` 與含 pagination、實際 sort、當前 filters 的 `meta` |
+
+`status` 不是共通字串篩選：後續各 domain 必須定義自己的 status enum。`customer_id` 也要等 ID 與 organization scope 契約完成後由 domain 加入，不在共通 primitive 預先假設。
+
+`date_from`／`date_to` 只適用於 endpoint 已明確定義唯一「主要日期」的情況，而且 OpenAPI 說明必須指出它代表建立日、交期、開立日或其他日期。同一列表若需要查詢兩種日期，不得重複套用這個 FastAPI dependency；應由 domain 定義 `delivery_date_from` 等明確欄位，再重用純日期區間驗證。
+
+endpoint-specific 排序寫法：
+
+```python
+class CustomerSortField(StrEnum):
+    CODE = "customer_code"
+    NAME = "customer_name"
+
+
+class CustomerSortParams(SortParams[CustomerSortField]):
+    sort_by: CustomerSortField = CustomerSortField.CODE
+```
+
+在 FastAPI handler 以 `Annotated[CustomerSortParams, Depends()]` 注入，OpenAPI 會列出允許值，非白名單欄位會在進入 query/repository 前回傳 422。一般列表不得把 `page_size` 放大或繞過分頁；大量匯出必須另建有權限的專用 endpoint。
+
+列表 response 形狀：
+
+```json
+{
+  "items": [],
+  "meta": {
+    "pagination": {
+      "page": 1,
+      "page_size": 25,
+      "total_items": 0,
+      "total_pages": 0,
+      "has_previous": false,
+      "has_next": false
+    },
+    "sort": {"field": "customer_code", "direction": "asc"},
+    "filters": {"keyword": null}
+  }
+}
+```
+
 ## 目錄責任
 
 ```text
 app/
-├─ api/v1/       # v1 router 與 health endpoints
+├─ api/
+│  ├─ contracts/ # 列表、OpenAPI 等可重用 HTTP 契約
+│  └─ v1/        # v1 router 與 health endpoints
 ├─ core/
 │  ├─ config/   # 設定模型、載入順序、資料庫環境防呆
 │  ├─ errors.py # 統一例外與 API error response

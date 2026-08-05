@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Sequence
+from typing import Literal
 
 from fastapi import APIRouter
 from pydantic import BaseModel
@@ -12,19 +13,24 @@ from app.core.readiness import ReadinessCheck, ReadinessCheckResult, run_readine
 
 
 class LiveResponse(BaseModel):
-    status: str
-    service: str
+    status: Literal["alive"]
+    service: Literal["company-system-api"]
 
 
 class ReadyResponse(BaseModel):
-    status: str
+    status: Literal["ready"]
     checks: list[ReadinessCheckResult]
 
 
 def build_health_router(checks: Sequence[ReadinessCheck]) -> APIRouter:
     router = APIRouter(prefix="/health", tags=["health"])
 
-    @router.get("/live", response_model=LiveResponse)
+    @router.get(
+        "/live",
+        response_model=LiveResponse,
+        operation_id="health_live",
+        summary="檢查 API 進程是否存活",
+    )
     def live() -> LiveResponse:
         """Report process liveness without calling external dependencies."""
 
@@ -33,7 +39,14 @@ def build_health_router(checks: Sequence[ReadinessCheck]) -> APIRouter:
     @router.get(
         "/ready",
         response_model=ReadyResponse,
-        responses={503: {"model": ErrorResponse}},
+        operation_id="health_ready",
+        summary="檢查必要相依服務是否就緒",
+        responses={
+            503: {
+                "model": ErrorResponse,
+                "description": "必要相依服務尚未就緒",
+            }
+        },
     )
     def ready() -> ReadyResponse:
         """Report whether every configured required dependency is available."""

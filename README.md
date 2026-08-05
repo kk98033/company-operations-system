@@ -52,12 +52,12 @@
 
 | 項目 | 目前狀態 |
 |---|---|
-| 最後更新日期 | 2026-08-05 |
+| 最後更新日期 | 2026-08-06 |
 | 計畫版本 | v1.0 |
-| 架構版本 | v1.2（ADR-010：統一 UI 設計方向） |
-| 目前階段 | Phase 0 工程骨架、設定安全與正式 UI 基準已建立；P0 業務決策仍待公司確認 |
-| 目前切片 | Slice 0.2 已完成；下一個工程切片為 0.4 |
-| 實作完成度 | Phase 0：4／10 完成；Import I-0：2／3 完成；業務功能 0% |
+| 架構版本 | v1.3（API 契約與 ADR-010 UI 基準） |
+| 目前階段 | Phase 0 工程骨架、設定安全、API 契約與正式 UI 基準已建立；P0 業務決策仍待公司確認 |
+| 目前切片 | Slice 0.4 已完成；下一個工程切片為 0.5 |
+| 實作完成度 | Phase 0：5／10 完成；Import I-0：2／3 完成；業務功能 0% |
 | 規劃文件完成度 | 100% |
 | 最新中型進度備份 | Git tag `checkpoint-foundation-batch-1`；bundle 位於專案外層 `git-backups/` |
 | 正式遠端 Git 備份 | 尚未設定，開工前需建立私人 repository |
@@ -77,7 +77,7 @@
 - 完成 Slice 0.1：鎖定 Node 24、npm 11、Python 3.12、PostgreSQL 17，初始化 React 與 FastAPI 專案。
 - 完成 Slice 0.3：PostgreSQL Compose healthy、只綁 localhost，容器重啟後測試資料仍存在。
 - 完成 Slice 0.6：React、TanStack Router、TanStack Query、Error Boundary、首頁與 404；lint、typecheck、4 個測試、build、`npm audit` 與實際瀏覽器檢查通過。
-- 建立 FastAPI app、統一錯誤格式與 live／ready 骨架；8 個 API 測試及真實 HTTP smoke 通過。資料庫 readiness 留待 Slice 0.5 接線，因此 Slice 0.4 尚未標記完整完成。
+- 完成 Slice 0.4：FastAPI app、runtime／OpenAPI 統一錯誤契約、安全 validation details／logging、production 文件關閉、live／ready 語意，以及分頁、排序白名單、關鍵字／日期 primitive 與列表 metadata；真實 DB readiness 明確留待 Slice 0.5。
 - 建立 `.env.example`、工具鏈檢查、Make 指令與桌面版操作殼層初版；這些分別是 Slice 0.2、0.7、0.10 的部分成果，尚未提前標記完成。
 - 因 2026-08-04 React Router 修補版尚未發布，依 ADR-009 改採安全版本 TanStack Router；乾淨 lockfile 的 `npm audit` 為 0。
 - 完成 DESIGN-PREVIEW-001：`/style-preview` 可用同一組假工單資料切換 A 平面工業 ERP、B 現代桌面 ERP、C Bootstrap 企業版；5 個前端測試、build 與三種實際瀏覽器檢查通過。
@@ -96,13 +96,12 @@
 
 ### 接下來要做
 
-1. 執行單一 Slice 0.4：補齊 FastAPI app、統一錯誤、live／ready 的剩餘驗收與開發文件，不提前建立業務 API。
-2. 執行 Slice 0.5：加入 SQLAlchemy session、真實 DB readiness 與 Alembic 空白基線；只建工程／Import 基礎 schema，不建正式業務表。
-3. 執行 Import I-0.3：建立 `import_runs`、staging、mapping 與 errors 基礎，仍不得寫入正式客戶表。
-4. 執行 Slice 0.7a：在第一個業務前端頁前拆分超過門檻的共用 TSX／CSS，保留 public API、ADR-010 視覺、RWD 與 conformance 強度。
-5. 執行 Slice 0.7b：補完自動 accessibility error、鍵盤及 Windows 常用尺寸基線。
-6. 依 Slice 0.8 建立各主模組可點擊空白路由及跨模組導覽原型，仍只使用明確標示的假資料。
-7. 逐項請公司完成 `04_開工前確認清單.md` 的 P0-01～P0-10，之後才開始不可逆的業務 schema。
+1. 執行單一 Slice 0.5：加入 SQLAlchemy session、真實 DB readiness 與 Alembic 空白基線；只建工程／Import 基礎 schema，不建正式業務表。
+2. 執行 Import I-0.3：建立 `import_runs`、staging、mapping 與 errors 基礎，仍不得寫入正式客戶表。
+3. 執行 Slice 0.7a：在第一個業務前端頁前拆分超過門檻的共用 TSX／CSS，保留 public API、ADR-010 視覺、RWD 與 conformance 強度。
+4. 執行 Slice 0.7b：補完自動 accessibility error、鍵盤及 Windows 常用尺寸基線。
+5. 依 Slice 0.8 建立各主模組可點擊空白路由及跨模組導覽原型，仍只使用明確標示的假資料。
+6. 逐項請公司完成 `04_開工前確認清單.md` 的 P0-01～P0-10，之後才開始不可逆的業務 schema。
 
 ### 尚待確認但不影響閱讀計畫
 

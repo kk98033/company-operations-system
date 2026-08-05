@@ -6,8 +6,15 @@ from collections.abc import Sequence
 
 from fastapi import FastAPI
 
+from app.api.contracts.openapi import (
+    API_DESCRIPTION,
+    API_TAGS,
+    API_TITLE,
+    API_VERSION,
+    build_default_error_responses,
+)
 from app.api.v1.router import build_v1_router
-from app.core.config import AppSettings, load_settings
+from app.core.config import AppEnvironment, AppSettings, load_settings
 from app.core.errors import register_exception_handlers
 from app.core.readiness import ReadinessCheck, database_not_configured
 
@@ -20,12 +27,17 @@ def create_app(
     """Create an isolated app with validated settings and injected checks."""
 
     configured_settings = settings or load_settings()
+    expose_api_docs = configured_settings.environment is not AppEnvironment.PRODUCTION
 
     app = FastAPI(
-        title="公司管理系統 API",
-        version="0.1.0",
-        docs_url="/docs",
+        title=API_TITLE,
+        description=API_DESCRIPTION,
+        version=API_VERSION,
+        docs_url="/docs" if expose_api_docs else None,
         redoc_url=None,
+        openapi_url="/openapi.json" if expose_api_docs else None,
+        openapi_tags=API_TAGS,
+        responses=build_default_error_responses(),
     )
     app.state.settings = configured_settings
     register_exception_handlers(app)
