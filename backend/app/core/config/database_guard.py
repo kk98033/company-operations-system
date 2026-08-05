@@ -73,7 +73,7 @@ def validate_database_target(
     if not parsed_url.password:
         raise UnsafeDatabaseTargetError("DATABASE_URL 必須指定資料庫密碼")
 
-    if parsed_url.password == "replace-with-local-only-password":
+    if parsed_url.password.startswith("replace-with-"):
         raise UnsafeDatabaseTargetError(
             "DATABASE_URL 仍使用範例密碼，請先更換本機專用密碼"
         )

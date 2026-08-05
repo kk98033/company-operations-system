@@ -6,6 +6,7 @@ LEGACY_SOURCE_DIR ?= ../extraction/export/uv_print_full/tables
 IMPORT_PROFILE_OUTPUT ?= artifacts/import/profile
 
 .PHONY: docs-check toolchain-check env-init db-config db-up db-down db-status \
+	db-test-config db-test-up db-test-down backend-database-integration-check \
 	import-profile import-profile-test backend-test backend-check frontend-test \
 	frontend-check test
 
@@ -32,6 +33,23 @@ db-down:
 db-status:
 	docker compose ps postgres
 
+db-test-config:
+	docker compose --profile test config --quiet
+
+db-test-up:
+	docker compose --profile test up -d --wait postgres-test
+
+db-test-down:
+	docker compose --profile test stop postgres-test
+
+backend-database-integration-check:
+	@set -eu; \
+	cleanup() { docker compose --profile test stop postgres-test >/dev/null; }; \
+	trap cleanup EXIT INT TERM; \
+	docker compose --profile test up -d --wait postgres-test; \
+	RUN_DATABASE_INTEGRATION=1 backend/.venv/bin/python -m pytest \
+		-c backend/pyproject.toml backend/tests -m database_integration
+
 import-profile:
 	$(PYTHON) scripts/legacy_import_profile.py \
 		--source-dir "$(LEGACY_SOURCE_DIR)" \
@@ -41,7 +59,7 @@ import-profile-test:
 	$(PYTHON) -m unittest discover -s scripts/tests -p 'test_*.py' -v
 
 backend-test:
-	cd backend && .venv/bin/python -m pytest
+	cd backend && .venv/bin/python -m pytest -m "not database_integration"
 
 backend-check: backend-test
 	cd backend && .venv/bin/python -m compileall -q app tests

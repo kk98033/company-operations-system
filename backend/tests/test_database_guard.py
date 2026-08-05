@@ -83,13 +83,20 @@ def test_invalid_database_scheme_does_not_echo_database_url() -> None:
     assert database_url not in str(error.value)
 
 
-def test_example_database_password_is_rejected() -> None:
+@pytest.mark.parametrize(
+    "placeholder",
+    [
+        "replace-with-local-only-password",
+        "replace-with-test-only-password",
+    ],
+)
+def test_example_database_password_is_rejected(placeholder: str) -> None:
     with pytest.raises(SettingsLoadError) as error:
         load_settings(
             environ=valid_settings_values(
                 DATABASE_URL=(
                     "postgresql+psycopg://company_system_dev:"
-                    "replace-with-local-only-password@127.0.0.1/"
+                    f"{placeholder}@127.0.0.1/"
                     "company_system_dev"
                 )
             ),
@@ -97,7 +104,7 @@ def test_example_database_password_is_rejected() -> None:
         )
 
     assert "仍使用範例密碼" in str(error.value)
-    assert "replace-with-local-only-password" not in str(error.value)
+    assert placeholder not in str(error.value)
 
 
 @pytest.mark.parametrize(

@@ -19,5 +19,24 @@ services:
       start_period: 5s
     restart: unless-stopped
 
+  postgres-test:
+    image: postgres:17-alpine
+    profiles: ["test"]
+    environment:
+      POSTGRES_DB: ${POSTGRES_TEST_DB:-company_system_test}
+      POSTGRES_USER: ${POSTGRES_TEST_USER:-company_system_test}
+      POSTGRES_PASSWORD: ${POSTGRES_TEST_PASSWORD:-company-system-test-only}
+    ports:
+      - "127.0.0.1:${POSTGRES_TEST_PORT:-5433}:5432"
+    tmpfs:
+      - /var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 2s
+      timeout: 3s
+      retries: 20
+      start_period: 3s
+    restart: "no"
+
 volumes:
   company_system_pgdata:

@@ -1,11 +1,14 @@
 # Backend
 
-FastAPI 後端專案骨架。現階段提供可驗證的環境設定、統一 API 錯誤格式、存活／就緒健康檢查與可組合的列表 API 契約，尚未建立業務資料表、登入或權限。
+FastAPI 後端專案骨架。現階段提供環境防呆、統一 API 契約、真實資料庫就緒檢查，以及 SQLAlchemy／Alembic 基礎。目前只有空白 migration baseline，尚未建立業務資料表、Import schema、登入或權限。
 
 ## 環境
 
 - Python 3.12（專案基準版本）
 - FastAPI
+- SQLAlchemy 2 同步模式
+- Alembic
+- Psycopg 3 binary distribution
 - Uvicorn
 - Pytest
 
@@ -77,7 +80,7 @@ uvicorn app.main:app --reload --host 127.0.0.1 --port 8000
 - 存活檢查：`http://127.0.0.1:8000/api/v1/health/live`
 - 就緒檢查：`http://127.0.0.1:8000/api/v1/health/ready`
 
-目前尚未連接資料庫，因此 `ready` 會明確回傳 HTTP 503 與 `database: not_configured`。Slice 0.5 建立 SQLAlchemy session 後，會注入真實資料庫檢查。`live` 不檢查外部相依，仍會回傳 HTTP 200。
+`ready` 會透過 SQLAlchemy 執行 `SELECT 1`；資料庫停止或連線失敗時回傳 HTTP 503，且不回顯 DSN、密碼或 driver exception。`live` 不檢查外部相依，仍會回傳 HTTP 200。
 
 development 與 test 環境會開啟 `/docs` 及 `/openapi.json`；production 環境會同時關閉這兩個入口，避免對外暴露 API 結構。OpenAPI 中的共通 4xx、422 與 500，以及真正可能未就緒 endpoint 的 503，均宣告為同一 `ErrorResponse` envelope；`live` 不會錯誤宣告 503。
 
@@ -101,6 +104,29 @@ python -m pytest -ra
 - process environment 正確覆寫 `.env`。
 - development、test、production 的資料庫名稱與帳號都不得交叉或混用環境標記。
 - 驗證失敗與 `repr` 不得曝露 DSN 內的密碼。
+
+## 資料庫 session 與 lifecycle
+
+- 每個 FastAPI app 擁有一組 lazy engine 與 session factory；建立 app 不會立即連線。
+- 小型 VM 預設 pool 為 5 connections、2 overflow、5 秒 timeout，並開啟 `pool_pre_ping`。
+- request dependency 只負責 rollback-on-error 與 close，不自動 commit；後續 service 必須明確擁有 transaction boundary。
+- `create_app(database_resources=...)` 的注入即代表把 ownership 移交給該 app；FastAPI shutdown 會 dispose engine，不得把同一個 resources 共用給多個 app。
+- SQLAlchemy 關閉 parameter log，並只使用設定層驗證過的 PostgreSQL DSN。
+
+## Alembic migration
+
+Alembic 設定在 `alembic.ini`，版本檔在 `migrations/versions/`。空白基線 `0001_empty_baseline` 只建立 Alembic 版本起點，不建立任何正式表。應用程式啟動不會自動 migration。
+
+一般 `make backend-test` 會排除整合測試，不需要 Docker。要用完全隔離的 PostgreSQL 驗證真實連線與 `upgrade -> downgrade -> upgrade`：
+
+```bash
+cd ..
+make backend-database-integration-check
+```
+
+`postgres-test` 只綁定 `127.0.0.1:5433`、資料庫名與 username 均含 `_test`，並使用 tmpfs，不與 development volume 共用資料。專案內只提供明確非正式用途的本機 test-only 預設密碼；CI 或共用環境可以 `POSTGRES_TEST_PASSWORD` 覆寫。Make target 無論成功或失敗都會停止 test container，不會刪除 development volume。
+
+當需要人工驗收停機行為時，先啟動 API 再停止 PostgreSQL；`live` 應持續 200，`ready` 應變為 503，重啟 PostgreSQL 後 `ready` 應恢復 200。
 
 ## API 錯誤格式
 
@@ -180,10 +206,12 @@ app/
 │  └─ v1/        # v1 router 與 health endpoints
 ├─ core/
 │  ├─ config/   # 設定模型、載入順序、資料庫環境防呆
+│  ├─ database/ # engine、session、metadata、readiness 與 lifecycle
 │  ├─ errors.py # 統一例外與 API error response
 │  └─ readiness.py # 可注入的就緒檢查
 └─ main.py       # FastAPI app factory 與預設 app
-tests/            # API 與核心元件測試
+migrations/        # Alembic 可回復 migration；目前僅空白 baseline
+tests/             # API、核心元件及明確標記的 DB integration 測試
 ```
 
 命名與模組原則：

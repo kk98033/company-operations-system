@@ -2,6 +2,7 @@ from fastapi.testclient import TestClient
 
 from app.core.readiness import ReadinessCheckResult
 from app.main import create_app
+from tests.database_factory import make_database_resources
 from tests.settings_factory import make_test_settings
 
 
@@ -25,8 +26,15 @@ def test_live_reports_alive_without_dependency_checks() -> None:
     }
 
 
-def test_default_ready_explicitly_reports_database_not_configured() -> None:
-    client = TestClient(create_app(settings=make_test_settings()))
+def test_default_ready_uses_real_database_check_without_leaking_failure() -> None:
+    resources = make_database_resources()
+    resources.engine.connect.side_effect = RuntimeError("secret connection detail")
+    client = TestClient(
+        create_app(
+            settings=make_test_settings(),
+            database_resources=resources,
+        )
+    )
 
     response = client.get("/api/v1/health/ready")
 
@@ -39,13 +47,14 @@ def test_default_ready_explicitly_reports_database_not_configured() -> None:
                 "checks": [
                     {
                         "name": "database",
-                        "status": "not_configured",
-                        "message": "資料庫就緒檢查將在 Slice 0.5 建立",
+                        "status": "error",
+                        "message": "檢查執行失敗",
                     }
                 ]
             },
         }
     }
+    assert "secret connection detail" not in response.text
 
 
 def test_ready_reports_success_when_injected_checks_pass() -> None:

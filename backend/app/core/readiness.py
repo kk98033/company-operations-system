@@ -19,16 +19,6 @@ class ReadinessCheckResult(BaseModel):
 ReadinessCheck = Callable[[], ReadinessCheckResult]
 
 
-def database_not_configured() -> ReadinessCheckResult:
-    """Temporary explicit result until SQLAlchemy is introduced in Slice 0.5."""
-
-    return ReadinessCheckResult(
-        name="database",
-        status="not_configured",
-        message="資料庫就緒檢查將在 Slice 0.5 建立",
-    )
-
-
 def run_readiness_checks(
     checks: Sequence[ReadinessCheck],
 ) -> list[ReadinessCheckResult]:

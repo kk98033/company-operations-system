@@ -47,6 +47,7 @@
 12. 現有版型無法滿足需求時，不得直接在 feature 內做一次性 UI；必須先證明缺口，再擴充成跨模組可用的共用元件，沿用既有 Tokens，補齊 RWD、鍵盤、狀態及測試後才可使用。
 13. `npm run lint` 必須同時通過 UI conformance check；禁止 inline style、舊版 UI class、玻璃模糊、浮卡陰影及未使用 token 的圓角。`/style-preview` 是唯一歷史比較例外，不是正式 UI。
 14. 程式碼、檔案、API、資料庫、測試、CSS、文件與 Import 必須遵守命名規範及單檔責任門檻；禁止新增巨型 `utils`、`helpers`、`types` 或把多個 domain 塞進同一檔案。
+15. 前端遇到表單、schema 驗證、日期、資料取得、表格、無障礙元件等通用問題時，必須先評估現有依賴與成熟 npm 套件，不重造基礎輪子；新增套件前仍要確認維護活躍度、授權、安全紀錄、TypeScript 支援、bundle 影響、無障礙及是否與現有套件重疊。業務規則不得藏進第三方 UI 套件。
 
 ## 4. 目前進度
 
@@ -54,12 +55,12 @@
 |---|---|
 | 最後更新日期 | 2026-08-06 |
 | 計畫版本 | v1.0 |
-| 架構版本 | v1.3（API 契約與 ADR-010 UI 基準） |
-| 目前階段 | Phase 0 工程骨架、設定安全、API 契約與正式 UI 基準已建立；P0 業務決策仍待公司確認 |
-| 目前切片 | Slice 0.4 已完成；下一個工程切片為 0.5 |
-| 實作完成度 | Phase 0：5／10 完成；Import I-0：2／3 完成；業務功能 0% |
+| 架構版本 | v1.4（資料庫基礎、API 契約與 ADR-010 UI 基準） |
+| 目前階段 | Phase 0 工程骨架、設定安全、資料庫／API 契約與正式 UI 基準已建立；P0 業務決策仍待公司確認 |
+| 目前切片 | Slice 0.5 已完成；下一個切片為 Import I-0.3 |
+| 實作完成度 | Phase 0：6／10 完成；Import I-0：2／3 完成；業務功能 0% |
 | 規劃文件完成度 | 100% |
-| 最新中型進度備份 | Git tag `checkpoint-foundation-batch-1`；bundle 位於專案外層 `git-backups/` |
+| 最新中型進度備份 | Git tag `checkpoint-backend-foundation-v1`；bundle 位於專案外層 `git-backups/` |
 | 正式遠端 Git 備份 | 尚未設定，開工前需建立私人 repository |
 
 ### 已完成
@@ -78,6 +79,7 @@
 - 完成 Slice 0.3：PostgreSQL Compose healthy、只綁 localhost，容器重啟後測試資料仍存在。
 - 完成 Slice 0.6：React、TanStack Router、TanStack Query、Error Boundary、首頁與 404；lint、typecheck、4 個測試、build、`npm audit` 與實際瀏覽器檢查通過。
 - 完成 Slice 0.4：FastAPI app、runtime／OpenAPI 統一錯誤契約、安全 validation details／logging、production 文件關閉、live／ready 語意，以及分頁、排序白名單、關鍵字／日期 primitive 與列表 metadata；真實 DB readiness 明確留待 Slice 0.5。
+- 完成 Slice 0.5：採用 SQLAlchemy 2、Alembic 與 psycopg 3，建立 bounded connection pool、request session lifecycle、真實 `SELECT 1` readiness、app shutdown dispose、空白 migration baseline，以及 localhost／tmpfs 隔離 test DB；92 個一般後端測試與 3 個真實 DB integration 通過。
 - 建立 `.env.example`、工具鏈檢查、Make 指令與桌面版操作殼層初版；這些分別是 Slice 0.2、0.7、0.10 的部分成果，尚未提前標記完成。
 - 因 2026-08-04 React Router 修補版尚未發布，依 ADR-009 改採安全版本 TanStack Router；乾淨 lockfile 的 `npm audit` 為 0。
 - 完成 DESIGN-PREVIEW-001：`/style-preview` 可用同一組假工單資料切換 A 平面工業 ERP、B 現代桌面 ERP、C Bootstrap 企業版；5 個前端測試、build 與三種實際瀏覽器檢查通過。
@@ -96,11 +98,11 @@
 
 ### 接下來要做
 
-1. 執行單一 Slice 0.5：加入 SQLAlchemy session、真實 DB readiness 與 Alembic 空白基線；只建工程／Import 基礎 schema，不建正式業務表。
-2. 執行 Import I-0.3：建立 `import_runs`、staging、mapping 與 errors 基礎，仍不得寫入正式客戶表。
-3. 執行 Slice 0.7a：在第一個業務前端頁前拆分超過門檻的共用 TSX／CSS，保留 public API、ADR-010 視覺、RWD 與 conformance 強度。
-4. 執行 Slice 0.7b：補完自動 accessibility error、鍵盤及 Windows 常用尺寸基線。
-5. 依 Slice 0.8 建立各主模組可點擊空白路由及跨模組導覽原型，仍只使用明確標示的假資料。
+1. 執行 Import I-0.3：建立 `import_runs`、staging、mapping 與 errors 基礎，仍不得寫入正式客戶表。
+2. 執行 Slice 0.7a：在第一個業務前端頁前拆分超過門檻的共用 TSX／CSS，保留 public API、ADR-010 視覺、RWD 與 conformance 強度。
+3. 執行 Slice 0.7b：補完自動 accessibility error、鍵盤及 Windows 常用尺寸基線。
+4. 依 Slice 0.8 建立各主模組可點擊空白路由及跨模組導覽原型，仍只使用明確標示的假資料。
+5. 執行 Slice 0.9：以 OpenAPI 產生 TypeScript client，避免前端重寫後端 DTO。
 6. 逐項請公司完成 `04_開工前確認清單.md` 的 P0-01～P0-10，之後才開始不可逆的業務 schema。
 
 ### 尚待確認但不影響閱讀計畫
