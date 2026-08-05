@@ -42,6 +42,9 @@
 8. 不得用刪除原紀錄的方式修正完工、庫存、出貨、計價、請款或收款；必須作廢或沖銷。
 9. 未通過測試、文件未更新或 README 進度未更新，該切片視為未完成。
 10. 不可因趕進度略過 Git 提交與中型進度備份。
+11. 所有正式 React 頁面必須選用 [ADR-010 通用版型](docs/UI設計系統與通用版型.md) 與 `frontend/src/ui/` 共用元件；禁止自行建立另一套頁首、卡片、表格、表單、狀態或按鈕視覺。
+12. 現有版型無法滿足需求時，不得直接在 feature 內做一次性 UI；必須先證明缺口，再擴充成跨模組可用的共用元件，沿用既有 Tokens，補齊 RWD、鍵盤、狀態及測試後才可使用。
+13. `npm run lint` 必須同時通過 UI conformance check；禁止 inline style、舊版 UI class、玻璃模糊、浮卡陰影及未使用 token 的圓角。`/style-preview` 是唯一歷史比較例外，不是正式 UI。
 
 ## 4. 目前進度
 
@@ -51,7 +54,7 @@
 | 計畫版本 | v1.0 |
 | 架構版本 | v1.2（ADR-010：統一 UI 設計方向） |
 | 目前階段 | Phase 0 工程骨架與正式 UI 基準已建立；P0 業務決策仍待公司確認 |
-| 目前切片 | UI-BASELINE-001 已完成；下一個工程切片仍為 0.2 |
+| 目前切片 | UI-GOVERNANCE-001 已完成；下一個工程切片仍為 0.2 |
 | 實作完成度 | Phase 0：3／10 完成；Import I-0：2／3 完成；業務功能 0% |
 | 規劃文件完成度 | 100% |
 | 最新中型進度備份 | Git tag `checkpoint-foundation-batch-1`；bundle 位於專案外層 `git-backups/` |
@@ -79,6 +82,7 @@
 - 依 ADR-010 正式選定「A 平面工業架構＋C 表單清晰度；B 只保留操作習慣」，未導入 Bootstrap，Ant Design 改為未來可選底層元件而非視覺基準。
 - 完成 UI-BASELINE-001：單一 248px／72px 側欄、平面 Design Tokens、首頁，以及 `/ui-patterns` 的總覽、清單查詢、新增／編輯、詳細資料四種可操作版型；共用 PageHeader、KPI、Section、FilterBar、Field、DataTableFrame、StatusLabel 與 DefinitionGrid。
 - 建立完整 [UI 設計系統與通用版型](docs/UI設計系統與通用版型.md)：包含八類版型、狀態、列印、響應式、鍵盤、URL 狀態、Do／Don't 與逐頁驗收清單；4 個前端測試檔、8 個測試、lint、typecheck、build、文件檢查及實際 1366／1280／390px 瀏覽器驗證通過。
+- 完成 UI-GOVERNANCE-001：404、路由錯誤與 React 崩潰頁改用共用 `SystemState`；新增 `check:ui` 並接入 `npm run lint`，自動阻擋脫離 ADR-010 的正式頁面、舊 class、inline style、玻璃模糊、浮卡陰影、非 token 圓角及缺少 RWD 基準。
 
 ### 進行中
 

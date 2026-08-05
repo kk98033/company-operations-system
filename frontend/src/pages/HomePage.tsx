@@ -14,7 +14,7 @@ export function HomePage() {
       <KpiStrip
         label="工程基準狀態"
         items={[
-          { label: '前端測試', value: '待驗證', hint: '本切片完成後更新' },
+          { label: '前端測試', value: '8', hint: '4 個測試檔通過', tone: 'success' },
           { label: '正式業務資料', value: '0', hint: '依規定尚未匯入' },
           { label: 'UI 版型', value: '4', hint: '總覽／清單／表單／詳細', tone: 'success' },
           { label: 'P0 待確認', value: '10', hint: '業務決策尚待公司', tone: 'warning' },

@@ -57,5 +57,6 @@ describe('應用程式骨架', () => {
       'href',
       '/',
     )
+    expect(document.querySelector('.ui-system-state')).toBeInTheDocument()
   })
 })

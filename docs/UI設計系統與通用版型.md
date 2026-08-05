@@ -317,6 +317,7 @@ Drawer 適用：不離開清單的輔助資訊，例如欄位設定、稽核摘�
 | `DataTableFrame` | 水平捲動與 footer | 排序、分頁、資料取得 |
 | `StatusLabel` | 顏色＋文字的狀態外觀 | 決定狀態轉換 |
 | `DefinitionGrid` | 唯讀 key/value 資料 | 編輯功能 |
+| `SystemState` | 404、路由錯誤、render error 等一致狀態頁 | 錯誤上報與重試策略 |
 
 未來預定：`SearchToolbar`、正式 `DataTable`、`MoneyInput`、`QuantityInput`、Picker、`AuditTimeline`、`AttachmentPanel`、`PrintPreview`、`DangerActionDialog`。這些必須沿用本文件規格。
 
@@ -360,3 +361,37 @@ Drawer 適用：不離開清單的輔助資訊，例如欄位設定、稽核摘�
 ## 13. 變更本規格
 
 小幅修正（間距、顏色可讀性、元件 bug）可在 Slice 中更新本文件。若要改變側欄架構、主要版型、元件庫、狀態語意或跨模組操作模式，必須新增／取代 ADR-010，並先更新 README、架構與測試基準。
+
+### 13.1 禁止一次性自創 UI
+
+正式頁面必須從本文件第 5 節選擇版型，並使用 `frontend/src/ui/`。遇到既有元件不足時依以下順序處理：
+
+1. 先確認能否由現有元件組合完成，不能只因個人偏好另做一套。
+2. 記錄跨模組都可能需要的缺口、狀態與操作案例。
+3. 在 `frontend/src/ui/` 擴充通用 API，命名不得綁定單一客戶或單一 feature。
+4. 只使用 `tokens.css` 的顏色、間距、圓角、控制高度與殼層尺寸。
+5. 同時定義 loading、空、錯誤、disabled、readonly、權限及衝突狀態。
+6. 同時完成桌面、收合側欄、雙欄轉單欄及窄視窗行為。
+7. 補元件／頁面測試、人工尺寸驗證與本文件；若改變主要互動模式則新增 ADR。
+
+不得先在 feature CSS 做完，再說「以後有空才抽共用」。無法證明通用性的 UI 不得成為正式基準。
+
+### 13.2 自動守門
+
+前端提供：
+
+```bash
+npm run check:ui
+```
+
+而 `npm run lint` 會一併執行。現階段自動阻擋：
+
+- 正式頁面未引用 ADR-010 共用 UI。
+- JSX inline style。
+- 已淘汰的 `panel`、`system-message`、`empty-state` 與舊按鈕 class。
+- `backdrop-filter` 玻璃效果。
+- 非 `none`／`inset` 的 box shadow。
+- 未使用圓角 token 的 border radius。
+- 缺少雙欄降級、窄視窗、收合側欄或 sticky 識別欄的基準規則。
+
+`StylePreviewPage`／`style-preview.css` 只因保存 A／B／C 歷史比較而排除，畫面必須明確標示「不可作正式 UI」。新增其他例外必須先更新 ADR，不得直接修改檢查腳本繞過。

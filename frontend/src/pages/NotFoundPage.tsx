@@ -1,14 +1,15 @@
 import { Link } from '@tanstack/react-router'
 
+import { SystemState } from '../ui/UiPatterns'
+
 export function NotFoundPage() {
   return (
-    <section className="empty-state">
-      <p className="eyebrow">404</p>
-      <h1>找不到這個頁面</h1>
-      <p>這個網址不存在，或功能尚未開放。</p>
-      <Link className="button button--primary" to="/">
-        回到首頁
-      </Link>
-    </section>
+    <SystemState
+      action={<Link className="ui-button ui-button--primary" to="/">回到首頁</Link>}
+      code="404"
+      description="這個網址不存在，或功能尚未開放。請由左側模組導覽重新進入作業。"
+      eyebrow="ROUTE / NOT FOUND"
+      title="找不到這個頁面"
+    />
   )
 }

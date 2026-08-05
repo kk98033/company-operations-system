@@ -23,6 +23,7 @@ describe('ErrorBoundary', () => {
     )
 
     expect(screen.getByRole('alert')).toHaveTextContent('頁面無法顯示')
+    expect(screen.getByRole('alert')).toHaveClass('ui-system-state--full')
     expect(screen.getByRole('button', { name: '重新載入' })).toBeInTheDocument()
     expect(consoleError).toHaveBeenCalled()
   })

@@ -260,19 +260,6 @@
   font-weight: 900;
 }
 
-.empty-state {
-  display: grid;
-  min-height: min(32rem, calc(100vh - var(--topbar-height) - 3rem));
-  place-items: start;
-  align-content: center;
-  justify-content: center;
-  text-align: center;
-}
-
-.empty-state p:not(.eyebrow) {
-  color: var(--color-ink-700);
-}
-
 @media (max-width: 64rem) {
   .app-shell {
     grid-template-columns: var(--sidebar-collapsed-width) minmax(0, 1fr);

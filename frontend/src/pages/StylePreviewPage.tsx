@@ -276,7 +276,7 @@ export function StylePreviewPage() {
           <h1>介面風格比較</h1>
           <p>三個提案使用相同假工單資料。先比較資訊排列與操作密度，選定後才套用到正式頁面。</p>
         </div>
-        <span className="style-preview-heading__notice">僅供視覺評估 · 無真實資料</span>
+        <span className="style-preview-heading__notice">歷史比較紀錄 · 不可作正式 UI</span>
       </header>
 
       <div className="style-switcher" role="group" aria-label="選擇介面風格">
