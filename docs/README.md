@@ -7,5 +7,6 @@
 - `舊系統資料Import對照與分批計畫.md`：實際舊表、初步筆數、新表 mapping、平行 Import Slice 與核對門檻。
 - `本機開發與Git備份規範.md`：commit、tag、bundle、remote 與回復。
 - `風險與決策紀錄.md`：目前風險、已定決策及 ADR 入口。
+- `UI設計系統與通用版型.md`：正式 UI Tokens、全站殼層、八類通用版型、響應式、無障礙與逐頁檢查表。
 - `decisions/`：重大架構與業務決策。
 - `progress/實作進度紀錄.md`：不可覆蓋的實作歷史。

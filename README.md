@@ -17,15 +17,16 @@
 2. [02_最終系統架構.md](02_最終系統架構.md)
 3. [03_最終實作計畫.md](03_最終實作計畫.md)
 4. [04_開工前確認清單.md](04_開工前確認清單.md)
-5. [需求追蹤矩陣](docs/需求追蹤矩陣.md)
-6. [資料模型與業務規則](docs/資料模型與業務規則.md)
-7. [測試與驗收計畫](docs/測試與驗收計畫.md)
-8. [舊資料移轉計畫](docs/舊資料移轉計畫.md)
-9. [舊系統資料 Import 對照與分批計畫](docs/舊系統資料Import對照與分批計畫.md)
-10. [舊資料來源基線報告](docs/舊資料來源基線報告.md)
-11. [本機開發與 Git 備份規範](docs/本機開發與Git備份規範.md)
-12. [風險與決策紀錄](docs/風險與決策紀錄.md)
-13. [詳細實作進度紀錄](docs/progress/實作進度紀錄.md)
+5. [UI 設計系統與通用版型](docs/UI設計系統與通用版型.md)
+6. [需求追蹤矩陣](docs/需求追蹤矩陣.md)
+7. [資料模型與業務規則](docs/資料模型與業務規則.md)
+8. [測試與驗收計畫](docs/測試與驗收計畫.md)
+9. [舊資料移轉計畫](docs/舊資料移轉計畫.md)
+10. [舊系統資料 Import 對照與分批計畫](docs/舊系統資料Import對照與分批計畫.md)
+11. [舊資料來源基線報告](docs/舊資料來源基線報告.md)
+12. [本機開發與 Git 備份規範](docs/本機開發與Git備份規範.md)
+13. [風險與決策紀錄](docs/風險與決策紀錄.md)
+14. [詳細實作進度紀錄](docs/progress/實作進度紀錄.md)
 
 原始分析證據保留在專案外層的 `../analysis/` 與 `../extraction/`。新版程式不得直接修改這些原始分析或匯出資料。
 
@@ -48,9 +49,9 @@
 |---|---|
 | 最後更新日期 | 2026-08-05 |
 | 計畫版本 | v1.0 |
-| 架構版本 | v1.1（ADR-009：TanStack Router） |
-| 目前階段 | Phase 0 工程骨架完成，介面風格比較頁等待使用者選擇；P0 業務決策仍待公司確認 |
-| 目前切片 | DESIGN-PREVIEW-001 已完成；下一個工程切片仍為 0.2 |
+| 架構版本 | v1.2（ADR-010：統一 UI 設計方向） |
+| 目前階段 | Phase 0 工程骨架與正式 UI 基準已建立；P0 業務決策仍待公司確認 |
+| 目前切片 | UI-BASELINE-001 已完成；下一個工程切片仍為 0.2 |
 | 實作完成度 | Phase 0：3／10 完成；Import I-0：2／3 完成；業務功能 0% |
 | 規劃文件完成度 | 100% |
 | 最新中型進度備份 | Git tag `checkpoint-foundation-batch-1`；bundle 位於專案外層 `git-backups/` |
@@ -75,20 +76,23 @@
 - 建立 `.env.example`、工具鏈檢查、Make 指令與桌面版操作殼層初版；這些分別是 Slice 0.2、0.7、0.10 的部分成果，尚未提前標記完成。
 - 因 2026-08-04 React Router 修補版尚未發布，依 ADR-009 改採安全版本 TanStack Router；乾淨 lockfile 的 `npm audit` 為 0。
 - 完成 DESIGN-PREVIEW-001：`/style-preview` 可用同一組假工單資料切換 A 平面工業 ERP、B 現代桌面 ERP、C Bootstrap 企業版；5 個前端測試、build 與三種實際瀏覽器檢查通過。
+- 依 ADR-010 正式選定「A 平面工業架構＋C 表單清晰度；B 只保留操作習慣」，未導入 Bootstrap，Ant Design 改為未來可選底層元件而非視覺基準。
+- 完成 UI-BASELINE-001：單一 248px／72px 側欄、平面 Design Tokens、首頁，以及 `/ui-patterns` 的總覽、清單查詢、新增／編輯、詳細資料四種可操作版型；共用 PageHeader、KPI、Section、FilterBar、Field、DataTableFrame、StatusLabel 與 DefinitionGrid。
+- 建立完整 [UI 設計系統與通用版型](docs/UI設計系統與通用版型.md)：包含八類版型、狀態、列印、響應式、鍵盤、URL 狀態、Do／Don't 與逐頁驗收清單；4 個前端測試檔、8 個測試、lint、typecheck、build、文件檢查及實際 1366／1280／390px 瀏覽器驗證通過。
 
 ### 進行中
 
 - 無未提交的功能開發；第一批成果已驗證並建立 checkpoint。
-- 介面正式風格尚待使用者從 A／B／C 選擇；比較頁不代表已導入 Bootstrap 或 Ant Design，也不計入已完成的正式業務頁面。
+- 介面正式方向已定案；`/style-preview` 只保留為歷史比較與 ADR-010 決策證據，不是正式業務頁。
 - 公司 P0-01～P0-10 業務決策仍未完成，因此尚未建立正式業務 migration，也未把舊客戶資料寫入新版資料庫。
 
 ### 接下來要做
 
-1. 由使用者在 `/style-preview` 選擇 A、B、C 或指定混合方向，再把決定記錄到 UI Design Token／Slice 0.7。
-2. 執行單一 Slice 0.2：加入後端 settings、必要環境變數驗證，以及 test 不得誤連 dev DB 的測試。
-3. 完成 Slice 0.4／0.5：加入 SQLAlchemy session、真實 DB readiness 與 Alembic 空白基線；只建工程／Import 基礎 schema，不建正式業務表。
-4. 執行 Import I-0.3：建立 `import_runs`、staging、mapping 與 errors 基礎，仍不得寫入正式客戶表。
-5. 補完 Slice 0.7 的狀態元件、accessibility 基線及 Windows 常用尺寸檢查。
+1. 執行單一 Slice 0.2：加入後端 settings、必要環境變數驗證，以及 test 不得誤連 dev DB 的測試。
+2. 完成 Slice 0.4／0.5：加入 SQLAlchemy session、真實 DB readiness 與 Alembic 空白基線；只建工程／Import 基礎 schema，不建正式業務表。
+3. 執行 Import I-0.3：建立 `import_runs`、staging、mapping 與 errors 基礎，仍不得寫入正式客戶表。
+4. 補完 Slice 0.7 的自動 accessibility error 基線；正式頁面一律沿用 ADR-010 共用元件，不再重新選視覺方向。
+5. 依 Slice 0.8 建立各主模組可點擊空白路由及跨模組導覽原型，仍只使用明確標示的假資料。
 6. 逐項請公司完成 `04_開工前確認清單.md` 的 P0-01～P0-10，之後才開始不可逆的業務 schema。
 
 ### 尚待確認但不影響閱讀計畫

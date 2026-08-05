@@ -9,6 +9,7 @@ import { HomePage } from '../pages/HomePage'
 import { NotFoundPage } from '../pages/NotFoundPage'
 import { RouteErrorPage } from '../pages/RouteErrorPage'
 import { StylePreviewPage } from '../pages/StylePreviewPage'
+import { UiPatternsPage } from '../pages/UiPatternsPage'
 import { AppLayout } from './AppLayout'
 
 const rootRoute = createRootRoute({
@@ -29,7 +30,13 @@ const stylePreviewRoute = createRoute({
   component: StylePreviewPage,
 })
 
-const routeTree = rootRoute.addChildren([indexRoute, stylePreviewRoute])
+const uiPatternsRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/ui-patterns',
+  component: UiPatternsPage,
+})
+
+const routeTree = rootRoute.addChildren([indexRoute, uiPatternsRoute, stylePreviewRoute])
 
 export function createAppRouter(history?: RouterHistory) {
   return createRouter({

@@ -7,6 +7,7 @@ import { AppProviders } from './app/providers'
 import './styles/tokens.css'
 import './styles/global.css'
 import './styles/layout.css'
+import './styles/ui-patterns.css'
 import './styles/style-preview.css'
 
 const rootElement = document.getElementById('root')

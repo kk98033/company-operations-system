@@ -1,4 +1,5 @@
 import { screen } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import { useQueryClient } from '@tanstack/react-query'
 import { render } from '@testing-library/react'
 
@@ -23,6 +24,17 @@ describe('應用程式骨架', () => {
       'page',
     )
     expect(screen.getByText('本機開發')).toBeInTheDocument()
+  })
+
+  it('可收合與展開正式側邊欄', async () => {
+    const user = userEvent.setup()
+    await renderApp(['/'])
+
+    const collapseButton = screen.getByRole('button', { name: '收合側邊欄' })
+    await user.click(collapseButton)
+
+    expect(screen.getByRole('button', { name: '展開側邊欄' })).toBeInTheDocument()
+    expect(document.querySelector('.app-shell')).toHaveClass('app-shell--collapsed')
   })
 
   it('使用共用 TanStack Query client', () => {
