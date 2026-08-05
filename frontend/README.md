@@ -17,6 +17,11 @@ npm run dev
 
 開發伺服器預設為 `http://localhost:5173`。後端建立後，`/api` 會由 Vite 代理至 `http://localhost:8000`。
 
+目前可用頁面：
+
+- `/`：Phase 0 工程首頁。
+- `/style-preview`：A 平面工業 ERP、B 現代桌面 ERP、C Bootstrap 企業版的互動比較；全部使用假資料，尚未選定正式風格。
+
 ## 驗證指令
 
 ```bash

@@ -33,6 +33,18 @@ export function AppLayout() {
             </span>
             首頁
           </Link>
+          <Link
+            className="sidebar__link"
+            to="/style-preview"
+            activeProps={{
+              className: 'sidebar__link sidebar__link--active',
+            }}
+          >
+            <span className="sidebar__link-icon" aria-hidden="true">
+              Aa
+            </span>
+            風格比較
+          </Link>
         </nav>
 
         <div className="sidebar__footer">

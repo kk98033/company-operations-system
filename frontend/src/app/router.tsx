@@ -8,6 +8,7 @@ import {
 import { HomePage } from '../pages/HomePage'
 import { NotFoundPage } from '../pages/NotFoundPage'
 import { RouteErrorPage } from '../pages/RouteErrorPage'
+import { StylePreviewPage } from '../pages/StylePreviewPage'
 import { AppLayout } from './AppLayout'
 
 const rootRoute = createRootRoute({
@@ -22,7 +23,13 @@ const indexRoute = createRoute({
   component: HomePage,
 })
 
-const routeTree = rootRoute.addChildren([indexRoute])
+const stylePreviewRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/style-preview',
+  component: StylePreviewPage,
+})
+
+const routeTree = rootRoute.addChildren([indexRoute, stylePreviewRoute])
 
 export function createAppRouter(history?: RouterHistory) {
   return createRouter({

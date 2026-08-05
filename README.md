@@ -46,11 +46,11 @@
 
 | 項目 | 目前狀態 |
 |---|---|
-| 最後更新日期 | 2026-08-04 |
+| 最後更新日期 | 2026-08-05 |
 | 計畫版本 | v1.0 |
 | 架構版本 | v1.1（ADR-009：TanStack Router） |
-| 目前階段 | Phase 0 第一批可回復工程骨架已完成；P0 業務決策仍待公司確認 |
-| 目前切片 | 下一個單一切片為 0.2：完成後端設定載入與環境防呆 |
+| 目前階段 | Phase 0 工程骨架完成，介面風格比較頁等待使用者選擇；P0 業務決策仍待公司確認 |
+| 目前切片 | DESIGN-PREVIEW-001 已完成；下一個工程切片仍為 0.2 |
 | 實作完成度 | Phase 0：3／10 完成；Import I-0：2／3 完成；業務功能 0% |
 | 規劃文件完成度 | 100% |
 | 最新中型進度備份 | Git tag `checkpoint-foundation-batch-1`；bundle 位於專案外層 `git-backups/` |
@@ -74,19 +74,22 @@
 - 建立 FastAPI app、統一錯誤格式與 live／ready 骨架；8 個 API 測試及真實 HTTP smoke 通過。資料庫 readiness 留待 Slice 0.5 接線，因此 Slice 0.4 尚未標記完整完成。
 - 建立 `.env.example`、工具鏈檢查、Make 指令與桌面版操作殼層初版；這些分別是 Slice 0.2、0.7、0.10 的部分成果，尚未提前標記完成。
 - 因 2026-08-04 React Router 修補版尚未發布，依 ADR-009 改採安全版本 TanStack Router；乾淨 lockfile 的 `npm audit` 為 0。
+- 完成 DESIGN-PREVIEW-001：`/style-preview` 可用同一組假工單資料切換 A 平面工業 ERP、B 現代桌面 ERP、C Bootstrap 企業版；5 個前端測試、build 與三種實際瀏覽器檢查通過。
 
 ### 進行中
 
 - 無未提交的功能開發；第一批成果已驗證並建立 checkpoint。
+- 介面正式風格尚待使用者從 A／B／C 選擇；比較頁不代表已導入 Bootstrap 或 Ant Design，也不計入已完成的正式業務頁面。
 - 公司 P0-01～P0-10 業務決策仍未完成，因此尚未建立正式業務 migration，也未把舊客戶資料寫入新版資料庫。
 
 ### 接下來要做
 
-1. 執行單一 Slice 0.2：加入後端 settings、必要環境變數驗證，以及 test 不得誤連 dev DB 的測試。
-2. 完成 Slice 0.4／0.5：加入 SQLAlchemy session、真實 DB readiness 與 Alembic 空白基線；只建工程／Import 基礎 schema，不建正式業務表。
-3. 執行 Import I-0.3：建立 `import_runs`、staging、mapping 與 errors 基礎，仍不得寫入正式客戶表。
-4. 補完 Slice 0.7 的狀態元件、accessibility 基線及 Windows 常用尺寸檢查。
-5. 逐項請公司完成 `04_開工前確認清單.md` 的 P0-01～P0-10，之後才開始不可逆的業務 schema。
+1. 由使用者在 `/style-preview` 選擇 A、B、C 或指定混合方向，再把決定記錄到 UI Design Token／Slice 0.7。
+2. 執行單一 Slice 0.2：加入後端 settings、必要環境變數驗證，以及 test 不得誤連 dev DB 的測試。
+3. 完成 Slice 0.4／0.5：加入 SQLAlchemy session、真實 DB readiness 與 Alembic 空白基線；只建工程／Import 基礎 schema，不建正式業務表。
+4. 執行 Import I-0.3：建立 `import_runs`、staging、mapping 與 errors 基礎，仍不得寫入正式客戶表。
+5. 補完 Slice 0.7 的狀態元件、accessibility 基線及 Windows 常用尺寸檢查。
+6. 逐項請公司完成 `04_開工前確認清單.md` 的 P0-01～P0-10，之後才開始不可逆的業務 schema。
 
 ### 尚待確認但不影響閱讀計畫
 
