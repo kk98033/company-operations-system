@@ -203,6 +203,8 @@ Import 程式不得修改上述檔案。正式執行時先複製到受控的唯�
 
 每個 Import Slice 都是小切片，必須各自測試、更新進度及 commit；不能把全部 Import 寫成一個超大腳本。
 
+I-0.1～I-0.3 已完成。I-0.3 實際以 `import_runs`、`import_source_files`、通用 `import_staging_records`、`import_errors` 與 `legacy_mappings` 建立不承載正式業務資料的基礎；檔案統計分開保存實體行、含表頭邏輯列及資料列，避免再次混淆 `cust` 221／222。下一個 Import slice 仍是客戶 Slice 2.6 後的 I-1.1，不得因 staging schema 已存在就提前匯入 221 筆客戶。
+
 ## 6. 預定程式結構
 
 ```text

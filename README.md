@@ -55,12 +55,12 @@
 |---|---|
 | 最後更新日期 | 2026-08-06 |
 | 計畫版本 | v1.0 |
-| 架構版本 | v1.4（資料庫基礎、API 契約與 ADR-010 UI 基準） |
-| 目前階段 | Phase 0 工程骨架、設定安全、資料庫／API 契約與正式 UI 基準已建立；P0 業務決策仍待公司確認 |
-| 目前切片 | Slice 0.5 已完成；下一個切片為 Import I-0.3 |
-| 實作完成度 | Phase 0：6／10 完成；Import I-0：2／3 完成；業務功能 0% |
+| 架構版本 | v1.5（加入可追溯、可重跑的 Import staging 基礎） |
+| 目前階段 | Phase 0 工程骨架與 Import I-0 基礎已建立；P0 業務決策仍待公司確認 |
+| 目前切片 | Import I-0.3 已完成；下一個切片為 Slice 0.7a |
+| 實作完成度 | Phase 0：6／10 完成；Import I-0：3／3 完成；業務功能 0% |
 | 規劃文件完成度 | 100% |
-| 最新中型進度備份 | Git tag `checkpoint-backend-foundation-v1`；bundle 位於專案外層 `git-backups/` |
+| 最新中型進度備份 | Git tag `checkpoint-import-foundation-v1`；bundle 位於專案外層 `git-backups/company-system-import-foundation-v1-*.bundle` |
 | 正式遠端 Git 備份 | 尚未設定，開工前需建立私人 repository |
 
 ### 已完成
@@ -75,6 +75,7 @@
 - 建立新版專案目錄及第一個本機 Git 計畫基準。
 - 完成 Import I-0.1、I-0.2：106 個 CSV 的唯讀 manifest／SHA-256／CSV 邏輯筆數／編碼異常基線；同一來源重跑報告完全一致。
 - 正式確認 `cust.csv` 為 221 筆客戶資料；222 是包含表頭的 CSV 邏輯行數，未把客戶欄位值寫進報告或 Git。
+- 完成 Import I-0.3：建立 `import_runs`、`import_source_files`、通用 `import_staging_records`、`import_errors` 與 `legacy_mappings`；原始／清理 payload 可比較，來源檔、表、列與 key 由複合外鍵保護，跨 run mapping 唯一鍵阻止重複正式套用。98 個一般後端測試與 12 個隔離 PostgreSQL integration 通過，仍未建立或寫入正式客戶表。
 - 完成 Slice 0.1：鎖定 Node 24、npm 11、Python 3.12、PostgreSQL 17，初始化 React 與 FastAPI 專案。
 - 完成 Slice 0.3：PostgreSQL Compose healthy、只綁 localhost，容器重啟後測試資料仍存在。
 - 完成 Slice 0.6：React、TanStack Router、TanStack Query、Error Boundary、首頁與 404；lint、typecheck、4 個測試、build、`npm audit` 與實際瀏覽器檢查通過。
@@ -92,18 +93,18 @@
 
 ### 進行中
 
-- 無未提交的功能開發；第一批成果已驗證並建立 checkpoint。
+- 無未提交的功能開發；Import I-0 三個切片已驗證並建立 checkpoint。
 - 介面正式方向已定案；`/style-preview` 只保留為歷史比較與 ADR-010 決策證據，不是正式業務頁。
 - 公司 P0-01～P0-10 業務決策仍未完成，因此尚未建立正式業務 migration，也未把舊客戶資料寫入新版資料庫。
+- `import_staging_records` 目前只是 raw／normalized 通用 envelope；客戶 typed mapping、dry-run、apply、個資 access／retention 與錯誤訊息遮罩留在 I-1.x，不得提前把 JSONB 當正式業務模型。
 
 ### 接下來要做
 
-1. 執行 Import I-0.3：建立 `import_runs`、staging、mapping 與 errors 基礎，仍不得寫入正式客戶表。
-2. 執行 Slice 0.7a：在第一個業務前端頁前拆分超過門檻的共用 TSX／CSS，保留 public API、ADR-010 視覺、RWD 與 conformance 強度。
-3. 執行 Slice 0.7b：補完自動 accessibility error、鍵盤及 Windows 常用尺寸基線。
-4. 依 Slice 0.8 建立各主模組可點擊空白路由及跨模組導覽原型，仍只使用明確標示的假資料。
-5. 執行 Slice 0.9：以 OpenAPI 產生 TypeScript client，避免前端重寫後端 DTO。
-6. 逐項請公司完成 `04_開工前確認清單.md` 的 P0-01～P0-10，之後才開始不可逆的業務 schema。
+1. 執行 Slice 0.7a：在第一個業務前端頁前拆分超過門檻的共用 TSX／CSS，保留 public API、ADR-010 視覺、RWD 與 conformance 強度。
+2. 執行 Slice 0.7b：補完自動 accessibility error、鍵盤及 Windows 常用尺寸基線。
+3. 依 Slice 0.8 建立各主模組可點擊空白路由及跨模組導覽原型，仍只使用明確標示的假資料。
+4. 執行 Slice 0.9：以 OpenAPI 產生 TypeScript client，避免前端重寫後端 DTO。
+5. 逐項請公司完成 `04_開工前確認清單.md` 的 P0-01～P0-10；客戶 Slice 2.6 完成並簽認 mapping 後，才執行 I-1.1 `cust` dry-run。
 
 ### 尚待確認但不影響閱讀計畫
 
@@ -202,7 +203,7 @@ company-system/
 └─ docs/                    # 資料、測試、移轉、決策與進度文件
 ```
 
-目前 `frontend/` 與 `backend/` 已有可執行的 Phase 0 骨架，PostgreSQL 由根目錄 `compose.yaml` 啟動；`infra/` 仍只保留責任說明。正式業務資料表、登入、客戶、工單與帳務功能都尚未建立。
+目前 `frontend/` 與 `backend/` 已有可執行的 Phase 0 骨架，PostgreSQL 由根目錄 `compose.yaml` 啟動；`backend/app/modules/imports/` 只包含 Import staging／trace infrastructure，`infra/` 仍只保留責任說明。正式業務資料表、登入、客戶、工單與帳務功能都尚未建立。
 
 ## 8. 完成定義
 

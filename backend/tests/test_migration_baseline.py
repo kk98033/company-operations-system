@@ -1,10 +1,11 @@
-"""Static guardrails for the intentionally empty Alembic baseline."""
+"""Static guardrails for the baseline and first infrastructure migration."""
 
 import importlib.util
 from pathlib import Path
 from types import ModuleType
 
 from app.core.database import Base
+from app.core.database.model_registry import REGISTERED_MODELS
 
 BACKEND_ROOT = Path(__file__).resolve().parents[1]
 BASELINE_PATH = BACKEND_ROOT / "migrations/versions/0001_empty_baseline.py"
@@ -18,8 +19,16 @@ def _load_baseline() -> ModuleType:
     return module
 
 
-def test_base_metadata_contains_no_business_tables() -> None:
-    assert Base.metadata.tables == {}
+def test_base_metadata_contains_only_import_infrastructure_tables() -> None:
+    assert REGISTERED_MODELS
+    assert set(Base.metadata.tables) == {
+        "import_errors",
+        "import_runs",
+        "import_source_files",
+        "import_staging_records",
+        "legacy_mappings",
+    }
+    assert "customers" not in Base.metadata.tables
 
 
 def test_empty_baseline_upgrade_and_downgrade_are_safe_no_ops() -> None:

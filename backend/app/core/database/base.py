@@ -1,4 +1,4 @@
-"""Shared declarative metadata for future business models."""
+"""Shared declarative metadata for infrastructure and future business models."""
 
 from sqlalchemy.orm import DeclarativeBase
 

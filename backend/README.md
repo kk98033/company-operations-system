@@ -1,6 +1,6 @@
 # Backend
 
-FastAPI 後端專案骨架。現階段提供環境防呆、統一 API 契約、真實資料庫就緒檢查，以及 SQLAlchemy／Alembic 基礎。目前只有空白 migration baseline，尚未建立業務資料表、Import schema、登入或權限。
+FastAPI 後端專案骨架。現階段提供環境防呆、統一 API 契約、真實資料庫就緒檢查、SQLAlchemy／Alembic，以及不含正式資料的 Import staging／trace 基礎。尚未建立正式業務資料表、登入或權限。
 
 ## 環境
 
@@ -115,7 +115,7 @@ python -m pytest -ra
 
 ## Alembic migration
 
-Alembic 設定在 `alembic.ini`，版本檔在 `migrations/versions/`。空白基線 `0001_empty_baseline` 只建立 Alembic 版本起點，不建立任何正式表。應用程式啟動不會自動 migration。
+Alembic 設定在 `alembic.ini`，版本檔在 `migrations/versions/`。`0001_empty_baseline` 是空白起點；`0002_import_staging` 建立 run／source file／staging，`0003_import_trace` 建立 errors／mappings。這些都只是 Import infrastructure，不建立或 seed `customers` 等正式業務資料。應用程式啟動不會自動 migration。
 
 一般 `make backend-test` 會排除整合測試，不需要 Docker。要用完全隔離的 PostgreSQL 驗證真實連線與 `upgrade -> downgrade -> upgrade`：
 
@@ -127,6 +127,20 @@ make backend-database-integration-check
 `postgres-test` 只綁定 `127.0.0.1:5433`、資料庫名與 username 均含 `_test`，並使用 tmpfs，不與 development volume 共用資料。專案內只提供明確非正式用途的本機 test-only 預設密碼；CI 或共用環境可以 `POSTGRES_TEST_PASSWORD` 覆寫。Make target 無論成功或失敗都會停止 test container，不會刪除 development volume。
 
 當需要人工驗收停機行為時，先啟動 API 再停止 PostgreSQL；`live` 應持續 200，`ready` 應變為 503，重啟 PostgreSQL 後 `ready` 應恢復 200。
+
+## Import staging 與 trace
+
+`app/modules/imports/models/` 目前只定義五個 infrastructure models：
+
+- `import_runs`：manifest hash、importer version、既定 run lifecycle 與彙總計數。
+- `import_source_files`：相對路徑、來源表、SHA-256、檔案大小、實體行、含表頭邏輯列與資料列。
+- `import_staging_records`：來源檔／表／列／key，以及可比較的 raw／normalized JSONB。
+- `import_errors`：run／file／row／field scope 與處理狀態。
+- `legacy_mappings`：跨 run 的來源 identity 唯一鍵與 target UUID。
+
+複合外鍵會拒絕 file、staging、error 與 mapping 互相矛盾的來源資訊；同一 manifest／檔案允許建立新 run 重跑，但同一來源 identity 不得因 run ID 不同而建立第二個相同 mapping。所有目前測試資料都是 synthetic canary；不得把 221 筆客戶、真實名稱、地址、電話或原始 payload 放進 fixture、log 或 Git。
+
+I-0.3 不提供 Import API、reader service、domain mapping、dry-run 或 apply。`import_staging_records` 是正式 schema 未簽認前的通用 envelope，不是未來客戶／工單的正式 JSONB 模型。I-1.1 前還要補 raw PII 的管理者權限、保留／清除政策，以及禁止錯誤訊息拼接 raw value 的規則。
 
 ## API 錯誤格式
 
@@ -209,8 +223,10 @@ app/
 │  ├─ database/ # engine、session、metadata、readiness 與 lifecycle
 │  ├─ errors.py # 統一例外與 API error response
 │  └─ readiness.py # 可注入的就緒檢查
+├─ modules/
+│  └─ imports/  # Import run／source／staging／error／mapping models；無正式資料 apply
 └─ main.py       # FastAPI app factory 與預設 app
-migrations/        # Alembic 可回復 migration；目前僅空白 baseline
+migrations/        # Alembic 可回復 migration；目前為空白 baseline＋Import infrastructure
 tests/             # API、核心元件及明確標記的 DB integration 測試
 ```
 

@@ -9,6 +9,7 @@ from sqlalchemy.engine import Connection
 
 from app.core.config import load_settings
 from app.core.database import Base
+from app.core.database.model_registry import REGISTERED_MODELS
 from app.core.database.resources import create_database_resources
 
 config = context.config
@@ -16,6 +17,7 @@ if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 
 target_metadata = Base.metadata
+assert REGISTERED_MODELS
 
 
 def run_migrations_with_connection(connection: Connection) -> None:

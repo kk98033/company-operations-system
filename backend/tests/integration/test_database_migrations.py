@@ -12,6 +12,7 @@ from alembic.migration import MigrationContext
 from sqlalchemy import inspect
 
 from app.core.database import create_database_resources
+from app.core.database.model_registry import REGISTERED_MODELS
 from tests.integration.database_settings import load_database_test_settings
 
 pytestmark = [
@@ -46,7 +47,16 @@ def _table_names() -> list[str]:
         resources.dispose()
 
 
-def test_empty_baseline_upgrade_downgrade_upgrade_round_trip(
+IMPORT_TABLES = [
+    "import_errors",
+    "import_runs",
+    "import_source_files",
+    "import_staging_records",
+    "legacy_mappings",
+]
+
+
+def test_import_foundation_upgrade_downgrade_upgrade_round_trip(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     settings = load_database_test_settings()
@@ -55,15 +65,18 @@ def test_empty_baseline_upgrade_downgrade_upgrade_round_trip(
     monkeypatch.setenv("APP_PORT", str(settings.port))
     monkeypatch.setenv("DATABASE_URL", settings.database_url_value())
     config = _alembic_config()
+    assert REGISTERED_MODELS
 
     command.upgrade(config, "head")
-    assert _current_revision() == "0001_empty_baseline"
-    assert _table_names() == ["alembic_version"]
+    assert _current_revision() == "0003_import_trace"
+    assert _table_names() == ["alembic_version", *IMPORT_TABLES]
+
+    command.check(config)
 
     command.downgrade(config, "base")
     assert _current_revision() is None
     assert _table_names() == ["alembic_version"]
 
     command.upgrade(config, "head")
-    assert _current_revision() == "0001_empty_baseline"
-    assert _table_names() == ["alembic_version"]
+    assert _current_revision() == "0003_import_trace"
+    assert _table_names() == ["alembic_version", *IMPORT_TABLES]
