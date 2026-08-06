@@ -1,8 +1,9 @@
 import { useState, type MouseEvent } from 'react'
 import { Link, Outlet } from '@tanstack/react-router'
 
-const navigation = [
-  { to: '/', icon: '▦', label: '首頁', exact: true },
+import { workflowModules } from './workflowModules'
+
+const developmentNavigation = [
   { to: '/ui-patterns', icon: 'UI', label: '統一 UI 版型', exact: false },
   { to: '/style-preview', icon: 'Aa', label: '設計比較紀錄', exact: false },
 ] as const
@@ -30,7 +31,32 @@ export function AppLayout() {
 
         <nav className="sidebar__nav" aria-label="主要導覽">
           <p className="sidebar__section-label">工作區</p>
-          {navigation.map((item) => (
+          <Link
+            activeOptions={{ exact: true }}
+            activeProps={{ className: 'sidebar__link--active' }}
+            className="sidebar__link"
+            to="/"
+          >
+            <span className="sidebar__link-icon" aria-hidden="true">▦</span>
+            <span className="sidebar__link-label">首頁</span>
+          </Link>
+
+          <p className="sidebar__section-label sidebar__section-label--modules">核心流程</p>
+          {workflowModules.map((item) => (
+            <Link
+              activeOptions={{ exact: true }}
+              activeProps={{ className: 'sidebar__link--active' }}
+              className="sidebar__link"
+              key={item.id}
+              to={item.path}
+            >
+              <span className="sidebar__link-icon" aria-hidden="true">{item.icon}</span>
+              <span className="sidebar__link-label">{item.label}</span>
+            </Link>
+          ))}
+
+          <p className="sidebar__section-label sidebar__section-label--modules">開發基準</p>
+          {developmentNavigation.map((item) => (
             <Link
               activeOptions={{ exact: item.exact }}
               activeProps={{ className: 'sidebar__link--active' }}
@@ -42,12 +68,6 @@ export function AppLayout() {
               <span className="sidebar__link-label">{item.label}</span>
             </Link>
           ))}
-
-          <p className="sidebar__section-label sidebar__section-label--modules">預定模組</p>
-          <div className="sidebar__placeholder"><span aria-hidden="true">客</span><span className="sidebar__link-label">客戶與報價</span></div>
-          <div className="sidebar__placeholder"><span aria-hidden="true">工</span><span className="sidebar__link-label">工單與生產</span></div>
-          <div className="sidebar__placeholder"><span aria-hidden="true">出</span><span className="sidebar__link-label">庫存與出貨</span></div>
-          <div className="sidebar__placeholder"><span aria-hidden="true">帳</span><span className="sidebar__link-label">計價與請款</span></div>
         </nav>
 
         <div className="sidebar__footer">

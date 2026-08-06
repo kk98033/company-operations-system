@@ -20,6 +20,7 @@ npm run dev
 目前可用頁面：
 
 - `/`：Phase 0 工程首頁，使用正式 ADR-010 UI。
+- `/customers`、`/quotations`、`/work-orders`、`/production`、`/inventory`、`/shipments`、`/pricing`、`/statements`、`/receipts`：九個公司主流程的 Phase 0 可點擊路由原型；只描述責任與交接，尚無正式功能或資料。
 - `/ui-patterns`：總覽、清單、表單與詳細資料的正式共用版型；全部使用假資料。
 - `/style-preview`：A／B／C 的歷史比較證據；不是正式 UI，不得加入業務功能。
 
@@ -40,8 +41,8 @@ npm run build
 
 ```text
 src/
-├─ app/          Router、Providers、ErrorBoundary 與桌面版 Layout
-├─ pages/        首頁與共用狀態頁；業務頁面後續移入 features
+├─ app/          Router、主流程模組目錄、Providers、ErrorBoundary 與桌面版 Layout
+├─ pages/        首頁、流程原型與共用狀態頁；正式業務頁後續移入 features
 ├─ ui/           ADR-010 跨模組共用元件與開發規則
 ├─ styles/       正式 Design Tokens、殼層、共用元件及歷史預覽樣式
 └─ test/         Vitest 與 Testing Library 共用設定
@@ -51,4 +52,5 @@ src/
 - 不在前端自行決定庫存、稅額、單號或權限結果。
 - 正式介面已依 ADR-010 鎖定 A 平面工業架構＋C 表單清晰度；只使用專案 tokens 與共用元件。
 - `npm run lint` 會同時執行 UI conformance；新頁面不得自創另一套視覺。
+- 九個流程名稱、順序、路徑與原型責任集中在 `src/app/workflowModules.ts`；不得在側邊欄或其他頁面另建重複清單。
 - 業務功能必須依 `../03_最終實作計畫.md` 的 Slice 順序新增。

@@ -4,6 +4,7 @@ import { useQueryClient } from '@tanstack/react-query'
 import { render } from '@testing-library/react'
 
 import { AppProviders } from './providers'
+import { workflowModules } from './workflowModules'
 import { renderApp } from '../test/renderApp'
 
 function QueryClientProbe() {
@@ -51,8 +52,16 @@ describe('應用程式骨架', () => {
 
     await user.tab()
     expect(screen.getByRole('link', { name: '首頁' })).toHaveFocus()
+
+    for (const module of workflowModules) {
+      await user.tab()
+      expect(screen.getByRole('link', { name: module.label })).toHaveFocus()
+    }
+
     await user.tab()
+    expect(screen.getByRole('link', { name: '統一 UI 版型' })).toHaveFocus()
     await user.tab()
+    expect(screen.getByRole('link', { name: '設計比較紀錄' })).toHaveFocus()
     await user.tab()
 
     const collapseButton = screen.getByRole('button', { name: '收合側邊欄' })

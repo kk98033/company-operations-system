@@ -2,6 +2,7 @@ import axe, { type ElementContext, type RunOptions } from 'axe-core'
 import { screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 
+import { workflowModules } from '../app/workflowModules'
 import { renderApp } from './renderApp'
 
 const accessibilityOptions: RunOptions = {
@@ -49,4 +50,13 @@ describe('自動無障礙基線', () => {
       await expectNoAccessibilityViolations()
     }
   })
+
+  it.each(workflowModules)(
+    '$label 路由沒有 axe WCAG A／AA 與 best-practice 違規',
+    async (module) => {
+      await renderApp([module.path])
+      expect(screen.getAllByRole('heading', { level: 1 })).toHaveLength(1)
+      await expectNoAccessibilityViolations()
+    },
+  )
 })

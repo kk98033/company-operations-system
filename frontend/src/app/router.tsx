@@ -6,11 +6,13 @@ import {
 } from '@tanstack/react-router'
 
 import { HomePage } from '../pages/HomePage'
+import { ModulePrototypePage } from '../pages/ModulePrototypePage'
 import { NotFoundPage } from '../pages/NotFoundPage'
 import { RouteErrorPage } from '../pages/RouteErrorPage'
 import { StylePreviewPage } from '../pages/StylePreviewPage'
 import { UiPatternsPage } from '../pages/UiPatternsPage'
 import { AppLayout } from './AppLayout'
+import { workflowModules } from './workflowModules'
 
 const rootRoute = createRootRoute({
   component: AppLayout,
@@ -36,7 +38,18 @@ const uiPatternsRoute = createRoute({
   component: UiPatternsPage,
 })
 
-const routeTree = rootRoute.addChildren([indexRoute, uiPatternsRoute, stylePreviewRoute])
+const workflowRoutes = workflowModules.map((module) => createRoute({
+  getParentRoute: () => rootRoute,
+  path: module.path,
+  component: () => <ModulePrototypePage module={module} />,
+}))
+
+const routeTree = rootRoute.addChildren([
+  indexRoute,
+  ...workflowRoutes,
+  uiPatternsRoute,
+  stylePreviewRoute,
+])
 
 export function createAppRouter(history?: RouterHistory) {
   return createRouter({
