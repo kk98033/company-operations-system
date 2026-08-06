@@ -7,7 +7,13 @@ import { AppProviders } from './app/providers'
 import './styles/tokens.css'
 import './styles/global.css'
 import './styles/layout.css'
-import './styles/ui-patterns.css'
+// ADR-010 cascade：頁面結構 → 表單 → 資訊 → 系統狀態 → 版型示範。
+import './styles/ui-page-patterns.css'
+import './styles/ui-form-patterns.css'
+import './styles/ui-information-patterns.css'
+import './styles/ui-system-state.css'
+import './styles/ui-pattern-gallery.css'
+// 歷史比較頁是正式 UI 之外的唯一例外，必須最後載入且不可供 feature 使用。
 import './styles/style-preview.css'
 
 const rootElement = document.getElementById('root')

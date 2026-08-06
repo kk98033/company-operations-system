@@ -1,5 +1,5 @@
 import { readdir, readFile } from 'node:fs/promises'
-import { resolve } from 'node:path'
+import { basename, resolve } from 'node:path'
 
 const projectRoot = process.cwd()
 const sourceRoot = resolve(projectRoot, 'src')
@@ -21,6 +21,7 @@ const formalTsxFiles = sourceFiles.filter((file) => (
   && !file.endsWith('.test.tsx')
   && !file.endsWith('StylePreviewPage.tsx')
 ))
+const formalUiTsxFiles = formalTsxFiles.filter((file) => file.includes('/src/ui/'))
 
 for (const file of formalTsxFiles) {
   const source = await readFile(file, 'utf8')
@@ -46,6 +47,14 @@ for (const file of formalTsxFiles) {
   }
 }
 
+for (const file of formalUiTsxFiles) {
+  const source = await readFile(file, 'utf8')
+  const lineCount = source.trimEnd().split('\n').length
+  if (lineCount > 200) {
+    errors.push(`${file.slice(projectRoot.length + 1)}: 正式共用 React module 不可超過 200 行，目前 ${lineCount} 行。`)
+  }
+}
+
 const formalPages = sourceFiles.filter((file) => (
   /\/pages\/.*Page\.tsx$/.test(file)
   && !file.endsWith('StylePreviewPage.tsx')
@@ -56,6 +65,9 @@ for (const file of formalPages) {
   const source = await readFile(file, 'utf8')
   if (!source.includes("../ui/UiPatterns")) {
     errors.push(`${file.slice(projectRoot.length + 1)}: 正式頁面必須使用 ADR-010 共用 UI 元件。`)
+  }
+  if (/\.\.\/ui\/(?:FormPatterns|InformationPatterns|PagePatterns|SystemState)/.test(source)) {
+    errors.push(`${file.slice(projectRoot.length + 1)}: 正式頁面不得繞過 UiPatterns public boundary。`)
   }
 }
 
@@ -80,15 +92,67 @@ for (const file of formalCssFiles) {
       errors.push(`${relative}: 圓角必須使用 ADR-010 token：${line.trim()}`)
     }
   }
+
+  if (file.includes('/src/styles/ui-')) {
+    const lineCount = source.trimEnd().split('\n').length
+    if (lineCount > 500) {
+      errors.push(`${relative}: 正式共用 UI style module 不可超過 500 行，目前 ${lineCount} 行。`)
+    }
+  }
 }
 
-const patternsCss = await readFile(resolve(sourceRoot, 'styles/ui-patterns.css'), 'utf8')
+const uiStyleManifest = [
+  ['ui-page-patterns.css', ['@media (max-width: 72rem)', '@media (max-width: 58rem)', '@media (max-width: 40rem)']],
+  ['ui-form-patterns.css', ['@media (max-width: 72rem)', '@media (max-width: 40rem)']],
+  ['ui-information-patterns.css', ['@media (max-width: 72rem)', '@media (max-width: 40rem)']],
+  ['ui-system-state.css', ['@media (max-width: 40rem)']],
+  ['ui-pattern-gallery.css', ['@media (max-width: 40rem)']],
+]
+const discoveredUiStyleNames = formalCssFiles
+  .filter((file) => file.includes('/src/styles/ui-'))
+  .map((file) => basename(file))
+  .sort()
+const expectedUiStyleNames = uiStyleManifest.map(([fileName]) => fileName).sort()
+
+if (JSON.stringify(discoveredUiStyleNames) !== JSON.stringify(expectedUiStyleNames)) {
+  errors.push(`正式共用 UI style manifest 不一致：預期 ${expectedUiStyleNames.join(', ')}；實際 ${discoveredUiStyleNames.join(', ')}。`)
+}
+
+for (const [fileName, requiredMarkers] of uiStyleManifest) {
+  const source = await readFile(resolve(sourceRoot, 'styles', fileName), 'utf8')
+  for (const marker of requiredMarkers) {
+    if (!source.includes(marker)) {
+      errors.push(`${fileName}: 缺少責任內的 RWD／sticky 基準 ${marker}。`)
+    }
+  }
+}
+
+const informationCss = await readFile(resolve(sourceRoot, 'styles/ui-information-patterns.css'), 'utf8')
+const stickyIdentityRule = /\.ui-data-table \.ui-data-table__sticky\s*\{[^}]*position:\s*sticky;[^}]*left:\s*0;/s
+if (!stickyIdentityRule.test(informationCss)) {
+  errors.push('ui-information-patterns.css: 第一識別欄必須使用指定 sticky selector 與 left: 0。')
+}
+
+const mainSource = await readFile(resolve(sourceRoot, 'main.tsx'), 'utf8')
+const styleImportOrder = [
+  'tokens.css',
+  'global.css',
+  'layout.css',
+  ...uiStyleManifest.map(([fileName]) => fileName),
+  'style-preview.css',
+]
+let previousImportIndex = -1
+for (const fileName of styleImportOrder) {
+  const importIndex = mainSource.indexOf(`./styles/${fileName}`)
+  const isDuplicated = importIndex !== mainSource.lastIndexOf(`./styles/${fileName}`)
+  if (importIndex === -1 || importIndex <= previousImportIndex || isDuplicated) {
+    errors.push(`main.tsx: 完整 style cascade import 缺少、重複或順序錯誤：${fileName}。`)
+  }
+  previousImportIndex = importIndex
+}
+
 const layoutCss = await readFile(resolve(sourceRoot, 'styles/layout.css'), 'utf8')
 const requiredRules = [
-  [patternsCss, '@media (max-width: 72rem)', '缺少桌面縮排 breakpoint'],
-  [patternsCss, '@media (max-width: 58rem)', '缺少雙欄轉單欄 breakpoint'],
-  [patternsCss, '@media (max-width: 40rem)', '缺少窄視窗 breakpoint'],
-  [patternsCss, 'position: sticky', '資料表缺少 sticky 識別欄規則'],
   [layoutCss, '--sidebar-collapsed-width', '側欄缺少收合寬度規則'],
   [layoutCss, '@media (max-width: 46rem)', '殼層缺少窄視窗導覽規則'],
 ]

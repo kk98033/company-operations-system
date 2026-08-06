@@ -305,7 +305,7 @@ Drawer 適用：不離開清單的輔助資訊，例如欄位設定、稽核摘�
 
 ## 9. 共用 React 元件對照
 
-目前基準位於 `frontend/src/ui/UiPatterns.tsx`；隨功能增長可拆檔，但 API 應保持一致。
+正式 public boundary 位於 `frontend/src/ui/UiPatterns.tsx`，頁面只能由此匯入。內部依責任拆成 `PagePatterns.tsx`、`FormPatterns.tsx`、`InformationPatterns.tsx` 與 `SystemState.tsx`；對應 CSS 依頁面、表單、資訊、系統狀態與版型示範拆檔，並由 `main.tsx` 依固定順序載入。後續可繼續拆分，但 public API、DOM／ARIA、Tokens、RWD 與載入順序必須保持相容。
 
 | 元件 | 責任 | 不負責 |
 |---|---|---|
@@ -387,11 +387,14 @@ npm run check:ui
 而 `npm run lint` 會一併執行。現階段自動阻擋：
 
 - 正式頁面未引用 ADR-010 共用 UI。
+- 正式頁面繞過 `UiPatterns.tsx` public boundary，直接引用內部責任檔。
 - JSX inline style。
 - 已淘汰的 `panel`、`system-message`、`empty-state` 與舊按鈕 class。
 - `backdrop-filter` 玻璃效果。
 - 非 `none`／`inset` 的 box shadow。
 - 未使用圓角 token 的 border radius。
 - 缺少雙欄降級、窄視窗、收合側欄或 sticky 識別欄的基準規則。
+- 正式共用 React module 超過 200 行，或共用 UI style module 超過 500 行。
+- 共用 UI CSS manifest 與實際檔案不一致，或 `main.tsx` 的完整樣式載入缺少、重複、順序錯誤。
 
 `StylePreviewPage`／`style-preview.css` 只因保存 A／B／C 歷史比較而排除，畫面必須明確標示「不可作正式 UI」。新增其他例外必須先更新 ADR，不得直接修改檢查腳本繞過。
