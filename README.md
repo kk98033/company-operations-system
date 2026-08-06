@@ -57,8 +57,8 @@
 | 計畫版本 | v1.0 |
 | 架構版本 | v1.5（加入可追溯、可重跑的 Import staging 基礎） |
 | 目前階段 | Phase 0 工程骨架與 Import I-0 基礎已建立；P0 業務決策仍待公司確認 |
-| 目前切片 | Slice 0.7a 已完成；下一個切片為 Slice 0.7b |
-| 實作完成度 | Phase 0：6／10 完成；Import I-0：3／3 完成；業務功能 0% |
+| 目前切片 | Slice 0.7 已完成（0.7a＋0.7b）；下一個切片為 Slice 0.8 |
+| 實作完成度 | Phase 0：7／10 完成；Import I-0：3／3 完成；業務功能 0% |
 | 規劃文件完成度 | 100% |
 | 最新中型進度備份 | Git tag `checkpoint-import-foundation-v1`；bundle 位於專案外層 `git-backups/company-system-import-foundation-v1-*.bundle` |
 | 正式遠端 Git 備份 | 尚未設定，開工前需建立私人 repository |
@@ -91,19 +91,20 @@
 - 完成 Slice 0.2：後端設定拆為 `config/models.py`、`loader.py`、`database_guard.py`；必要變數與非法值 fail-fast，development／test／production 的 DB 名稱及帳號雙向隔離，Secret 與驗證錯誤不洩漏 DSN；37 個後端測試與 branch coverage 100% 通過。
 - 建立 [程式碼與檔案命名規範](docs/程式碼與檔案命名規範.md)：定義 React／TypeScript、FastAPI／Python、SQL／Alembic、API／JSON、測試、CSS、文件及 Import 命名，加入單檔責任、拆檔門檻與 review checklist。
 - 完成 Slice 0.7a：保留 `UiPatterns.tsx` 為正式 public boundary，將共用元件依頁面、表單、資訊與系統狀態責任拆成 4 個內部 TSX，將 607 行共用 CSS 拆成 5 個責任樣式檔；conformance 會檢查 200／500 行門檻、public boundary、完整樣式 manifest／載入順序、RWD 與 sticky 識別欄。10 個前端測試、lint、typecheck、build、CSS 語意比對及 7 種實際瀏覽器尺寸通過，畫面、DOM、public API 與 RWD 行為不變。
+- 完成 Slice 0.7b：採用精確鎖版 `axe-core` 4.13.0 建立首頁、404 與四種 UI 版型的 WCAG A／AA＋best-practice 自動基線；版型頁維持單一 H1，頁籤具備 tablist／tab／tabpanel、aria-selected／controls、roving tabIndex 與方向鍵／Home／End 操作，跳轉連結會移動焦點至 main，必填文字與 reduced-motion 降級完整。6 個前端測試檔、15 個測試、lint、typecheck、build、`npm audit` 及 7 種實際瀏覽器尺寸通過。
 
 ### 進行中
 
-- Slice 0.7a 已完成並通過獨立審查；Phase 0 完成數仍維持 6／10，因完整 Slice 0.7 尚需 0.7b 的 accessibility 與鍵盤基線。
+- 完整 Slice 0.7 已完成；正式 UI 結構、RWD、自動無障礙與鍵盤基線已建立，Phase 0 進度為 7／10。
 - 介面正式方向已定案；`/style-preview` 只保留為歷史比較與 ADR-010 決策證據，不是正式業務頁。
 - 公司 P0-01～P0-10 業務決策仍未完成，因此尚未建立正式業務 migration，也未把舊客戶資料寫入新版資料庫。
 - `import_staging_records` 目前只是 raw／normalized 通用 envelope；客戶 typed mapping、dry-run、apply、個資 access／retention 與錯誤訊息遮罩留在 I-1.x，不得提前把 JSONB 當正式業務模型。
 
 ### 接下來要做
 
-1. 執行 Slice 0.7b：補完自動 accessibility error、鍵盤及 Windows 常用尺寸基線。
-2. 依 Slice 0.8 建立各主模組可點擊空白路由及跨模組導覽原型，仍只使用明確標示的假資料。
-3. 執行 Slice 0.9：以 OpenAPI 產生 TypeScript client，避免前端重寫後端 DTO。
+1. 依 Slice 0.8 建立各主模組可點擊空白路由及跨模組導覽原型，仍只使用明確標示的假資料。
+2. 執行 Slice 0.9：以 OpenAPI 產生 TypeScript client，避免前端重寫後端 DTO。
+3. 執行 Slice 0.10：驗證統一 `make dev/test/lint/build/down` 與乾淨環境操作。
 4. 逐項請公司完成 `04_開工前確認清單.md` 的 P0-01～P0-10；客戶 Slice 2.6 完成並簽認 mapping 後，才執行 I-1.1 `cust` dry-run。
 
 ### 尚待確認但不影響閱讀計畫

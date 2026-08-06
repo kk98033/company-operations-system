@@ -30,10 +30,11 @@ npm run lint
 npm run check:ui
 npm run typecheck
 npm run test
+npm run test:a11y
 npm run build
 ```
 
-`npm run test:watch` 可在開發時持續執行 Vitest。
+`npm run test` 已包含 accessibility 測試；`npm run test:a11y` 可單獨執行 axe-core 的 WCAG A／AA 與 best-practice 基線。`npm run test:watch` 可在開發時持續執行 Vitest。色彩與實際焦點仍須用瀏覽器人工確認。
 
 ## 目錄原則
 

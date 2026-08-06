@@ -8,20 +8,24 @@ type Action = {
 
 export function PageHeader({
   eyebrow,
+  headingLevel = 1,
   title,
   description,
   actions = [],
 }: {
   eyebrow: string
+  headingLevel?: 1 | 2
   title: string
   description?: string
   actions?: Action[]
 }) {
+  const Heading = headingLevel === 2 ? 'h2' : 'h1'
+
   return (
     <header className="ui-page-header">
       <div>
         <p className="eyebrow">{eyebrow}</p>
-        <h1>{title}</h1>
+        <Heading>{title}</Heading>
         {description ? <p className="ui-page-header__description">{description}</p> : null}
       </div>
       {actions.length > 0 ? (

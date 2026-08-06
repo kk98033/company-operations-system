@@ -303,6 +303,8 @@ Drawer 適用：不離開清單的輔助資訊，例如欄位設定、稽核摘�
 - 常用快捷鍵需先在頁面提示並避開瀏覽器／作業系統快捷鍵；B 方案只作習慣參考。
 - 動畫保持短暫，並尊重 `prefers-reduced-motion`。
 
+Slice 0.7b 已把上述規格落成正式基線：首頁、404 及 `/ui-patterns` 四種狀態由 axe-core 執行 WCAG A／AA 與 best-practice 掃描；每個正式路由只有一個 H1。版型切換使用 tablist／tab／tabpanel、aria-selected／aria-controls 與 roving tabIndex，支援左右方向鍵、Home、End；跳轉連結可把焦點送到 `main`，全域焦點外框為 3px。JSDOM 無真實像素排版，因此自動掃描不假裝驗證色彩對比；顏色、焦點可見性與破版仍須在實際瀏覽器人工驗收。
+
 ## 9. 共用 React 元件對照
 
 正式 public boundary 位於 `frontend/src/ui/UiPatterns.tsx`，頁面只能由此匯入。內部依責任拆成 `PagePatterns.tsx`、`FormPatterns.tsx`、`InformationPatterns.tsx` 與 `SystemState.tsx`；對應 CSS 依頁面、表單、資訊、系統狀態與版型示範拆檔，並由 `main.tsx` 依固定順序載入。後續可繼續拆分，但 public API、DOM／ARIA、Tokens、RWD 與載入順序必須保持相容。
@@ -382,6 +384,7 @@ Drawer 適用：不離開清單的輔助資訊，例如欄位設定、稽核摘�
 
 ```bash
 npm run check:ui
+npm run test:a11y
 ```
 
 而 `npm run lint` 會一併執行。現階段自動阻擋：
@@ -396,5 +399,8 @@ npm run check:ui
 - 缺少雙欄降級、窄視窗、收合側欄或 sticky 識別欄的基準規則。
 - 正式共用 React module 超過 200 行，或共用 UI style module 超過 500 行。
 - 共用 UI CSS manifest 與實際檔案不一致，或 `main.tsx` 的完整樣式載入缺少、重複、順序錯誤。
+- 正數 `tabIndex`、缺少全域 focus-visible、跳轉連結／main 目標或 reduced-motion 降級。
+
+`npm run test:a11y` 另外以 axe-core 掃描目前正式路由與 UI 狀態；新增正式路由或通用互動狀態時，必須同步加入掃描案例。axe 自動結果不能取代鍵盤、螢幕尺寸、色彩與公司實際工作流程的人工驗收。
 
 `StylePreviewPage`／`style-preview.css` 只因保存 A／B／C 歷史比較而排除，畫面必須明確標示「不可作正式 UI」。新增其他例外必須先更新 ADR，不得直接修改檢查腳本繞過。

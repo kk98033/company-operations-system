@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, type MouseEvent } from 'react'
 import { Link, Outlet } from '@tanstack/react-router'
 
 const navigation = [
@@ -10,9 +10,14 @@ const navigation = [
 export function AppLayout() {
   const [isCollapsed, setIsCollapsed] = useState(false)
 
+  function moveFocusToMain(event: MouseEvent<HTMLAnchorElement>) {
+    event.preventDefault()
+    document.getElementById('main-content')?.focus()
+  }
+
   return (
     <div className={`app-shell${isCollapsed ? ' app-shell--collapsed' : ''}`}>
-      <a className="skip-link" href="#main-content">跳到主要內容</a>
+      <a className="skip-link" href="#main-content" onClick={moveFocusToMain}>跳到主要內容</a>
 
       <aside className="sidebar">
         <div className="sidebar__brand">

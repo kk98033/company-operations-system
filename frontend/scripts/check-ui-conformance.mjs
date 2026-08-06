@@ -31,6 +31,10 @@ for (const file of formalTsxFiles) {
     errors.push(`${relative}: 正式 UI 禁止 inline style，請使用共用 token／元件。`)
   }
 
+  if (/tabIndex\s*=\s*\{\s*[1-9]/.test(source)) {
+    errors.push(`${relative}: 禁止正數 tabIndex，鍵盤順序必須跟隨 DOM 與視覺流程。`)
+  }
+
   const classLiterals = [...source.matchAll(/className\s*=\s*["']([^"']+)["']/g)]
     .flatMap((match) => match[1].split(/\s+/))
   const hasLegacyClass = classLiterals.some((className) => (
@@ -152,9 +156,16 @@ for (const fileName of styleImportOrder) {
 }
 
 const layoutCss = await readFile(resolve(sourceRoot, 'styles/layout.css'), 'utf8')
+const globalCss = await readFile(resolve(sourceRoot, 'styles/global.css'), 'utf8')
+const appLayoutSource = await readFile(resolve(sourceRoot, 'app/AppLayout.tsx'), 'utf8')
 const requiredRules = [
   [layoutCss, '--sidebar-collapsed-width', '側欄缺少收合寬度規則'],
   [layoutCss, '@media (max-width: 46rem)', '殼層缺少窄視窗導覽規則'],
+  [layoutCss, '@media (prefers-reduced-motion: reduce)', '殼層動畫缺少 reduced-motion 降級規則'],
+  [globalCss, ':focus-visible', '全域樣式缺少鍵盤可見焦點規則'],
+  [globalCss, '.skip-link:focus', '全域樣式缺少跳到主要內容的焦點顯示規則'],
+  [appLayoutSource, 'href="#main-content"', 'AppLayout 缺少跳到主要內容連結'],
+  [appLayoutSource, 'id="main-content"', 'AppLayout 缺少主要內容焦點目標'],
 ]
 
 for (const [source, marker, message] of requiredRules) {

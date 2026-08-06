@@ -24,7 +24,7 @@ export function Field({
     <label className="ui-field">
       <span className="ui-field__label">
         {label}
-        {required ? <b aria-label="必填">＊</b> : null}
+        {required ? <><b aria-hidden="true">＊</b><span className="visually-hidden">必填</span></> : null}
       </span>
       {children}
       {hint ? <small>{hint}</small> : null}

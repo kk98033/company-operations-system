@@ -37,6 +37,30 @@ describe('應用程式骨架', () => {
     expect(document.querySelector('.app-shell')).toHaveClass('app-shell--collapsed')
   })
 
+  it('鍵盤焦點先進入跳轉連結，並可用 Enter 操作側邊欄按鈕', async () => {
+    const user = userEvent.setup()
+    await renderApp(['/'])
+
+    await user.tab()
+    const skipLink = screen.getByRole('link', { name: '跳到主要內容' })
+    expect(skipLink).toHaveFocus()
+    await user.keyboard('{Enter}')
+    expect(document.querySelector('#main-content')).toHaveFocus()
+
+    skipLink.focus()
+
+    await user.tab()
+    expect(screen.getByRole('link', { name: '首頁' })).toHaveFocus()
+    await user.tab()
+    await user.tab()
+    await user.tab()
+
+    const collapseButton = screen.getByRole('button', { name: '收合側邊欄' })
+    expect(collapseButton).toHaveFocus()
+    await user.keyboard('{Enter}')
+    expect(screen.getByRole('button', { name: '展開側邊欄' })).toHaveFocus()
+  })
+
   it('使用共用 TanStack Query client', () => {
     render(
       <AppProviders>
