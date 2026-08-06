@@ -1,6 +1,7 @@
 import { Link } from '@tanstack/react-router'
 
 import { workflowModules } from '../app/workflowModules'
+import { ApiConnectionStatus } from '../app/ApiConnectionStatus'
 import { KpiStrip, PageHeader, Section, StatusLabel } from '../ui/UiPatterns'
 
 export function HomePage() {
@@ -15,7 +16,7 @@ export function HomePage() {
       <KpiStrip
         label="工程基準狀態"
         items={[
-          { label: 'Phase 0', value: '8 / 10', hint: '下一步建立 API client', tone: 'success' },
+          { label: 'Phase 0', value: '9 / 10', hint: '下一步統一開發指令', tone: 'success' },
           { label: '正式業務資料', value: '0', hint: '依規定尚未匯入' },
           { label: '主模組路由', value: String(workflowModules.length), hint: '客戶一路到收款', tone: 'success' },
           { label: 'P0 待確認', value: '10', hint: '業務決策尚待公司', tone: 'warning' },
@@ -32,7 +33,8 @@ export function HomePage() {
           <Link className="ui-button ui-button--primary ui-section-link" to="/customers">從客戶管理開始</Link>
         </Section>
         <Section title="實作狀態" description="所有業務功能依小切片完成、驗證與 Git 備份。">
-          <div className="ui-status-summary"><StatusLabel tone="working">Phase 0</StatusLabel><strong>路由原型完成</strong><p>下一個工程切片為 0.9 OpenAPI TypeScript client；所有模組頁目前都不是正式業務功能。</p></div>
+          <div className="ui-status-summary"><StatusLabel tone="working">Phase 0</StatusLabel><strong>型別安全 API client 完成</strong><p>下一個工程切片為 0.10 統一開發指令；所有模組頁目前都不是正式業務功能。</p></div>
+          <ApiConnectionStatus />
         </Section>
       </div>
     </div>

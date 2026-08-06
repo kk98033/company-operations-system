@@ -57,8 +57,8 @@
 | 計畫版本 | v1.0 |
 | 架構版本 | v1.5（加入可追溯、可重跑的 Import staging 基礎） |
 | 目前階段 | Phase 0 工程骨架與 Import I-0 基礎已建立；P0 業務決策仍待公司確認 |
-| 目前切片 | Slice 0.8 已完成；下一個切片為 Slice 0.9 |
-| 實作完成度 | Phase 0：8／10 完成；Import I-0：3／3 完成；業務功能 0% |
+| 目前切片 | Slice 0.9 已完成；下一個切片為 Slice 0.10 |
+| 實作完成度 | Phase 0 工程切片：9／10 完成；Import I-0：3／3 完成；業務功能 0% |
 | 規劃文件完成度 | 100% |
 | 最新中型進度備份 | Git tag `checkpoint-phase0-ui-routing-v1`；bundle 位於專案外層 `git-backups/company-system-phase0-ui-routing-v1-*.bundle` |
 | 正式遠端 Git 備份 | 尚未設定，開工前需建立私人 repository |
@@ -94,17 +94,19 @@
 - 完成 Slice 0.7b：採用精確鎖版 `axe-core` 4.13.0 建立首頁、404 與四種 UI 版型的 WCAG A／AA＋best-practice 自動基線；版型頁維持單一 H1，頁籤具備 tablist／tab／tabpanel、aria-selected／controls、roving tabIndex 與方向鍵／Home／End 操作，跳轉連結會移動焦點至 main，必填文字與 reduced-motion 降級完整。6 個前端測試檔、15 個測試、lint、typecheck、build、`npm audit` 及 7 種實際瀏覽器尺寸通過。
 - 完成 Slice 0.8：以 `workflowModules.ts` 集中定義客戶、報價、工單、生產、庫存、出貨、計價、請款／對帳、收款九個主模組；同一份定義產生路由、側欄及公司流程導覽，所有頁面明確標示為 Phase 0 假資料原型，未連接 API、資料庫或正式公司資料。7 個前端測試檔、34 個測試與 12 個 axe 案例通過；實際瀏覽器可由客戶逐站走到收款，7 種尺寸無整頁水平溢位。
 
+- 完成 Slice 0.9：FastAPI 可離線、deterministic 匯出 OpenAPI snapshot，Orval 8.23.0 由契約產生原生 Fetch TypeScript client；`api:check` 以暫存目錄逐 byte 阻擋 snapshot／client drift。API origin 預設同源且不重複 `/api/v1`；首頁實際顯示 loading、ready、503、離線與重試，non-2xx 會成為 TanStack Query error，安全中文訊息不洩漏底層例外。獨立 Agent 攔下已進入 maintenance mode 的 `openapi-fetch` 與帶 high advisory 的替代版本，最終 lockfile 的 npm high advisory 為 0。
+
 ### 進行中
 
-- Slice 0.8 已完成；九個主模組路由、側欄與跨模組流程已建立，Phase 0 進度為 8／10。
+- Slice 0.9 已完成；OpenAPI snapshot、型別安全 Fetch client、API 狀態與安全錯誤畫面已建立，Phase 0 工程進度為 9／10。
 - 介面正式方向已定案；`/style-preview` 只保留為歷史比較與 ADR-010 決策證據，不是正式業務頁。
 - 公司 P0-01～P0-10 業務決策仍未完成，因此尚未建立正式業務 migration，也未把舊客戶資料寫入新版資料庫。
 - `import_staging_records` 目前只是 raw／normalized 通用 envelope；客戶 typed mapping、dry-run、apply、個資 access／retention 與錯誤訊息遮罩留在 I-1.x，不得提前把 JSONB 當正式業務模型。
 
 ### 接下來要做
 
-1. 執行 Slice 0.9：以 OpenAPI 產生 TypeScript client，避免前端重寫後端 DTO。
-2. 執行 Slice 0.10：驗證統一 `make dev/test/lint/build/down` 與乾淨環境操作。
+1. 執行 Slice 0.10：完成並驗證統一 `make dev/test/lint/build/down` 與乾淨環境操作。
+2. 由公司簽認 Phase 0 導覽、頁面名稱、直接建立工單與報價轉工單兩條入口；工程完成不能代替公司驗收。
 3. 逐項請公司完成 `04_開工前確認清單.md` 的 P0-01～P0-10；客戶 Slice 2.6 完成並簽認 mapping 後，才執行 I-1.1 `cust` dry-run。
 
 ### 尚待確認但不影響閱讀計畫

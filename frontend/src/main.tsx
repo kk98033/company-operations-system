@@ -13,6 +13,7 @@ import './styles/ui-form-patterns.css'
 import './styles/ui-information-patterns.css'
 import './styles/ui-system-state.css'
 import './styles/ui-pattern-gallery.css'
+import './styles/api-connection-status.css'
 import './styles/module-prototype.css'
 // 歷史比較頁是正式 UI 之外的唯一例外，必須最後載入且不可供 feature 使用。
 import './styles/style-preview.css'

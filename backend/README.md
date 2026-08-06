@@ -84,6 +84,16 @@ uvicorn app.main:app --reload --host 127.0.0.1 --port 8000
 
 development 與 test 環境會開啟 `/docs` 及 `/openapi.json`；production 環境會同時關閉這兩個入口，避免對外暴露 API 結構。OpenAPI 中的共通 4xx、422 與 500，以及真正可能未就緒 endpoint 的 503，均宣告為同一 `ErrorResponse` envelope；`live` 不會錯誤宣告 503。
 
+前端 client 的權威來源是離線匯出的 FastAPI OpenAPI，不需啟動 API 或連接資料庫：
+
+```bash
+cd ..
+./scripts/generate-api-client.sh          # 更新 snapshot 與 generated client
+./scripts/generate-api-client.sh --check  # 在暫存目錄重產並檢查 drift
+```
+
+產生流程對匯出器注入固定 test-only 設定，並使用排序穩定的 UTF-8 JSON 與唯一 snake_case operation ID。`frontend/openapi/` 及 `frontend/src/api/generated/` 要提交 Git，但 generated client 禁止手改。
+
 ## 測試
 
 ```bash

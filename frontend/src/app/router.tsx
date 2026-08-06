@@ -54,7 +54,7 @@ const routeTree = rootRoute.addChildren([
 export function createAppRouter(history?: RouterHistory) {
   return createRouter({
     routeTree,
-    defaultPreload: 'intent',
+    defaultPreload: history ? false : 'intent',
     ...(history ? { history } : {}),
   })
 }

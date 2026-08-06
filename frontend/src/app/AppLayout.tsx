@@ -71,8 +71,8 @@ export function AppLayout() {
         </nav>
 
         <div className="sidebar__footer">
-          <span className="status-dot" aria-hidden="true" />
-          <span className="sidebar__link-label">本機服務運作中</span>
+          <span className="status-dot status-dot--neutral" aria-hidden="true" />
+          <span className="sidebar__link-label">服務狀態請見首頁</span>
         </div>
       </aside>
 

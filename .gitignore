@@ -37,6 +37,8 @@ uploads/
 imports/raw/
 imports/staging/
 generated/
+!frontend/src/api/generated/
+!frontend/src/api/generated/company-system.ts
 artifacts/
 playwright-report/
 test-results/

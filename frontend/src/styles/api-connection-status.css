@@ -1,0 +1,30 @@
+.api-connection-status {
+  display: flex;
+  min-height: var(--control-height);
+  align-items: center;
+  gap: var(--space-3);
+  margin-top: var(--space-4);
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--color-border);
+  color: var(--color-ink-700);
+  font-size: 0.78rem;
+}
+
+.api-connection-status .ui-button {
+  margin-left: auto;
+}
+
+.status-dot--neutral {
+  background: var(--color-border-strong);
+}
+
+@media (max-width: 46rem) {
+  .api-connection-status {
+    display: grid;
+  }
+
+  .api-connection-status .ui-button {
+    width: 100%;
+    margin-left: 0;
+  }
+}

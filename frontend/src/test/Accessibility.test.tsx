@@ -1,6 +1,7 @@
 import axe, { type ElementContext, type RunOptions } from 'axe-core'
 import { screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
+import { afterEach, beforeEach, vi } from 'vitest'
 
 import { workflowModules } from '../app/workflowModules'
 import { renderApp } from './renderApp'
@@ -15,6 +16,14 @@ const accessibilityOptions: RunOptions = {
     'color-contrast': { enabled: false },
   },
 }
+
+beforeEach(() => {
+  vi.stubGlobal('fetch', vi.fn<typeof fetch>().mockResolvedValue(
+    Response.json({ checks: [], status: 'ready' }),
+  ))
+})
+
+afterEach(() => vi.unstubAllGlobals())
 
 async function expectNoAccessibilityViolations(context: ElementContext = document.body) {
   const results = await axe.run(context, accessibilityOptions)
@@ -33,6 +42,11 @@ describe('自動無障礙基線', () => {
     ['404', '/not-a-real-page'],
   ])('%s 沒有 axe WCAG A／AA 與 best-practice 違規', async (_label, route) => {
     await renderApp([route])
+    if (route === '/') {
+      expect(await screen.findByRole('status')).toHaveTextContent(
+        'API 與必要相依服務目前可使用',
+      )
+    }
     expect(screen.getAllByRole('heading', { level: 1 })).toHaveLength(1)
     await expectNoAccessibilityViolations()
   })
