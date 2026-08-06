@@ -10,6 +10,19 @@
 - 所有啟動、migration、seed、test、build、backup 命令放進 Makefile 或 scripts，不依賴個人記憶。
 - README 是新電腦復原的第一入口。
 
+根目錄權威指令：
+
+| 指令 | 責任 |
+|---|---|
+| `make bootstrap` | 建立本機 `.env`、Python venv，以及安裝 Python／npm dependencies |
+| `make dev` | 驗證 Secret、啟動 PostgreSQL、migration、FastAPI 與 Vite |
+| `make lint` | 文件／shell／Compose／Ruff／ESLint／UI／OpenAPI drift |
+| `make test` | Import／backend unit／隔離 DB integration／frontend tests |
+| `make build` | backend import smoke 與 frontend production build |
+| `make down` | 停止容器但絕不刪除 development volume |
+
+`make audit` 需要對外網路；不混入一般 test，避免 registry 暫時不可用時把程式測試誤報失敗。`make check` 是 lint→test→build→audit 的完整手動 gate。
+
 ## 2. Git repository 範圍
 
 新版 repository 根目錄是 `company-system/`。

@@ -56,12 +56,12 @@
 | 最後更新日期 | 2026-08-06 |
 | 計畫版本 | v1.0 |
 | 架構版本 | v1.5（加入可追溯、可重跑的 Import staging 基礎） |
-| 目前階段 | Phase 0 工程骨架與 Import I-0 基礎已建立；P0 業務決策仍待公司確認 |
-| 目前切片 | Slice 0.9 已完成；下一個切片為 Slice 0.10 |
-| 實作完成度 | Phase 0 工程切片：9／10 完成；Import I-0：3／3 完成；業務功能 0% |
+| 目前階段 | Phase 0 工程切片 10／10 已完成；Phase Gate 等待公司簽核 |
+| 目前切片 | Slice 0.10 已完成；暫停進入正式業務 schema |
+| 實作完成度 | Phase 0 工程切片：10／10 完成；Import I-0：3／3 完成；業務功能 0% |
 | 規劃文件完成度 | 100% |
-| 最新中型進度備份 | Git tag `checkpoint-phase0-ui-routing-v1`；bundle 位於專案外層 `git-backups/company-system-phase0-ui-routing-v1-*.bundle` |
-| 正式遠端 Git 備份 | 尚未設定，開工前需建立私人 repository |
+| 最新中型進度備份 | Git tag `checkpoint-phase0-engineering-v1`；bundle 位於專案外層 `git-backups/company-system-phase0-engineering-v1-*.bundle` |
+| 正式遠端 Git 備份 | 尚未設定，必須在 Phase 1 完成前建立私人 repository |
 
 ### 已完成
 
@@ -81,7 +81,7 @@
 - 完成 Slice 0.6：React、TanStack Router、TanStack Query、Error Boundary、首頁與 404；lint、typecheck、4 個測試、build、`npm audit` 與實際瀏覽器檢查通過。
 - 完成 Slice 0.4：FastAPI app、runtime／OpenAPI 統一錯誤契約、安全 validation details／logging、production 文件關閉、live／ready 語意，以及分頁、排序白名單、關鍵字／日期 primitive 與列表 metadata；真實 DB readiness 明確留待 Slice 0.5。
 - 完成 Slice 0.5：採用 SQLAlchemy 2、Alembic 與 psycopg 3，建立 bounded connection pool、request session lifecycle、真實 `SELECT 1` readiness、app shutdown dispose、空白 migration baseline，以及 localhost／tmpfs 隔離 test DB；92 個一般後端測試與 3 個真實 DB integration 通過。
-- 建立 `.env.example`、工具鏈檢查、Make 指令與桌面版操作殼層初版；這些分別是 Slice 0.2、0.7、0.10 的部分成果，尚未提前標記完成。
+- 建立 `.env.example`、工具鏈檢查、統一 Make 指令與桌面版操作殼層；分別由 Slice 0.2、0.7、0.10 完成並驗證。
 - 因 2026-08-04 React Router 修補版尚未發布，依 ADR-009 改採安全版本 TanStack Router；乾淨 lockfile 的 `npm audit` 為 0。
 - 完成 DESIGN-PREVIEW-001：`/style-preview` 可用同一組假工單資料切換 A 平面工業 ERP、B 現代桌面 ERP、C Bootstrap 企業版；5 個前端測試、build 與三種實際瀏覽器檢查通過。
 - 依 ADR-010 正式選定「A 平面工業架構＋C 表單清晰度；B 只保留操作習慣」，未導入 Bootstrap，Ant Design 改為未來可選底層元件而非視覺基準。
@@ -95,19 +95,20 @@
 - 完成 Slice 0.8：以 `workflowModules.ts` 集中定義客戶、報價、工單、生產、庫存、出貨、計價、請款／對帳、收款九個主模組；同一份定義產生路由、側欄及公司流程導覽，所有頁面明確標示為 Phase 0 假資料原型，未連接 API、資料庫或正式公司資料。7 個前端測試檔、34 個測試與 12 個 axe 案例通過；實際瀏覽器可由客戶逐站走到收款，7 種尺寸無整頁水平溢位。
 
 - 完成 Slice 0.9：FastAPI 可離線、deterministic 匯出 OpenAPI snapshot，Orval 8.23.0 由契約產生原生 Fetch TypeScript client；`api:check` 以暫存目錄逐 byte 阻擋 snapshot／client drift。API origin 預設同源且不重複 `/api/v1`；首頁實際顯示 loading、ready、503、離線與重試，non-2xx 會成為 TanStack Query error，安全中文訊息不洩漏底層例外。獨立 Agent 攔下已進入 maintenance mode 的 `openapi-fetch` 與帶 high advisory 的替代版本，最終 lockfile 的 npm high advisory 為 0。
+- 完成 Slice 0.10：根目錄提供 `make bootstrap/dev/test/lint/build/down`，另有 `audit/check`；Ruff、ESLint／UI conformance、OpenAPI drift、99 個一般後端測試、12 個隔離 PostgreSQL integration、39 個前端測試、build 與乾淨目錄安裝／啟停流程均通過。`make down` 不使用 `-v`，development volume 在停止後仍保留。
 
 ### 進行中
 
-- Slice 0.9 已完成；OpenAPI snapshot、型別安全 Fetch client、API 狀態與安全錯誤畫面已建立，Phase 0 工程進度為 9／10。
+- Phase 0 工程切片 10／10 已完成；工程完成不等於公司 Phase Gate 已簽核，也不代表正式業務功能已完成。
 - 介面正式方向已定案；`/style-preview` 只保留為歷史比較與 ADR-010 決策證據，不是正式業務頁。
 - 公司 P0-01～P0-10 業務決策仍未完成，因此尚未建立正式業務 migration，也未把舊客戶資料寫入新版資料庫。
 - `import_staging_records` 目前只是 raw／normalized 通用 envelope；客戶 typed mapping、dry-run、apply、個資 access／retention 與錯誤訊息遮罩留在 I-1.x，不得提前把 JSONB 當正式業務模型。
 
 ### 接下來要做
 
-1. 執行 Slice 0.10：完成並驗證統一 `make dev/test/lint/build/down` 與乾淨環境操作。
-2. 由公司簽認 Phase 0 導覽、頁面名稱、直接建立工單與報價轉工單兩條入口；工程完成不能代替公司驗收。
-3. 逐項請公司完成 `04_開工前確認清單.md` 的 P0-01～P0-10；客戶 Slice 2.6 完成並簽認 mapping 後，才執行 I-1.1 `cust` dry-run。
+1. 由公司簽認 Phase 0 導覽、頁面名稱、直接建立工單與報價轉工單兩條入口；工程完成不能代替公司驗收。
+2. 逐項請公司完成 `04_開工前確認清單.md` 的 P0-01～P0-10；未完成前不得建立會固定未決規則的正式 migration。
+3. 公司簽核完成後進入 Phase 1；客戶 Slice 2.6 完成並簽認 mapping 後，才執行 I-1.1 `cust` dry-run。
 
 ### 尚待確認但不影響閱讀計畫
 
@@ -157,38 +158,46 @@
 
 ## 7. 預定技術與目錄
 
-本機第一次啟動：
+### 本機前置需求
+
+- Docker Desktop（daemon 必須已啟動）與 Docker Compose。
+- Python 3.12（專案基準）、Git、GNU Make、ripgrep。
+- Node 24／npm 11；未安裝正確版本時，專案 wrapper 可透過 npm cache／網路取得隔離工具鏈。
+- 第一次安裝需可連線 npm registry 與 PyPI；`make audit` 也需要網路。
+
+### 統一操作指令
+
+本機第一次安裝：
 
 ```bash
-cp .env.example .env
-# 將 .env 的 POSTGRES_PASSWORD 換成本機專用值後；DATABASE_URL 會引用同一組變數：
-docker compose up -d postgres
-
-cd backend
-python3.12 -m venv .venv
-.venv/bin/python -m pip install -e '.[dev]'
-.venv/bin/uvicorn app.main:app --reload --host 127.0.0.1 --port 8000
+make toolchain-check
+make bootstrap
+# 編輯 .env，把 POSTGRES_PASSWORD 換成只供本機使用的非範例密碼
+make env-check
 ```
 
 若 `.env` 是 Slice 0.2 前建立的舊檔，需先將其中的 `DATABASE_URL` 同步為目前 `.env.example` 的變數引用寫法，再設定 `POSTGRES_PASSWORD`；程式不會覆寫本機私密設定。
 
-另一個終端啟動前端：
+日常操作：
 
 ```bash
-cd frontend
-# 先依 .nvmrc 使用 Node 24 / npm 11
-npm ci
-npm run dev
+make dev    # PostgreSQL＋migration＋FastAPI＋Vite；Ctrl-C 停掉兩個 host process
+make lint   # 文件、shell、Compose、Ruff、ESLint＋UI、OpenAPI drift
+make test   # Import、backend unit、隔離 PostgreSQL integration、frontend test
+make build  # backend import smoke、frontend typecheck 與 production build
+make down   # 停掉 Compose 服務；不刪除 development volume
 ```
 
-若這台電腦尚未安裝 nvm／Node 24，可先在 `frontend/` 使用專案包裝器；它會透過現有 `npx` 暫時取得 Node 24 與固定 npm 11.19.0，不依賴不穩定的快取路徑：
+其他入口：
 
 ```bash
-../scripts/npm11.sh ci
-../scripts/npm11.sh run dev
+make audit  # pip check 與 npm security audit，需網路
+make check  # lint → test → build → audit
 ```
 
-長期開發仍建議安裝 Node 24 LTS，再依 `.nvmrc` 切換。根目錄 `make test` 會執行文件、Import、後端與前端檢查；目前仍須先完成後端 venv 與前端 `npm ci`。`.env`、資料庫 volume、舊資料、Import 報告與正式資料都不得提交 Git。
+`make dev` 因範例密碼或缺少 `.env` 拒絕啟動時，先執行 `make bootstrap`並修改密碼。port 5173、8000 或 5432 被佔用時，先停掉佔用該 port 的本專案過程，不可使用寬鬆 `pkill node/python`。若只需停掉容器，執行 `make down`；它在 `.env` 不存在時仍可用，且不會刪除開發資料。
+
+前端有完整 `package-lock.json`；Python 依賴目前是受控版本範圍而非 bit-for-bit lock，Phase 1 前會再評估 lockfile。`.env`、資料庫 volume、舊資料、Import 報告與正式資料都不得提交 Git。
 
 ```text
 company-system/

@@ -18,7 +18,6 @@ from app.modules.imports.models import (
 )
 from tests.integration.synthetic_import_data import (
     insert_import_run,
-    insert_source_file,
     insert_staged_source,
     insert_staging_record,
 )

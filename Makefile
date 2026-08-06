@@ -4,11 +4,39 @@ PYTHON ?= python3.12
 PROJECT_NPM ?= ../scripts/npm11.sh
 LEGACY_SOURCE_DIR ?= ../extraction/export/uv_print_full/tables
 IMPORT_PROFILE_OUTPUT ?= artifacts/import/profile
+COMPOSE_PARSE_ENV = POSTGRES_PASSWORD=company-system-compose-parse-only
 
-.PHONY: docs-check toolchain-check env-init db-config db-up db-down db-status \
+.PHONY: bootstrap env-check dev down lint test build audit check shell-check \
+	docs-check toolchain-check env-init db-config db-up db-down db-status \
 	db-test-config db-test-up db-test-down backend-database-integration-check \
 	import-profile import-profile-test backend-test backend-check frontend-test \
-	frontend-check test
+	frontend-lint frontend-build frontend-audit frontend-check backend-build
+
+bootstrap:
+	PYTHON_BIN=$(PYTHON) ./scripts/bootstrap.sh
+
+env-check:
+	./scripts/check-local-env.sh
+
+dev: env-check
+	./scripts/dev.sh
+
+down:
+	$(COMPOSE_PARSE_ENV) docker compose --profile test down --remove-orphans
+
+lint: docs-check shell-check db-config
+	cd backend && .venv/bin/ruff check app scripts tests
+	cd frontend && $(PROJECT_NPM) run lint
+	cd frontend && $(PROJECT_NPM) run api:check
+
+test: docs-check import-profile-test backend-check backend-database-integration-check frontend-test
+
+build: backend-build frontend-build
+
+audit: frontend-audit
+	cd backend && .venv/bin/python -m pip check
+
+check: lint test build audit
 
 docs-check:
 	./scripts/check-project-docs.sh
@@ -22,9 +50,9 @@ env-init:
 	@echo "Local .env is present. Replace the placeholder password before shared use."
 
 db-config:
-	docker compose config --quiet
+	$(COMPOSE_PARSE_ENV) docker compose config --quiet
 
-db-up:
+db-up: env-check
 	docker compose up -d postgres
 
 db-down:
@@ -34,19 +62,19 @@ db-status:
 	docker compose ps postgres
 
 db-test-config:
-	docker compose --profile test config --quiet
+	$(COMPOSE_PARSE_ENV) docker compose --profile test config --quiet
 
 db-test-up:
-	docker compose --profile test up -d --wait postgres-test
+	$(COMPOSE_PARSE_ENV) docker compose --profile test up -d --wait postgres-test
 
 db-test-down:
-	docker compose --profile test stop postgres-test
+	$(COMPOSE_PARSE_ENV) docker compose --profile test stop postgres-test
 
 backend-database-integration-check:
 	@set -eu; \
-	cleanup() { docker compose --profile test stop postgres-test >/dev/null; }; \
+	cleanup() { $(COMPOSE_PARSE_ENV) docker compose --profile test stop postgres-test >/dev/null; }; \
 	trap cleanup EXIT INT TERM; \
-	docker compose --profile test up -d --wait postgres-test; \
+	$(COMPOSE_PARSE_ENV) docker compose --profile test up -d --wait postgres-test; \
 	RUN_DATABASE_INTEGRATION=1 backend/.venv/bin/python -m pytest \
 		-c backend/pyproject.toml backend/tests -m database_integration
 
@@ -62,16 +90,31 @@ backend-test:
 	cd backend && .venv/bin/python -m pytest -m "not database_integration"
 
 backend-check: backend-test
-	cd backend && .venv/bin/python -m compileall -q app tests
+	cd backend && .venv/bin/python -m compileall -q app scripts tests
 	cd backend && .venv/bin/python -m pip check
 
 frontend-test:
 	cd frontend && $(PROJECT_NPM) test
+	cd frontend && $(PROJECT_NPM) run api:check
 
-frontend-check: frontend-test
+frontend-lint:
 	cd frontend && $(PROJECT_NPM) run lint
+
+frontend-build:
 	cd frontend && $(PROJECT_NPM) run typecheck
 	cd frontend && $(PROJECT_NPM) run build
+
+frontend-audit:
 	cd frontend && $(PROJECT_NPM) audit --audit-level=high
 
-test: docs-check import-profile-test backend-check frontend-check
+frontend-check: frontend-test
+	$(MAKE) frontend-lint frontend-build frontend-audit
+
+backend-build:
+	cd backend && .venv/bin/python -m compileall -q app scripts
+	cd backend && APP_ENV=test APP_HOST=127.0.0.1 APP_PORT=8000 \
+		DATABASE_URL='postgresql+psycopg://company_system_test:build-only@127.0.0.1/company_system_test' \
+		.venv/bin/python -c 'from app.main import app; assert app.title'
+
+shell-check:
+	bash -n scripts/*.sh
