@@ -53,14 +53,14 @@
 
 | 項目 | 目前狀態 |
 |---|---|
-| 最後更新日期 | 2026-08-06 |
+| 最後更新日期 | 2026-08-07 |
 | 計畫版本 | v1.0 |
 | 架構版本 | v1.5（加入可追溯、可重跑的 Import staging 基礎） |
 | 目前階段 | Phase 0 工程切片 10／10 已完成；Phase Gate 等待公司簽核 |
-| 目前切片 | Slice 0.10 已完成；暫停進入正式業務 schema |
+| 目前切片 | UX-CLARIFICATION-001 已完成；暫停進入正式業務 schema |
 | 實作完成度 | Phase 0 工程切片：10／10 完成；Import I-0：3／3 完成；業務功能 0% |
 | 規劃文件完成度 | 100% |
-| 最新中型進度備份 | Git tag `checkpoint-phase0-engineering-v1`；bundle 位於專案外層 `git-backups/company-system-phase0-engineering-v1-*.bundle` |
+| 最新中型進度備份 | Git tag `checkpoint-phase0-work-order-ia-v1`；bundle 位於專案外層 `git-backups/company-system-phase0-work-order-ia-v1-20260807.bundle` |
 | 正式遠端 Git 備份 | 尚未設定，必須在 Phase 1 完成前建立私人 repository |
 
 ### 已完成
@@ -96,10 +96,12 @@
 
 - 完成 Slice 0.9：FastAPI 可離線、deterministic 匯出 OpenAPI snapshot，Orval 8.23.0 由契約產生原生 Fetch TypeScript client；`api:check` 以暫存目錄逐 byte 阻擋 snapshot／client drift。API origin 預設同源且不重複 `/api/v1`；首頁實際顯示 loading、ready、503、離線與重試，non-2xx 會成為 TanStack Query error，安全中文訊息不洩漏底層例外。獨立 Agent 攔下已進入 maintenance mode 的 `openapi-fetch` 與帶 high advisory 的替代版本，最終 lockfile 的 npm high advisory 為 0。
 - 完成 Slice 0.10：根目錄提供 `make bootstrap/dev/test/lint/build/down`，另有 `audit/check`；Ruff、ESLint／UI conformance、OpenAPI drift、99 個一般後端測試、12 個隔離 PostgreSQL integration、39 個前端測試、build 與乾淨目錄安裝／啟停流程均通過。`make down` 不使用 `-v`，development volume 在停止後仍保留。
+- 完成 UX-CLARIFICATION-001：依 Gmail 原稿把 `/work-orders` 修正為工單查詢清單，保留關鍵字及單價／版費／刀模費結果欄；`/work-orders/new` 是客戶、訂單、價格、備紙、印刷、13 道製程、備註與圖片都在同一 form 的假資料原型。畫面使用既有 ADR-010 元件，內部拆成 7 個單一責任 TSX 與 1 個 RWD 樣式檔；頁內錨點同步 hash 並移動焦點，沒有 KPI、正式資料、API 寫入或業務 migration。製版、單號、浪紙欄位等 P0 未決規則沒有被硬編。
 
 ### 進行中
 
 - Phase 0 工程切片 10／10 已完成；工程完成不等於公司 Phase Gate 已簽核，也不代表正式業務功能已完成。
+- 工單查詢與單頁建檔的介面邊界已依原稿修正；正式儲存、編輯、列印、API 與資料表仍屬 Phase 4，不把原型誤報為業務功能。
 - 介面正式方向已定案；`/style-preview` 只保留為歷史比較與 ADR-010 決策證據，不是正式業務頁。
 - 公司 P0-01～P0-10 業務決策仍未完成，因此尚未建立正式業務 migration，也未把舊客戶資料寫入新版資料庫。
 - `import_staging_records` 目前只是 raw／normalized 通用 envelope；客戶 typed mapping、dry-run、apply、個資 access／retention 與錯誤訊息遮罩留在 I-1.x，不得提前把 JSONB 當正式業務模型。

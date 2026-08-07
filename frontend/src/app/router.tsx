@@ -11,6 +11,8 @@ import { NotFoundPage } from '../pages/NotFoundPage'
 import { RouteErrorPage } from '../pages/RouteErrorPage'
 import { StylePreviewPage } from '../pages/StylePreviewPage'
 import { UiPatternsPage } from '../pages/UiPatternsPage'
+import { WorkOrderListPrototypePage } from '../pages/work-orders/WorkOrderListPrototypePage'
+import { WorkOrderPrototypePage } from '../pages/work-orders/WorkOrderPrototypePage'
 import { AppLayout } from './AppLayout'
 import { workflowModules } from './workflowModules'
 
@@ -41,12 +43,21 @@ const uiPatternsRoute = createRoute({
 const workflowRoutes = workflowModules.map((module) => createRoute({
   getParentRoute: () => rootRoute,
   path: module.path,
-  component: () => <ModulePrototypePage module={module} />,
+  component: module.id === 'work-orders'
+    ? WorkOrderListPrototypePage
+    : () => <ModulePrototypePage module={module} />,
 }))
+
+const workOrderNewRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/work-orders/new',
+  component: WorkOrderPrototypePage,
+})
 
 const routeTree = rootRoute.addChildren([
   indexRoute,
   ...workflowRoutes,
+  workOrderNewRoute,
   uiPatternsRoute,
   stylePreviewRoute,
 ])

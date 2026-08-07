@@ -44,7 +44,7 @@ export function AppLayout() {
           <p className="sidebar__section-label sidebar__section-label--modules">核心流程</p>
           {workflowModules.map((item) => (
             <Link
-              activeOptions={{ exact: true }}
+              activeOptions={{ exact: false }}
               activeProps={{ className: 'sidebar__link--active' }}
               className="sidebar__link"
               key={item.id}

@@ -73,4 +73,10 @@ describe('自動無障礙基線', () => {
       await expectNoAccessibilityViolations()
     },
   )
+
+  it('單頁工單新增路由沒有 axe WCAG A／AA 與 best-practice 違規', async () => {
+    await renderApp(['/work-orders/new'])
+    expect(screen.getAllByRole('heading', { level: 1 })).toHaveLength(1)
+    await expectNoAccessibilityViolations()
+  })
 })

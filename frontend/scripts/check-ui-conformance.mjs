@@ -157,6 +157,7 @@ for (const fileName of styleImportOrder) {
 
 const layoutCss = await readFile(resolve(sourceRoot, 'styles/layout.css'), 'utf8')
 const globalCss = await readFile(resolve(sourceRoot, 'styles/global.css'), 'utf8')
+const workOrderPrototypeCss = await readFile(resolve(sourceRoot, 'styles/work-order-prototype.css'), 'utf8')
 const appLayoutSource = await readFile(resolve(sourceRoot, 'app/AppLayout.tsx'), 'utf8')
 const requiredRules = [
   [layoutCss, '--sidebar-collapsed-width', '側欄缺少收合寬度規則'],
@@ -166,6 +167,13 @@ const requiredRules = [
   [globalCss, '.skip-link:focus', '全域樣式缺少跳到主要內容的焦點顯示規則'],
   [appLayoutSource, 'href="#main-content"', 'AppLayout 缺少跳到主要內容連結'],
   [appLayoutSource, 'id="main-content"', 'AppLayout 缺少主要內容焦點目標'],
+  [mainSource, './styles/work-order-prototype.css', 'main.tsx 缺少單頁工單原型樣式'],
+  [workOrderPrototypeCss, '@media (max-width: 72rem)', '單頁工單缺少中型桌面降級規則'],
+  [workOrderPrototypeCss, '@media (max-width: 58rem)', '單頁工單缺少窄桌面降級規則'],
+  [workOrderPrototypeCss, '@media (max-width: 46rem)', '單頁工單缺少 736px 單欄規則'],
+  [workOrderPrototypeCss, '.work-order-prototype__section-nav', '單頁工單缺少頁內導覽樣式'],
+  [workOrderPrototypeCss, '.work-order-paper-grid', '單頁工單缺少備紙 RWD grid'],
+  [workOrderPrototypeCss, '.work-order-process-row', '單頁工單缺少製程 RWD grid'],
 ]
 
 for (const [source, marker, message] of requiredRules) {

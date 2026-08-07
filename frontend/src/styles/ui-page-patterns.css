@@ -76,6 +76,11 @@
   background: var(--color-surface-subtle);
 }
 
+.ui-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.62;
+}
+
 .ui-kpi-strip {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));

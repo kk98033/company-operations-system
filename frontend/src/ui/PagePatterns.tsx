@@ -4,6 +4,7 @@ type Action = {
   label: string
   onClick?: () => void
   tone?: 'primary' | 'secondary'
+  disabled?: boolean
 }
 
 export function PageHeader({
@@ -33,6 +34,7 @@ export function PageHeader({
           {actions.map((action) => (
             <button
               className={`ui-button ui-button--${action.tone ?? 'secondary'}`}
+              disabled={action.disabled}
               key={action.label}
               onClick={action.onClick}
               type="button"

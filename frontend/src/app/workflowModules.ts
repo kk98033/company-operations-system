@@ -28,7 +28,10 @@ export const workflowModules = [
     id: 'work-orders', path: '/work-orders', icon: '工', label: '工單管理', phase: 'Phase 4',
     description: '同時支援直接建立工單，以及由報價明細轉入後再調整確認。',
     responsibilities: ['單頁分區完成主要資料', '材料、印刷、製程與附件', '查詢、列印、另存新檔與作廢'],
-    input: '客戶或報價明細', output: '生產製程', requirementIds: ['WO-001', 'WO-005', 'WO-009'],
+    input: '客戶或報價明細', output: '生產製程', requirementIds: [
+      'WO-001', 'WO-002', 'WO-003', 'WO-004', 'WO-005', 'WO-006',
+      'WO-007', 'WO-008', 'WO-009', 'WO-010', 'WO-011', 'WO-012',
+    ],
   },
   {
     id: 'production', path: '/production', icon: '生', label: '生產管理', phase: 'Phase 5',
