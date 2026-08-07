@@ -41,6 +41,13 @@ describe('公司主流程路由', () => {
     for (const groupName of ['面紙', '底紙', '浪紙', '印刷－正面', '印刷－反面', '美工', '運送', '其他']) {
       expect(within(form).getByRole('group', { name: groupName })).toBeInTheDocument()
     }
+    expect(within(form).getByRole('group', { name: '製版類型' })).toBeInTheDocument()
+    expect(within(form).getByRole('group', { name: '輪轉方向' })).toBeInTheDocument()
+    expect(within(form).getByRole('radio', { name: '新版' })).not.toBeChecked()
+    expect(within(form).getByRole('radio', { name: '舊版' })).not.toBeChecked()
+    expect(within(form).getByRole('radio', { name: '天地輪轉' })).not.toBeChecked()
+    expect(within(form).getByRole('radio', { name: '左右輪轉' })).not.toBeChecked()
+    expect(within(form).getByText('P0-08 已依公司附件確認')).toBeInTheDocument()
     for (const linkName of ['客戶與訂單', '備紙', '印刷', '製程', '備註與圖片']) {
       expect(within(sectionNav).getByRole('link', { name: new RegExp(linkName) }))
         .toHaveAttribute('href', expect.stringMatching(/^#work-order-/))

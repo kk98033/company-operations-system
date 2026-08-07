@@ -100,10 +100,25 @@
   font-weight: 700;
 }
 
-.work-order-process-options--pending {
+.work-order-plate-options {
+  display: grid;
+  grid-column: 2 / -1;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-4);
+}
+
+.work-order-process-option-group {
+  min-width: 0;
+  margin: 0;
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--color-border-strong);
+}
+
+.work-order-process-option-group legend {
+  padding: 0 var(--space-2);
   color: var(--color-ink-500);
   font-size: 0.7rem;
-  line-height: 1.45;
+  font-weight: 800;
 }
 
 .work-order-process-list {
@@ -172,6 +187,7 @@
   .work-order-prototype__basic-grid,
   .work-order-print-summary { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .work-order-process-row { grid-template-columns: 1fr; }
+  .work-order-plate-options,
   .work-order-process-options,
   .work-order-process-extras { grid-column: 1 / -1; }
   .work-order-notes-grid { grid-template-columns: 1fr; }
@@ -183,10 +199,12 @@
   .work-order-paper-grid,
   .work-order-print-summary,
   .work-order-color-grid,
+  .work-order-plate-options,
   .work-order-process-extras { grid-template-columns: 1fr; }
 
   .work-order-process-row { grid-template-columns: 1fr; }
   .work-order-process-row > *,
+  .work-order-plate-options,
   .work-order-process-options,
   .work-order-process-extras { grid-column: 1; }
 }

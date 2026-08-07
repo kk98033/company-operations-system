@@ -16,8 +16,29 @@ function ProcessRow({ name }: { name: (typeof processNames)[number] }) {
         <input placeholder={`輸入${name}規格或交接事項`} />
       </Field>
       {name === '製版' ? (
-        <div className="work-order-process-options work-order-process-options--pending">
-          新版／舊版、天地／左右輪轉的關係與必填規則待 P0-08 確認
+        <div className="work-order-plate-options">
+          <fieldset className="work-order-process-option-group">
+            <legend>製版類型</legend>
+            <div className="work-order-process-options">
+              {['新版', '舊版'].map((option) => (
+                <label key={option}>
+                  <input name="plate-version" type="radio" />
+                  <span>{option}</span>
+                </label>
+              ))}
+            </div>
+          </fieldset>
+          <fieldset className="work-order-process-option-group">
+            <legend>輪轉方向</legend>
+            <div className="work-order-process-options">
+              {['天地輪轉', '左右輪轉'].map((option) => (
+                <label key={option}>
+                  <input name="plate-rotation" type="radio" />
+                  <span>{option}</span>
+                </label>
+              ))}
+            </div>
+          </fieldset>
         </div>
       ) : null}
       {name === '上光' ? (
@@ -46,7 +67,7 @@ export function ProcessPlanningSection() {
       <Section
         title="製程規劃"
         description="本區保存工單預定製程；開始、完成、重開及最終完工仍由後續生產管理追蹤。"
-        actions={<StatusLabel tone="warning">製版欄位待 P0-08 確認</StatusLabel>}
+        actions={<StatusLabel tone="success">P0-08 已依公司附件確認</StatusLabel>}
       >
         <datalist id="demo-process-vendors">
           <option value="範例協力廠（假資料）" />
