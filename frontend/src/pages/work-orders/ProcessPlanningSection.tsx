@@ -12,9 +12,11 @@ function ProcessRow({ name }: { name: (typeof processNames)[number] }) {
       <Field label="協力廠">
         <input list="demo-process-vendors" placeholder="搜尋協力廠" />
       </Field>
-      <Field label="製程說明">
-        <input placeholder={`輸入${name}規格或交接事項`} />
-      </Field>
+      {name === '製版' || name === '糊邊' ? (
+        <Field label="製程說明">
+          <input placeholder={`輸入${name}規格或交接事項`} />
+        </Field>
+      ) : null}
       {name === '製版' ? (
         <div className="work-order-plate-options">
           <fieldset className="work-order-process-option-group">
@@ -57,6 +59,11 @@ function ProcessRow({ name }: { name: (typeof processNames)[number] }) {
           ))}
         </div>
       ) : null}
+      {name !== '製版' && name !== '糊邊' ? (
+        <Field label="製程說明">
+          <input placeholder={`輸入${name}規格或交接事項`} />
+        </Field>
+      ) : null}
     </fieldset>
   )
 }
@@ -67,7 +74,7 @@ export function ProcessPlanningSection() {
       <Section
         title="製程規劃"
         description="本區保存工單預定製程；開始、完成、重開及最終完工仍由後續生產管理追蹤。"
-        actions={<StatusLabel tone="success">P0-08 已依公司附件確認</StatusLabel>}
+        actions={<StatusLabel tone="success">製程欄位依公司附件確認</StatusLabel>}
       >
         <datalist id="demo-process-vendors">
           <option value="範例協力廠（假資料）" />

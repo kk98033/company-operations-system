@@ -25,11 +25,11 @@ describe('應用程式骨架', () => {
       'page',
     )
     expect(screen.getByText('本機開發')).toBeInTheDocument()
-    const pendingKpi = screen.getByText('P0 待確認').closest('article')
-    expect(pendingKpi).not.toBeNull()
-    expect(within(pendingKpi as HTMLElement).getByText('1')).toBeInTheDocument()
-    expect(within(pendingKpi as HTMLElement).getByText('9／10 已由公司確認')).toBeInTheDocument()
-    expect(screen.getByText(/P0 已確認 9／10，只剩 P0-05/)).toBeInTheDocument()
+    const decisionKpi = screen.getByText('開工決策').closest('article')
+    expect(decisionKpi).not.toBeNull()
+    expect(within(decisionKpi as HTMLElement).getByText('10 / 10')).toBeInTheDocument()
+    expect(within(decisionKpi as HTMLElement).getByText('公司已確認')).toBeInTheDocument()
+    expect(screen.getByText(/開工決策 10／10 已確認/)).toBeInTheDocument()
   })
 
   it('可收合與展開正式側邊欄', async () => {

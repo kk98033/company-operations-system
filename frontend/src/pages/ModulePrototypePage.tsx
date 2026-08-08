@@ -18,18 +18,18 @@ export function ModulePrototypePage({
   return (
     <div className="ui-pattern-stack module-prototype">
       <PageHeader
-        eyebrow="公司流程 / 頁面原型"
+        eyebrow="公司流程 / 頁面展示"
         title={module.label}
         description={module.description}
       />
 
       <div className="module-prototype__notice" role="status">
-        <StatusLabel tone="warning">Phase 0 假資料原型</StatusLabel>
-        <span>目前只驗證頁面名稱、模組責任與流程導覽；尚未連接 API、資料庫或公司正式資料。</span>
+        <StatusLabel tone="warning">展示資料／功能尚未啟用</StatusLabel>
+        <span>目前只展示頁面名稱、模組責任與流程導覽；尚未連接 API、資料庫或公司正式資料。</span>
       </div>
 
       <div className="ui-two-column">
-        <Section title="此模組未來負責" description="正式功能將依對應 Phase 小切片逐步實作。">
+        <Section title="此模組未來負責" description="正式功能將依實作計畫逐步啟用。">
           <ul className="check-list">
             {module.responsibilities.map((responsibility) => <li key={responsibility}>{responsibility}</li>)}
           </ul>
@@ -37,7 +37,7 @@ export function ModulePrototypePage({
         <Section title="流程交接" description="這裡只描述資料流向，不預先決定尚未簽認的業務規則。">
           <DefinitionGrid
             items={[
-              { label: '預定階段', value: module.phase },
+              { label: '目前狀態', value: '依實作計畫逐步啟用' },
               { label: '主要輸入', value: module.input },
               { label: '主要輸出', value: module.output },
               {

@@ -46,14 +46,14 @@ export function WorkOrderListPrototypePage() {
           onClick: () => navigate({ to: '/work-orders/new' }),
           tone: 'primary',
         }]}
-        description="先查詢現行與歷史工單；新增使用同一張整合表單，正式編輯入口留待 Phase 4。本頁不是把工單內容拆成多個步驟。"
-        eyebrow="工單管理 / 查詢原型"
+        description="先查詢現行與歷史工單；新增使用同一張整合表單。本頁不是把工單內容拆成多個步驟。"
+        eyebrow="工單管理 / 查詢展示"
         title="工單管理"
       />
 
       <div className="module-prototype__notice" role="status">
-        <StatusLabel tone="warning">Phase 0 假資料原型</StatusLabel>
-        <span>查詢條件與結果欄依系統修改圖排列；目前不會查詢、儲存或載入公司正式資料。</span>
+        <StatusLabel tone="warning">展示資料／功能尚未啟用</StatusLabel>
+        <span>查詢條件與結果欄依系統修改圖排列；目前不會查詢、存檔或載入公司正式資料。</span>
       </div>
 
       <FilterBar>
@@ -123,7 +123,7 @@ export function WorkOrderListPrototypePage() {
                   <td className="ui-data-table__number">{order.dieFee}</td>
                   <td>{order.deliveryDate}</td>
                   <td><StatusLabel tone={order.recordState === '現行' ? 'working' : 'neutral'}>{order.recordState}</StatusLabel></td>
-                  <td><button className="ui-text-button" disabled type="button">Phase 4 開啟</button></td>
+                  <td><button className="ui-text-button" disabled type="button">尚未啟用</button></td>
                 </tr>
               ))}
             </tbody>

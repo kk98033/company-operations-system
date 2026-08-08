@@ -45,18 +45,20 @@ export function PrintingSpecificationSection() {
             <input inputMode="numeric" placeholder="0" />
           </Field>
           <Field label="印刷數量">
-            <input defaultValue="1000" inputMode="numeric" />
+            <input inputMode="numeric" />
           </Field>
-          <Field label="正負量">
+          <Field label="加減量／±量">
             <input inputMode="numeric" placeholder="± 0" />
-          </Field>
-          <Field label="合計色數">
-            <input inputMode="numeric" placeholder="0" />
           </Field>
         </div>
         <div className="work-order-color-grid">
           <ColorSide side="正面" />
           <ColorSide side="反面" />
+        </div>
+        <div className="work-order-print-summary">
+          <Field label="合計色數">
+            <input inputMode="numeric" placeholder="0" />
+          </Field>
         </div>
       </Section>
     </div>

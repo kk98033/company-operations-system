@@ -43,8 +43,8 @@ export function PaperPreparationSection() {
     <div className="work-order-prototype__anchor" id="work-order-paper" tabIndex={-1}>
       <Section
         title="備紙"
-        description="面紙、底紙與浪紙同頁並列；供應商與紙質將由主檔搜尋，不另建裁紙設定頁。浪紙廠別在來源文件間有差異，原型不據此鎖定 schema。"
-        actions={<StatusLabel tone="warning">浪紙欄位待確認</StatusLabel>}
+        description="面紙、底紙與浪紙同頁並列；供應商與紙質將由主檔搜尋，不另建裁紙設定頁。依公司新稿，面紙／底紙有廠別，浪紙沒有廠別；舊浪紙廠別只讀保留。"
+        actions={<StatusLabel tone="success">備紙欄位依公司新稿</StatusLabel>}
       >
         <datalist id="demo-paper-vendors">
           <option value="範例紙行（假資料）" />

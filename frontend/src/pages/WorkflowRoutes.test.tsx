@@ -23,11 +23,11 @@ describe('公司主流程路由', () => {
     ])
   })
 
-  it.each(workflowModules)('$label 可直接進入且明確標示為假資料原型', async (module) => {
+  it.each(workflowModules)('$label 可直接進入且明確標示為展示資料', async (module) => {
     await renderApp([module.path])
 
     expect(screen.getByRole('heading', { level: 1, name: module.label })).toBeInTheDocument()
-    expect(screen.getByRole('status')).toHaveTextContent('Phase 0 假資料原型')
+    expect(screen.getByRole('status')).toHaveTextContent('展示資料')
     expect(within(screen.getByRole('navigation', { name: '主要導覽' }))
       .getByRole('link', { name: module.label }))
       .toHaveAttribute('aria-current', 'page')
@@ -49,7 +49,7 @@ describe('公司主流程路由', () => {
     const user = userEvent.setup({ skipHover: true })
     await renderApp(['/work-orders/new'])
 
-    const form = screen.getByRole('form', { name: '工單整合建檔原型' })
+    const form = screen.getByRole('form', { name: '工單整合建檔展示' })
     const sectionNav = within(form).getByRole('navigation', { name: '工單頁內區段' })
 
     for (const sectionName of ['客戶與訂單資料', '備紙', '印刷', '製程規劃', '備註與圖片']) {
@@ -65,7 +65,29 @@ describe('公司主流程路由', () => {
     expect(within(form).getByRole('radio', { name: '舊版' })).not.toBeChecked()
     expect(within(form).getByRole('radio', { name: '天地輪轉' })).not.toBeChecked()
     expect(within(form).getByRole('radio', { name: '左右輪轉' })).not.toBeChecked()
-    expect(within(form).getByText('P0-08 已依公司附件確認')).toBeInTheDocument()
+    expect(within(form).getByText('製程欄位依公司附件確認')).toBeInTheDocument()
+    expect(within(form).getByLabelText('客編')).not.toBeRequired()
+    expect(within(form).getByLabelText(/^工作單號/)).not.toBeRequired()
+    expect(within(form).getByLabelText('訂單數量')).toHaveValue('')
+    expect(within(form).getByLabelText('印刷數量')).toHaveValue('')
+
+    const processOrder = Array.from(form.querySelectorAll('.work-order-process-row > legend'))
+      .map((legend) => legend.textContent)
+    expect(processOrder).toEqual([
+      '美工', '輸出', '製版', '打樣', '印刷', '上光', '裱紙',
+      '模具', '軋型', '加工', '糊邊', '運送', '其他',
+    ])
+
+    const topLevelLabels = (processName: string) => {
+      const row = Array.from(form.querySelectorAll('.work-order-process-row'))
+        .find((candidate) => candidate.querySelector(':scope > legend')?.textContent === processName)
+      return Array.from(row?.children ?? []).map((child) => child.textContent?.trim())
+    }
+    expect(topLevelLabels('上光')).toEqual(['上光', '協力廠', '上光種類', '製程說明'])
+    expect(topLevelLabels('軋型')).toEqual(['軋型', '協力廠', '刀模號碼模數', '製程說明'])
+    expect(topLevelLabels('製版')).toEqual(['製版', '協力廠', '製程說明', '製版類型新版舊版輪轉方向天地輪轉左右輪轉'])
+    expect(topLevelLabels('糊邊')).toEqual(['糊邊', '協力廠', '製程說明', '裝箱裝袋'])
+    expect(within(form).getByLabelText('加減量／±量')).toBeInTheDocument()
     for (const linkName of ['客戶與訂單', '備紙', '印刷', '製程', '備註與圖片']) {
       expect(within(sectionNav).getByRole('link', { name: new RegExp(linkName) }))
         .toHaveAttribute('href', expect.stringMatching(/^#work-order-/))
@@ -73,14 +95,14 @@ describe('公司主流程路由', () => {
     expect(document.querySelector('.ui-kpi-strip')).not.toBeInTheDocument()
     expect(screen.queryByRole('link', { name: '下一站：生產管理' })).not.toBeInTheDocument()
     expect(within(form).getByText('一工單一主要品項已確認')).toBeInTheDocument()
-    expect(screen.getAllByRole('button', { name: '儲存' })).toHaveLength(2)
+    expect(screen.getAllByRole('button', { name: '存檔' })).toHaveLength(2)
     expect(screen.getAllByRole('button', { name: '列印' })).toHaveLength(2)
 
     for (const selector of ['.ui-page-actions', '.work-order-prototype__footer']) {
       const actionArea = document.querySelector(selector)
       expect(actionArea).not.toBeNull()
       const actions = within(actionArea as HTMLElement).getAllByRole('button')
-      expect(actions.map((button) => button.textContent)).toEqual(['另存新檔', '儲存', '取消', '列印'])
+      expect(actions.map((button) => button.textContent)).toEqual(['另存新檔', '存檔', '取消', '列印'])
       for (const button of actions) expect(button).toBeDisabled()
     }
 
@@ -101,8 +123,8 @@ describe('公司主流程路由', () => {
     expect(screen.getByRole('columnheader', { name: '資料狀態' })).toBeInTheDocument()
     expect(screen.getByRole('rowheader', { name: 'DEMO-WO-H01' })).toBeInTheDocument()
     expect(within(screen.getByRole('table')).getByText('歷史／封存')).toBeInTheDocument()
-    expect(screen.getAllByRole('button', { name: 'Phase 4 開啟' })).toHaveLength(2)
-    for (const button of screen.getAllByRole('button', { name: 'Phase 4 開啟' })) {
+    expect(screen.getAllByRole('button', { name: '尚未啟用' })).toHaveLength(2)
+    for (const button of screen.getAllByRole('button', { name: '尚未啟用' })) {
       expect(button).toBeDisabled()
     }
     expect(screen.getByRole('button', { name: '清除' })).toBeDisabled()
