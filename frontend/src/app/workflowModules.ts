@@ -15,22 +15,30 @@ export const workflowModules = [
   {
     id: 'customers', path: '/customers', icon: '客', label: '客戶管理', phase: 'Phase 2',
     description: '集中維護客戶基本資料、聯絡方式、帳務條件與常用工作項目。',
-    responsibilities: ['依代號、名稱或簡稱查詢', '保存聯絡與帳務設定', '提供報價與工單的客戶快照來源'],
-    input: '公司基本設定', output: '報價或直接建立工單', requirementIds: ['CUST-001', 'CUST-002', 'CUST-003'],
+    responsibilities: ['依代號、名稱或簡稱查詢', '保存聯絡與帳務設定', '提供報價、案件與工單的客戶快照來源'],
+    input: '公司基本設定', output: '報價或直接建立案件', requirementIds: ['CUST-001', 'CUST-002', 'CUST-003'],
   },
   {
     id: 'quotations', path: '/quotations', icon: '報', label: '報價管理', phase: 'Phase 3',
     description: '建立多明細報價、另存新檔與列印；報價不是建立工單的必經流程。',
-    responsibilities: ['建立多明細報價', '保存版費、刀模費與價格快照', '選擇報價明細轉入工單'],
-    input: '客戶資料', output: '工單（選用流程）', requirementIds: [
+    responsibilities: ['建立多明細報價', '保存版費、刀模費與價格快照', '選擇報價明細建立案件與子工單'],
+    input: '客戶資料', output: '案件（選用流程）', requirementIds: [
       'QUO-001', 'QUO-002', 'QUO-003', 'QUO-004', 'QUO-005', 'QUO-006', 'QUO-007', 'QUO-008',
+    ],
+  },
+  {
+    id: 'cases', path: '/cases', icon: '案', label: '案件管理', phase: 'Phase 4',
+    description: '用一個案件集中管理同一客戶訂單或同一張報價產生的多張獨立工單。',
+    responsibilities: ['集中顯示客戶、報價與整體交期', '一個案件包含一張或多張子工單', '彙總工單進度但不取代各工單狀態'],
+    input: '客戶或已確認報價', output: '一張或多張工單', requirementIds: [
+      'CASE-001', 'CASE-002', 'CASE-003', 'CASE-004', 'CASE-005',
     ],
   },
   {
     id: 'work-orders', path: '/work-orders', icon: '工', label: '工單管理', phase: 'Phase 4',
     description: '同時支援直接建立工單，以及由報價明細轉入後再調整確認。',
     responsibilities: ['單頁分區完成主要資料', '材料、印刷、製程與附件', '查詢、列印、另存新檔與作廢'],
-    input: '客戶或報價明細', output: '生產製程', requirementIds: [
+    input: '所屬案件', output: '製程任務', requirementIds: [
       'WO-001', 'WO-002', 'WO-003', 'WO-004', 'WO-005', 'WO-006',
       'WO-007', 'WO-008', 'WO-009', 'WO-010', 'WO-011', 'WO-012',
       'WO-013', 'WO-014', 'WO-015', 'WO-016',

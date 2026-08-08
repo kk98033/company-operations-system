@@ -55,13 +55,13 @@
 | 項目 | 目前狀態 |
 |---|---|
 | 最後更新日期 | 2026-08-08 |
-| 計畫版本 | v1.1（報價／工單附件逐項納入 Phase 3／4 Slice） |
-| 架構版本 | v1.6（加入 P0-08 製版 typed spec 與 P0-10 全量 Import 去向契約） |
+| 計畫版本 | v1.2（加入案件→工單→製程任務三層模型及 Phase 4 細切片） |
+| 架構版本 | v1.7（P0-01／P0-02 定案案件與單品工單模型） |
 | 目前階段 | Phase 0 工程切片 10／10 已完成；Phase Gate 等待公司簽核 |
-| 目前切片 | REQ-ATTACHMENT-TRACE-001：九份 PDF 與系統修改圖已逐項納入需求矩陣及 Phase 3／4 計畫；暫停進入正式業務 schema |
+| 目前切片 | P0-CASE-DECISION-001：案件三層模型已定案並補入 Phase 0 原型；暫停進入正式業務 schema |
 | 實作完成度 | Phase 0 工程切片：10／10 完成；Import I-0：3／3 完成；業務功能 0% |
 | 規劃文件完成度 | 100% |
-| 最新中型進度備份 | Git tag `checkpoint-p0-attachment-contract-v1`；經驗證 bundle 位於專案外層 `git-backups/` |
+| 最新中型進度備份 | Git tag `checkpoint-p0-case-model-v1`；經驗證 bundle 位於專案外層 `git-backups/` |
 | 正式遠端 Git 備份 | 尚未設定，必須在 Phase 1 完成前建立私人 repository |
 
 ### 已完成
@@ -93,32 +93,32 @@
 - 建立 [程式碼與檔案命名規範](docs/程式碼與檔案命名規範.md)：定義 React／TypeScript、FastAPI／Python、SQL／Alembic、API／JSON、測試、CSS、文件及 Import 命名，加入單檔責任、拆檔門檻與 review checklist。
 - 完成 Slice 0.7a：保留 `UiPatterns.tsx` 為正式 public boundary，將共用元件依頁面、表單、資訊與系統狀態責任拆成 4 個內部 TSX，將 607 行共用 CSS 拆成 5 個責任樣式檔；conformance 會檢查 200／500 行門檻、public boundary、完整樣式 manifest／載入順序、RWD 與 sticky 識別欄。10 個前端測試、lint、typecheck、build、CSS 語意比對及 7 種實際瀏覽器尺寸通過，畫面、DOM、public API 與 RWD 行為不變。
 - 完成 Slice 0.7b：採用精確鎖版 `axe-core` 4.13.0 建立首頁、404 與四種 UI 版型的 WCAG A／AA＋best-practice 自動基線；版型頁維持單一 H1，頁籤具備 tablist／tab／tabpanel、aria-selected／controls、roving tabIndex 與方向鍵／Home／End 操作，跳轉連結會移動焦點至 main，必填文字與 reduced-motion 降級完整。6 個前端測試檔、15 個測試、lint、typecheck、build、`npm audit` 及 7 種實際瀏覽器尺寸通過。
-- 完成 Slice 0.8：以 `workflowModules.ts` 集中定義客戶、報價、工單、生產、庫存、出貨、計價、請款／對帳、收款九個主模組；同一份定義產生路由、側欄及公司流程導覽，所有頁面明確標示為 Phase 0 假資料原型，未連接 API、資料庫或正式公司資料。7 個前端測試檔、34 個測試與 12 個 axe 案例通過；實際瀏覽器可由客戶逐站走到收款，7 種尺寸無整頁水平溢位。
+- 完成 Slice 0.8：以 `workflowModules.ts` 集中定義主模組；P0-CASE-DECISION-001 後擴充為客戶、報價、案件、工單、生產、庫存、出貨、計價、請款／對帳、收款十個模組。同一份定義產生路由、側欄及公司流程導覽，所有頁面明確標示為 Phase 0 假資料原型，未連接 API、資料庫或正式公司資料。
 
 - 完成 Slice 0.9：FastAPI 可離線、deterministic 匯出 OpenAPI snapshot，Orval 8.23.0 由契約產生原生 Fetch TypeScript client；`api:check` 以暫存目錄逐 byte 阻擋 snapshot／client drift。API origin 預設同源且不重複 `/api/v1`；首頁實際顯示 loading、ready、503、離線與重試，non-2xx 會成為 TanStack Query error，安全中文訊息不洩漏底層例外。獨立 Agent 攔下已進入 maintenance mode 的 `openapi-fetch` 與帶 high advisory 的替代版本，最終 lockfile 的 npm high advisory 為 0。
 - 完成 Slice 0.10：根目錄提供 `make bootstrap/dev/test/lint/build/down`，另有 `audit/check`；Ruff、ESLint／UI conformance、OpenAPI drift、99 個一般後端測試、12 個隔離 PostgreSQL integration、39 個前端測試、build 與乾淨目錄安裝／啟停流程均通過。`make down` 不使用 `-v`，development volume 在停止後仍保留。
 - 完成 UX-CLARIFICATION-001：依 Gmail 原稿把 `/work-orders` 修正為工單查詢清單，保留關鍵字及單價／版費／刀模費結果欄；`/work-orders/new` 是客戶、訂單、價格、備紙、印刷、13 道製程、備註與圖片都在同一 form 的假資料原型。畫面使用既有 ADR-010 元件，內部拆成 7 個單一責任 TSX 與 1 個 RWD 樣式檔；頁內錨點同步 hash 並移動焦點，沒有 KPI、正式資料、API 寫入或業務 migration。當時製版、單號、浪紙欄位等 P0 未決規則沒有被硬編；製版後續已由 P0-DECISION-001 定案。
 - 完成 P0-DECISION-001：重新逐頁核對 9 份 Gmail PDF 與 `系統修改.jpg`，確認 P0-08 保留製版協力廠／說明、新舊版與輪轉方向，並把版本與輪轉實作為兩組獨立單選。P0-10 確認不限年份的全量匯入目標，每筆來源都必須有正式匯入、只讀封存、合併 mapping 或例外待處理的可核對去向。
-- 完成 REQ-ATTACHMENT-TRACE-001：建立 [Gmail 附件需求逐項對照](docs/Gmail附件需求逐項對照.md)，把四份報價、五份工單 PDF 與 `系統修改.jpg` 分成建檔結構、註解規則、UAT 範例及列印契約；補齊 QUO-007～008、WO-013～016，並修正 Phase 3／4 的逐欄小切片與驗收條件。範例內容不作系統預設值，P0-01／02／09 仍維持未決。
+- 完成 REQ-ATTACHMENT-TRACE-001：建立 [Gmail 附件需求逐項對照](docs/Gmail附件需求逐項對照.md)，把四份報價、五份工單 PDF 與 `系統修改.jpg` 分成建檔結構、註解規則、UAT 範例及列印契約；補齊 QUO-007～008、WO-013～016，並修正 Phase 3／4 的逐欄小切片與驗收條件。範例內容不作系統預設值；當時 P0-01／02／09 尚未決，P0-01／02 後續已由 ADR-014 定案。
+- 完成 P0-CASE-DECISION-001：公司確認「案件 → 工單 → 製程任務」；N 筆報價明細建立一個案件與 N 張單品工單，直接建工單會自動建立單工單案件。新增 ADR-014、CASE-001～005、`/cases` 假資料原型與子工單表格；舊 `b_replay1`／`b_replay2` 納入 Import 計畫且不臆造舊報價工單關聯。
 
 ### 進行中
 
 - Phase 0 工程切片 10／10 已完成；工程完成不等於公司 Phase Gate 已簽核，也不代表正式業務功能已完成。
 - 工單查詢與單頁建檔的介面邊界已依原稿修正；正式儲存、編輯、列印、API 與資料表仍屬 Phase 4，不把原型誤報為業務功能。
 - 介面正式方向已定案；`/style-preview` 只保留為歷史比較與 ADR-010 決策證據，不是正式業務頁。
-- 公司 P0-08 與 P0-10 已確認；P0-01～P0-07 與 P0-09 共 8 項仍未完成，因此尚未建立正式業務 migration，也未把舊客戶資料寫入新版資料庫。
+- 公司 P0-01、P0-02、P0-08、P0-10 已確認；P0-03～P0-07 與 P0-09 共 6 項仍未完成，因此尚未建立正式業務 migration，也未把舊客戶資料寫入新版資料庫。
 - `import_staging_records` 目前只是 raw／normalized 通用 envelope；客戶 typed mapping、dry-run、apply、個資 access／retention 與錯誤訊息遮罩留在 I-1.x，不得提前把 JSONB 當正式業務模型。
 
 ### 接下來要做
 
-1. 由公司簽認 Phase 0 導覽、頁面名稱、直接建立工單與報價轉工單兩條入口；工程完成不能代替公司驗收。
-2. 逐項請公司完成 `04_開工前確認清單.md` 尚待確認的 P0-01～P0-07 與 P0-09；未完成前不得建立會固定未決規則的正式 migration。
+1. 由公司簽認 Phase 0 的客戶→報價（可略過）→案件→工單→製程任務導覽與頁面名稱；工程完成不能代替公司驗收。
+2. 逐項請公司完成 `04_開工前確認清單.md` 尚待確認的 P0-03～P0-07 與 P0-09；未完成前不得建立會固定未決規則的正式 migration。
 3. Phase 3／4 開工時依 `docs/Gmail附件需求逐項對照.md` 逐 Slice 建立測試，不可把整份報價或工單一次塞入單一元件。
 4. 公司簽核完成後進入 Phase 1；客戶 Slice 2.6 完成並簽認 mapping 後，才執行 I-1.1 `cust` dry-run。
 
 ### 尚待確認但不影響閱讀計畫
 
-- 報價明細轉工單的粒度。
 - 「運送」是否代表最終完工核定。
 - 出貨量與備品量的扣庫存定義。
 - 稅額、逐筆取整、付款條件及請款／對帳格式。
@@ -226,7 +226,7 @@ company-system/
 
 第一版只有在下列條件全部成立時才算完成：
 
-- 可由客戶直接建立工單，也可由報價明細轉成工單。
+- 可由客戶直接建立單工單案件，也可由報價明細建立一個案件與多張子工單。
 - 可完整走完工單、製程、最終完工、存貨、出貨、計價、請款及收款。
 - 部分完工、部分出貨、多次出貨、備品及沖銷均計算正確。
 - 不會超量出貨、重複計價、重複請款或超額收款。

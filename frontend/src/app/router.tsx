@@ -6,6 +6,7 @@ import {
 } from '@tanstack/react-router'
 
 import { HomePage } from '../pages/HomePage'
+import { CasePrototypePage } from '../pages/cases/CasePrototypePage'
 import { ModulePrototypePage } from '../pages/ModulePrototypePage'
 import { NotFoundPage } from '../pages/NotFoundPage'
 import { RouteErrorPage } from '../pages/RouteErrorPage'
@@ -45,6 +46,8 @@ const workflowRoutes = workflowModules.map((module) => createRoute({
   path: module.path,
   component: module.id === 'work-orders'
     ? WorkOrderListPrototypePage
+    : module.id === 'cases'
+      ? () => <CasePrototypePage module={module} />
     : () => <ModulePrototypePage module={module} />,
 }))
 

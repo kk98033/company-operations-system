@@ -56,6 +56,8 @@ P0-10 已於 2026-08-07 定案為「不限年份的全量匯入目標」。全�
 | `cust` | 221（CSV 邏輯資料列） | 客戶、聯絡與帳務設定 |
 | `fact` | 47 | 供應商／協力廠 |
 | `wpa` | 9,831 | 客戶常用工作項目與歷史規格 |
+| `b_replay1` | 4（CSV 邏輯資料列） | 舊報價主檔 |
+| `b_replay2` | 10（CSV 邏輯資料列） | 舊報價明細；4 張報價各有 1～4 筆明細 |
 | `subpoena` | 1,448 | 現行工單／製程傳票 |
 | `quote` | 1,451 | 現行工單製程明細，不是新版報價單 |
 | `subpoena_his` | 18,651 | 歷史工單 |
@@ -113,11 +115,20 @@ P0-10 已於 2026-08-07 定案為「不限年份的全量匯入目標」。全�
 
 `wpa` 有約 9,831 筆，不能在客戶主頁一次載入；需分頁、搜尋並處理同客戶重複／近似品名。
 
+### 4.2.1 舊報價
+
+| 舊表 | 關聯 | 新資料 | 注意事項 |
+|---|---|---|---|
+| `b_replay1` | `br_no` | `quotations` | 報價日期、客戶、有效期限、付款天數、含稅與整體備註 |
+| `b_replay2` | `br_no` → `b_replay1.br_no` | `quotation_items` | 序號、品名、規格、數量、單位、單價、合計與備註 |
+
+PowerBuilder 報價模組沒有找到 `subpoena` 或工單視窗呼叫，也沒有可靠外鍵可把舊報價明細接到舊工單。匯入時保留報價主明細，但不得臆造 `production_cases`、`source_quotation_item_id` 或報價轉工單關係。
+
 ### 4.3 現行工單與製程
 
 | 舊表 | 關聯 | 新資料 | 注意事項 |
 |---|---|---|---|
-| `subpoena` | `id`／`idbuffer` | `work_orders`、materials、print specs | 主工單、紙材、印刷、價格、製版與備註 |
+| `subpoena` | `id`／`idbuffer` | `production_cases`、`work_orders`、materials、print specs | 無可靠群組鍵時每張舊工單建立一個 `legacy_single_work_order` 案件，再匯主工單、紙材、印刷、價格、製版與備註 |
 | `quote` | `subpoenaid` → `subpoena.id` | `work_order_processes`、process history | 這個 `quote` 是製程內容，不可誤匯成新版 `quotations` |
 
 重要：舊表名稱 `quote` 容易被誤認為報價單，但從欄位與舊程式關聯可確認它保存設計、製版、曬版、印刷、上光、裱紙、刀模、裁切、運送等工單製程資料。新版報價功能要用新的 `quotations`／`quotation_items`，不可直接把舊 `quote` 當報價。
@@ -126,7 +137,7 @@ P0-10 已於 2026-08-07 定案為「不限年份的全量匯入目標」。全�
 
 | 舊表 | 關聯 | 新資料 | 注意事項 |
 |---|---|---|---|
-| `subpoena_his` | 工單舊鍵 | 同一 `work_orders` | 使用 archived／completed 狀態，不建立第二套歷史業務表 |
+| `subpoena_his` | 工單舊鍵 | `production_cases`、同一 `work_orders` | 每張歷史工單先建立單工單 legacy 案件；使用 archived／completed 狀態，不建立第二套歷史業務表 |
 | `quote_his` | `subpoenaid` | `work_order_processes`／歷史事件 | 和歷史工單配對 |
 
 現行與歷史可能有相同業務單號。Import 必須先定義去重鍵與優先順序，不能只靠單號直接 INSERT。
@@ -200,6 +211,7 @@ P0-10 已於 2026-08-07 定案為「不限年份的全量匯入目標」。全�
 | I-1.1 | Phase 2 customer 完成 | `cust` dry-run | 空鍵、重複、亂碼、稅額、取整報告 |
 | I-1.2 | Phase 2 vendor/master 完成 | `fact`、paper、gloss、paste 等 | 主檔 mapping 及停用項目簽認 |
 | I-1.3 | Phase 2 work item 完成 | `wpa` 小批與全量 dry-run | 客戶關聯、重複規格、效能 |
+| I-1.4 | Phase 3 quotation 完成 | `b_replay1`＋`b_replay2` 全量 dry-run | 4 主檔／10 明細、主從關聯、金額及不臆造工單關係 |
 | I-2.1 | Phase 4 work order 完成 | `subpoena`＋`quote` 現行工單 | 50 筆試匯＋公司抽樣 |
 | I-2.2 | Phase 4 history 完成 | `subpoena_his`＋`quote_his` | 現行／歷史去重、狀態及數量 |
 | I-3.1 | Phase 5 inventory 完成 | `merchandise` | 每工單完工／出貨／備品／餘額核對 |

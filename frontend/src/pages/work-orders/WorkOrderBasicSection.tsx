@@ -5,8 +5,8 @@ export function WorkOrderBasicSection() {
     <div className="work-order-prototype__anchor" id="work-order-basic" tabIndex={-1}>
       <Section
         title="客戶與訂單資料"
-        description="選取客編後帶入客戶資料；依樣張先呈現一組主要成品欄位，但不據此鎖定單一／多成品資料模型。工單號與日期規則仍依 P0-09 最終簽認。"
-        actions={<StatusLabel tone="warning">單一／多成品待 P0-02 確認</StatusLabel>}
+        description="選取客編後帶入客戶資料；P0-02 已確認一張工單只對應一個主要品項，並隸屬一個案件。工單號與日期規則仍依 P0-09 最終簽認。"
+        actions={<StatusLabel tone="success">一工單一主要品項已確認</StatusLabel>}
       >
         <div className="work-order-prototype__basic-grid">
           <Field label="客編" required>

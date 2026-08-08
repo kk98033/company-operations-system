@@ -1,9 +1,16 @@
+import type { ReactNode } from 'react'
 import { Link } from '@tanstack/react-router'
 
 import { workflowModules, type WorkflowModule } from '../app/workflowModules'
 import { DefinitionGrid, PageHeader, Section, StatusLabel } from '../ui/UiPatterns'
 
-export function ModulePrototypePage({ module }: { module: WorkflowModule }) {
+export function ModulePrototypePage({
+  children,
+  module,
+}: {
+  children?: ReactNode
+  module: WorkflowModule
+}) {
   const moduleIndex = workflowModules.findIndex((candidate) => candidate.id === module.id)
   const previousModule = workflowModules[moduleIndex - 1]
   const nextModule = workflowModules[moduleIndex + 1]
@@ -11,7 +18,7 @@ export function ModulePrototypePage({ module }: { module: WorkflowModule }) {
   return (
     <div className="ui-pattern-stack module-prototype">
       <PageHeader
-        eyebrow={`${module.phase.toUpperCase()} / ROUTE PROTOTYPE`}
+        eyebrow="公司流程 / 頁面原型"
         title={module.label}
         description={module.description}
       />
@@ -33,11 +40,22 @@ export function ModulePrototypePage({ module }: { module: WorkflowModule }) {
               { label: '預定階段', value: module.phase },
               { label: '主要輸入', value: module.input },
               { label: '主要輸出', value: module.output },
-              { label: '需求編號', value: module.requirementIds.join('、') },
+              {
+                label: '需求編號',
+                value: (
+                  <span className="module-prototype__requirement-ids">
+                    {module.requirementIds.map((requirementId) => (
+                      <span key={requirementId}>{requirementId}</span>
+                    ))}
+                  </span>
+                ),
+              },
             ]}
           />
         </Section>
       </div>
+
+      {children}
 
       <Section title="公司主流程" description="可由客戶開始，依序檢查到收款；報價為可選分支。">
         <nav className="module-flow" aria-label="公司主流程">

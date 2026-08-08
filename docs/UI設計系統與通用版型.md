@@ -121,15 +121,16 @@
 |---|---|---|---|
 | 1 | 客戶管理 | `/customers` | Phase 2 |
 | 2 | 報價管理 | `/quotations` | Phase 3；由客戶直接建工單時可略過 |
-| 3 | 工單管理 | `/work-orders` | Phase 4 |
-| 4 | 生產管理 | `/production` | Phase 5 |
-| 5 | 庫存管理 | `/inventory` | Phase 5 |
-| 6 | 出貨管理 | `/shipments` | Phase 6 |
-| 7 | 計價管理 | `/pricing` | Phase 7 |
-| 8 | 請款／對帳 | `/statements` | Phase 8 |
-| 9 | 收款管理 | `/receipts` | Phase 8 |
+| 3 | 案件管理 | `/cases` | Phase 4；集中同一客戶訂單或報價的子工單 |
+| 4 | 工單管理 | `/work-orders` | Phase 4；一張工單一個主要品項 |
+| 5 | 生產管理 | `/production` | Phase 5 |
+| 6 | 庫存管理 | `/inventory` | Phase 5 |
+| 7 | 出貨管理 | `/shipments` | Phase 6 |
+| 8 | 計價管理 | `/pricing` | Phase 7 |
+| 9 | 請款／對帳 | `/statements` | Phase 8 |
+| 10 | 收款管理 | `/receipts` | Phase 8 |
 
-Slice 0.8 原型頁只允許共用 `PageHeader`、`Section`、`StatusLabel` 與 `DefinitionGrid` 呈現模組責任、流程輸入／輸出及需求編號；頁首、狀態、相鄰流程按鈕與 RWD 必須沿用 ADR-010。正式清單、表單、API 狀態與業務操作只能在對應 Phase 另建 feature，不得在此通用原型元件堆疊條件分支。
+Slice 0.8 原型頁只允許共用 `PageHeader`、`Section`、`StatusLabel`、`DefinitionGrid` 與 `DataTableFrame` 呈現模組責任、流程輸入／輸出及需求編號；案件頁可用同一表格版型示意一案件多工單。頁首、狀態、相鄰流程按鈕與 RWD 必須沿用 ADR-010。正式清單、表單、API 狀態與業務操作只能在對應 Phase 另建 feature，不得在通用原型元件堆疊業務邏輯。
 
 ### 4.2 頂列
 

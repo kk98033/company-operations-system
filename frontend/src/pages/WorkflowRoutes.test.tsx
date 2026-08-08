@@ -5,12 +5,16 @@ import { workflowModules } from '../app/workflowModules'
 import { renderApp } from '../test/renderApp'
 
 describe('公司主流程路由', () => {
-  it('報價與工單模組追蹤到附件新增的完整需求編號', () => {
+  it('報價、案件與工單模組追蹤到完整需求編號', () => {
     const quotations = workflowModules.find((module) => module.id === 'quotations')
+    const cases = workflowModules.find((module) => module.id === 'cases')
     const workOrders = workflowModules.find((module) => module.id === 'work-orders')
 
     expect(quotations?.requirementIds).toEqual([
       'QUO-001', 'QUO-002', 'QUO-003', 'QUO-004', 'QUO-005', 'QUO-006', 'QUO-007', 'QUO-008',
+    ])
+    expect(cases?.requirementIds).toEqual([
+      'CASE-001', 'CASE-002', 'CASE-003', 'CASE-004', 'CASE-005',
     ])
     expect(workOrders?.requirementIds).toEqual([
       'WO-001', 'WO-002', 'WO-003', 'WO-004', 'WO-005', 'WO-006',
@@ -68,7 +72,7 @@ describe('公司主流程路由', () => {
     }
     expect(document.querySelector('.ui-kpi-strip')).not.toBeInTheDocument()
     expect(screen.queryByRole('link', { name: '下一站：生產管理' })).not.toBeInTheDocument()
-    expect(within(form).getByText('單一／多成品待 P0-02 確認')).toBeInTheDocument()
+    expect(within(form).getByText('一工單一主要品項已確認')).toBeInTheDocument()
     expect(screen.getAllByRole('button', { name: '儲存' })).toHaveLength(2)
     expect(screen.getAllByRole('button', { name: '列印' })).toHaveLength(2)
 
@@ -110,7 +114,17 @@ describe('公司主流程路由', () => {
       .toBeInTheDocument()
   })
 
-  it('可由側邊欄走過客戶到收款的九個模組', async () => {
+  it('案件原型顯示案件、子工單與製程三層責任', async () => {
+    await renderApp(['/cases'])
+
+    expect(screen.getByRole('heading', { level: 1, name: '案件管理' })).toBeInTheDocument()
+    expect(screen.getByText('DEMO-CASE-001')).toBeInTheDocument()
+    expect(screen.getByRole('table', { name: '案件中的子工單假資料' })).toBeInTheDocument()
+    expect(screen.getAllByRole('rowheader')).toHaveLength(3)
+    expect(screen.getByText('一張工單一個主要品項')).toBeInTheDocument()
+  })
+
+  it('可由側邊欄走過客戶到收款的十個模組', async () => {
     const user = userEvent.setup({ skipHover: true })
     await renderApp(['/'])
     const navigation = screen.getByRole('navigation', { name: '主要導覽' })
