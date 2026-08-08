@@ -142,6 +142,8 @@ PowerBuilder 報價模組沒有找到 `subpoena` 或工單視窗呼叫，也沒�
 
 現行與歷史可能有相同業務單號。Import 必須先定義去重鍵與優先順序，不能只靠單號直接 INSERT。
 
+ADR-018 定案後，每類舊文件都必須保存 `legacy_document_number`、`legacy_source_table` 與 `legacy_source_key`；舊號原樣顯示與搜尋，不加 `QUO`／`WO`／`SHP` 等前綴。新 sequence 只從新系統正式建單開始配發。
+
 ### 4.5 完工與待出貨
 
 | 舊表 | 關聯 | 新資料 | 注意事項 |
@@ -150,6 +152,8 @@ PowerBuilder 報價模組沒有找到 `subpoena` 或工單視窗呼叫，也沒�
 | `subp_replenish` | 依欄位確認 | adjustment／completion evidence | 是否代表補數或調整需從程式確認 |
 
 若無法從歷史事件還原每一次完工，不得偽造多筆完成日期。使用一筆明確標示 `legacy_opening_inventory` 的期初流水，並保存原始完工、出貨、備品摘要作核對。
+
+P0-04 新版「基礎計價只取正式量」不回溯改寫舊金額。舊備品計價依可取得的實際 `sal`／`sal2` 或對帳紀錄原樣匯入；無法證明時進差異報告，不以新公式重算。
 
 ### 4.6 出貨
 

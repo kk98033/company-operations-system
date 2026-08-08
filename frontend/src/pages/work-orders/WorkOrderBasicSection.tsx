@@ -5,7 +5,7 @@ export function WorkOrderBasicSection() {
     <div className="work-order-prototype__anchor" id="work-order-basic" tabIndex={-1}>
       <Section
         title="客戶與訂單資料"
-        description="選取客編後帶入客戶資料；P0-02 已確認一張工單只對應一個主要品項，並隸屬一個案件。工單號與日期規則仍依 P0-09 最終簽認。"
+        description="選取客編後帶入客戶資料；一張工單只對應一個主要品項並隸屬一個案件。正式工單號已定為 WO-YYYYMMDD-SSS，本頁仍是未連接 API 的假資料原型。"
         actions={<StatusLabel tone="success">一工單一主要品項已確認</StatusLabel>}
       >
         <div className="work-order-prototype__basic-grid">
@@ -27,8 +27,8 @@ export function WorkOrderBasicSection() {
           <Field label="地址">
             <input defaultValue="示範地址，不是真實公司資料" readOnly />
           </Field>
-          <Field label="工作單號" required hint="正式格式待 P0-09 確認">
-            <input defaultValue="DEMO-WO-001" readOnly />
+          <Field label="工作單號" required hint="正式格式：WO-YYYYMMDD-SSS">
+            <input defaultValue="WO-20260808-001（假資料）" readOnly />
           </Field>
           <Field label="訂購日期" required>
             <input defaultValue="2026-08-07" type="date" />

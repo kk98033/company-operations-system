@@ -1,4 +1,4 @@
-import { screen } from '@testing-library/react'
+import { screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { useQueryClient } from '@tanstack/react-query'
 import { render } from '@testing-library/react'
@@ -25,6 +25,11 @@ describe('應用程式骨架', () => {
       'page',
     )
     expect(screen.getByText('本機開發')).toBeInTheDocument()
+    const pendingKpi = screen.getByText('P0 待確認').closest('article')
+    expect(pendingKpi).not.toBeNull()
+    expect(within(pendingKpi as HTMLElement).getByText('1')).toBeInTheDocument()
+    expect(within(pendingKpi as HTMLElement).getByText('9／10 已由公司確認')).toBeInTheDocument()
+    expect(screen.getByText(/P0 已確認 9／10，只剩 P0-05/)).toBeInTheDocument()
   })
 
   it('可收合與展開正式側邊欄', async () => {
