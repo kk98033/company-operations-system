@@ -22,7 +22,9 @@ export const workflowModules = [
     id: 'quotations', path: '/quotations', icon: '報', label: '報價管理', phase: 'Phase 3',
     description: '建立多明細報價、另存新檔與列印；報價不是建立工單的必經流程。',
     responsibilities: ['建立多明細報價', '保存版費、刀模費與價格快照', '選擇報價明細轉入工單'],
-    input: '客戶資料', output: '工單（選用流程）', requirementIds: ['QUO-001', 'QUO-003', 'QUO-005'],
+    input: '客戶資料', output: '工單（選用流程）', requirementIds: [
+      'QUO-001', 'QUO-002', 'QUO-003', 'QUO-004', 'QUO-005', 'QUO-006', 'QUO-007', 'QUO-008',
+    ],
   },
   {
     id: 'work-orders', path: '/work-orders', icon: '工', label: '工單管理', phase: 'Phase 4',
@@ -31,6 +33,7 @@ export const workflowModules = [
     input: '客戶或報價明細', output: '生產製程', requirementIds: [
       'WO-001', 'WO-002', 'WO-003', 'WO-004', 'WO-005', 'WO-006',
       'WO-007', 'WO-008', 'WO-009', 'WO-010', 'WO-011', 'WO-012',
+      'WO-013', 'WO-014', 'WO-015', 'WO-016',
     ],
   },
   {

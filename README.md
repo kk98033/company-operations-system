@@ -20,14 +20,15 @@
 5. [UI 設計系統與通用版型](docs/UI設計系統與通用版型.md)
 6. [程式碼與檔案命名規範](docs/程式碼與檔案命名規範.md)
 7. [需求追蹤矩陣](docs/需求追蹤矩陣.md)
-8. [資料模型與業務規則](docs/資料模型與業務規則.md)
-9. [測試與驗收計畫](docs/測試與驗收計畫.md)
-10. [舊資料移轉計畫](docs/舊資料移轉計畫.md)
-11. [舊系統資料 Import 對照與分批計畫](docs/舊系統資料Import對照與分批計畫.md)
-12. [舊資料來源基線報告](docs/舊資料來源基線報告.md)
-13. [本機開發與 Git 備份規範](docs/本機開發與Git備份規範.md)
-14. [風險與決策紀錄](docs/風險與決策紀錄.md)
-15. [詳細實作進度紀錄](docs/progress/實作進度紀錄.md)
+8. [Gmail 附件需求逐項對照](docs/Gmail附件需求逐項對照.md)
+9. [資料模型與業務規則](docs/資料模型與業務規則.md)
+10. [測試與驗收計畫](docs/測試與驗收計畫.md)
+11. [舊資料移轉計畫](docs/舊資料移轉計畫.md)
+12. [舊系統資料 Import 對照與分批計畫](docs/舊系統資料Import對照與分批計畫.md)
+13. [舊資料來源基線報告](docs/舊資料來源基線報告.md)
+14. [本機開發與 Git 備份規範](docs/本機開發與Git備份規範.md)
+15. [風險與決策紀錄](docs/風險與決策紀錄.md)
+16. [詳細實作進度紀錄](docs/progress/實作進度紀錄.md)
 
 原始分析證據保留在專案外層的 `../analysis/` 與 `../extraction/`。新版程式不得直接修改這些原始分析或匯出資料。
 
@@ -53,14 +54,14 @@
 
 | 項目 | 目前狀態 |
 |---|---|
-| 最後更新日期 | 2026-08-07 |
-| 計畫版本 | v1.0 |
+| 最後更新日期 | 2026-08-08 |
+| 計畫版本 | v1.1（報價／工單附件逐項納入 Phase 3／4 Slice） |
 | 架構版本 | v1.6（加入 P0-08 製版 typed spec 與 P0-10 全量 Import 去向契約） |
 | 目前階段 | Phase 0 工程切片 10／10 已完成；Phase Gate 等待公司簽核 |
-| 目前切片 | P0-DECISION-001：P0-08／P0-10 證據與決策已完成；暫停進入正式業務 schema |
+| 目前切片 | REQ-ATTACHMENT-TRACE-001：九份 PDF 與系統修改圖已逐項納入需求矩陣及 Phase 3／4 計畫；暫停進入正式業務 schema |
 | 實作完成度 | Phase 0 工程切片：10／10 完成；Import I-0：3／3 完成；業務功能 0% |
 | 規劃文件完成度 | 100% |
-| 最新中型進度備份 | Git tag `checkpoint-p0-decisions-08-10-v1`；bundle 位於專案外層 `git-backups/company-system-p0-decisions-08-10-v1-20260807.bundle` |
+| 最新中型進度備份 | Git tag `checkpoint-p0-attachment-contract-v1`；經驗證 bundle 位於專案外層 `git-backups/` |
 | 正式遠端 Git 備份 | 尚未設定，必須在 Phase 1 完成前建立私人 repository |
 
 ### 已完成
@@ -98,6 +99,7 @@
 - 完成 Slice 0.10：根目錄提供 `make bootstrap/dev/test/lint/build/down`，另有 `audit/check`；Ruff、ESLint／UI conformance、OpenAPI drift、99 個一般後端測試、12 個隔離 PostgreSQL integration、39 個前端測試、build 與乾淨目錄安裝／啟停流程均通過。`make down` 不使用 `-v`，development volume 在停止後仍保留。
 - 完成 UX-CLARIFICATION-001：依 Gmail 原稿把 `/work-orders` 修正為工單查詢清單，保留關鍵字及單價／版費／刀模費結果欄；`/work-orders/new` 是客戶、訂單、價格、備紙、印刷、13 道製程、備註與圖片都在同一 form 的假資料原型。畫面使用既有 ADR-010 元件，內部拆成 7 個單一責任 TSX 與 1 個 RWD 樣式檔；頁內錨點同步 hash 並移動焦點，沒有 KPI、正式資料、API 寫入或業務 migration。當時製版、單號、浪紙欄位等 P0 未決規則沒有被硬編；製版後續已由 P0-DECISION-001 定案。
 - 完成 P0-DECISION-001：重新逐頁核對 9 份 Gmail PDF 與 `系統修改.jpg`，確認 P0-08 保留製版協力廠／說明、新舊版與輪轉方向，並把版本與輪轉實作為兩組獨立單選。P0-10 確認不限年份的全量匯入目標，每筆來源都必須有正式匯入、只讀封存、合併 mapping 或例外待處理的可核對去向。
+- 完成 REQ-ATTACHMENT-TRACE-001：建立 [Gmail 附件需求逐項對照](docs/Gmail附件需求逐項對照.md)，把四份報價、五份工單 PDF 與 `系統修改.jpg` 分成建檔結構、註解規則、UAT 範例及列印契約；補齊 QUO-007～008、WO-013～016，並修正 Phase 3／4 的逐欄小切片與驗收條件。範例內容不作系統預設值，P0-01／02／09 仍維持未決。
 
 ### 進行中
 
@@ -111,7 +113,8 @@
 
 1. 由公司簽認 Phase 0 導覽、頁面名稱、直接建立工單與報價轉工單兩條入口；工程完成不能代替公司驗收。
 2. 逐項請公司完成 `04_開工前確認清單.md` 尚待確認的 P0-01～P0-07 與 P0-09；未完成前不得建立會固定未決規則的正式 migration。
-3. 公司簽核完成後進入 Phase 1；客戶 Slice 2.6 完成並簽認 mapping 後，才執行 I-1.1 `cust` dry-run。
+3. Phase 3／4 開工時依 `docs/Gmail附件需求逐項對照.md` 逐 Slice 建立測試，不可把整份報價或工單一次塞入單一元件。
+4. 公司簽核完成後進入 Phase 1；客戶 Slice 2.6 完成並簽認 mapping 後，才執行 I-1.1 `cust` dry-run。
 
 ### 尚待確認但不影響閱讀計畫
 

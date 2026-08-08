@@ -5,6 +5,20 @@ import { workflowModules } from '../app/workflowModules'
 import { renderApp } from '../test/renderApp'
 
 describe('公司主流程路由', () => {
+  it('報價與工單模組追蹤到附件新增的完整需求編號', () => {
+    const quotations = workflowModules.find((module) => module.id === 'quotations')
+    const workOrders = workflowModules.find((module) => module.id === 'work-orders')
+
+    expect(quotations?.requirementIds).toEqual([
+      'QUO-001', 'QUO-002', 'QUO-003', 'QUO-004', 'QUO-005', 'QUO-006', 'QUO-007', 'QUO-008',
+    ])
+    expect(workOrders?.requirementIds).toEqual([
+      'WO-001', 'WO-002', 'WO-003', 'WO-004', 'WO-005', 'WO-006',
+      'WO-007', 'WO-008', 'WO-009', 'WO-010', 'WO-011', 'WO-012',
+      'WO-013', 'WO-014', 'WO-015', 'WO-016',
+    ])
+  })
+
   it.each(workflowModules)('$label 可直接進入且明確標示為假資料原型', async (module) => {
     await renderApp([module.path])
 
