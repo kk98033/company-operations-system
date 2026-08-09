@@ -5,6 +5,40 @@
  * 公司內部報價、工單、生產、出貨與帳務系統 API。
  * OpenAPI spec version: 0.1.0
  */
+export interface AuditFilterSummary {
+  action?: string | null;
+  entity_type?: string | null;
+  keyword?: string | null;
+  request_id?: string | null;
+}
+
+export type AuditLogResponseAfterData = { [key: string]: unknown } | null;
+
+export type AuditLogResponseBeforeData = { [key: string]: unknown } | null;
+
+export interface AuditLogResponse {
+  action: string;
+  actor_user_id: string | null;
+  after_data: AuditLogResponseAfterData;
+  before_data: AuditLogResponseBeforeData;
+  created_at: string;
+  document_number: string | null;
+  entity_id: string | null;
+  entity_type: string;
+  event_status: string;
+  id: string;
+  reason: string | null;
+  request_id: string;
+}
+
+export type AuditSortField = typeof AuditSortField[keyof typeof AuditSortField];
+
+
+export const AuditSortField = {
+  created_at: 'created_at',
+  action: 'action',
+} as const;
+
 export interface AuthenticatedOrganizationResponse {
   id: string;
   name: string;
@@ -37,6 +71,58 @@ export interface ErrorBody {
  */
 export interface ErrorResponse {
   error: ErrorBody;
+}
+
+/**
+ * Counts and navigation state for one bounded result page.
+ */
+export interface PaginationMeta {
+  has_next: boolean;
+  has_previous: boolean;
+  /**
+     * @minimum 1
+     * @maximum 1000000
+     */
+  page: number;
+  /**
+     * @minimum 1
+     * @maximum 100
+     */
+  page_size: number;
+  /** @minimum 0 */
+  total_items: number;
+  /** @minimum 0 */
+  total_pages: number;
+}
+
+/**
+ * Database-independent sort direction accepted by list endpoints.
+ */
+export type SortDirection = typeof SortDirection[keyof typeof SortDirection];
+
+
+export const SortDirection = {
+  asc: 'asc',
+  desc: 'desc',
+} as const;
+
+/**
+ * Effective sorting echoed to the caller.
+ */
+export interface SortMeta {
+  direction: SortDirection;
+  field: string;
+}
+
+export interface ListResponseMetaAuditFilterSummary {
+  filters: AuditFilterSummary;
+  pagination: PaginationMeta;
+  sort: SortMeta;
+}
+
+export interface ListResponseAuditLogResponseAuditFilterSummary {
+  items: AuditLogResponse[];
+  meta: ListResponseMetaAuditFilterSummary;
 }
 
 export const LiveResponseValue = {
@@ -88,6 +174,117 @@ export interface ReadyResponse {
   checks: ReadinessCheckResult[];
   status: 'ready';
 }
+
+export type AuditListParams = {
+/**
+ * @minimum 1
+ * @maximum 1000000
+ */
+page?: number;
+/**
+ * @minimum 1
+ * @maximum 100
+ */
+page_size?: number;
+sort_by?: AuditSortField;
+sort_direction?: SortDirection;
+keyword?: string | null;
+action?: string | null;
+entity_type?: string | null;
+request_id?: string | null;
+};
+
+export type auditListResponse200 = {
+  data: ListResponseAuditLogResponseAuditFilterSummary
+  status: 200
+}
+
+export type auditListResponse400 = {
+  data: ErrorResponse
+  status: 400
+}
+
+export type auditListResponse401 = {
+  data: ErrorResponse
+  status: 401
+}
+
+export type auditListResponse403 = {
+  data: ErrorResponse
+  status: 403
+}
+
+export type auditListResponse404 = {
+  data: ErrorResponse
+  status: 404
+}
+
+export type auditListResponse405 = {
+  data: ErrorResponse
+  status: 405
+}
+
+export type auditListResponse409 = {
+  data: ErrorResponse
+  status: 409
+}
+
+export type auditListResponse422 = {
+  data: ErrorResponse
+  status: 422
+}
+
+export type auditListResponse500 = {
+  data: ErrorResponse
+  status: 500
+}
+
+export type auditListResponseSuccess = (auditListResponse200) & {
+  headers: Headers;
+};
+export type auditListResponseError = (auditListResponse400 | auditListResponse401 | auditListResponse403 | auditListResponse404 | auditListResponse405 | auditListResponse409 | auditListResponse422 | auditListResponse500) & {
+  headers: Headers;
+};
+
+export type auditListResponse = (auditListResponseSuccess | auditListResponseError)
+
+export const getAuditListUrl = (params?: AuditListParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `${import.meta.env.VITE_API_ORIGIN || ''}/api/v1/audit-logs?${stringifiedParams}` : `${import.meta.env.VITE_API_ORIGIN || ''}/api/v1/audit-logs`
+}
+
+/**
+ * @summary 查詢目前公司的不可變稽核紀錄
+ */
+export const auditList = async (params?: AuditListParams, options?: RequestInit): Promise<auditListResponse> => {
+
+  const res = await fetch(getAuditListUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+)
+
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+
+  const data: auditListResponse['data'] = body ? JSON.parse(body) : {}
+  return { data, status: res.status, headers: res.headers } as auditListResponse
+}
+
+
 
 export type authLoginResponse200 = {
   data: LoginResponse

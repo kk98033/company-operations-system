@@ -1,6 +1,185 @@
 {
   "components": {
     "schemas": {
+      "AuditFilterSummary": {
+        "properties": {
+          "action": {
+            "anyOf": [
+              {
+                "maxLength": 128,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Action"
+          },
+          "entity_type": {
+            "anyOf": [
+              {
+                "maxLength": 64,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Entity Type"
+          },
+          "keyword": {
+            "anyOf": [
+              {
+                "maxLength": 100,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Keyword"
+          },
+          "request_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Request Id"
+          }
+        },
+        "title": "AuditFilterSummary",
+        "type": "object"
+      },
+      "AuditLogResponse": {
+        "properties": {
+          "action": {
+            "title": "Action",
+            "type": "string"
+          },
+          "actor_user_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Actor User Id"
+          },
+          "after_data": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "After Data"
+          },
+          "before_data": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Before Data"
+          },
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "document_number": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Document Number"
+          },
+          "entity_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Entity Id"
+          },
+          "entity_type": {
+            "title": "Entity Type",
+            "type": "string"
+          },
+          "event_status": {
+            "title": "Event Status",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reason"
+          },
+          "request_id": {
+            "format": "uuid",
+            "title": "Request Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "actor_user_id",
+          "action",
+          "entity_type",
+          "entity_id",
+          "document_number",
+          "event_status",
+          "reason",
+          "before_data",
+          "after_data",
+          "request_id",
+          "created_at"
+        ],
+        "title": "AuditLogResponse",
+        "type": "object"
+      },
+      "AuditSortField": {
+        "enum": [
+          "created_at",
+          "action"
+        ],
+        "title": "AuditSortField",
+        "type": "string"
+      },
       "AuthenticatedOrganizationResponse": {
         "properties": {
           "id": {
@@ -115,6 +294,46 @@
         "title": "ErrorResponse",
         "type": "object"
       },
+      "ListResponseMeta_AuditFilterSummary_": {
+        "properties": {
+          "filters": {
+            "$ref": "#/components/schemas/AuditFilterSummary"
+          },
+          "pagination": {
+            "$ref": "#/components/schemas/PaginationMeta"
+          },
+          "sort": {
+            "$ref": "#/components/schemas/SortMeta"
+          }
+        },
+        "required": [
+          "pagination",
+          "sort",
+          "filters"
+        ],
+        "title": "ListResponseMeta[AuditFilterSummary]",
+        "type": "object"
+      },
+      "ListResponse_AuditLogResponse_AuditFilterSummary_": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/AuditLogResponse"
+            },
+            "title": "Items",
+            "type": "array"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/ListResponseMeta_AuditFilterSummary_"
+          }
+        },
+        "required": [
+          "items",
+          "meta"
+        ],
+        "title": "ListResponse[AuditLogResponse, AuditFilterSummary]",
+        "type": "object"
+      },
       "LiveResponse": {
         "properties": {
           "service": {
@@ -195,6 +414,51 @@
         "title": "LoginResponse",
         "type": "object"
       },
+      "PaginationMeta": {
+        "description": "Counts and navigation state for one bounded result page.",
+        "properties": {
+          "has_next": {
+            "title": "Has Next",
+            "type": "boolean"
+          },
+          "has_previous": {
+            "title": "Has Previous",
+            "type": "boolean"
+          },
+          "page": {
+            "maximum": 1000000.0,
+            "minimum": 1.0,
+            "title": "Page",
+            "type": "integer"
+          },
+          "page_size": {
+            "maximum": 100.0,
+            "minimum": 1.0,
+            "title": "Page Size",
+            "type": "integer"
+          },
+          "total_items": {
+            "minimum": 0.0,
+            "title": "Total Items",
+            "type": "integer"
+          },
+          "total_pages": {
+            "minimum": 0.0,
+            "title": "Total Pages",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "page",
+          "page_size",
+          "total_items",
+          "total_pages",
+          "has_previous",
+          "has_next"
+        ],
+        "title": "PaginationMeta",
+        "type": "object"
+      },
       "ReadinessCheckResult": {
         "description": "One necessary dependency's current readiness state.",
         "properties": {
@@ -251,6 +515,33 @@
         ],
         "title": "ReadyResponse",
         "type": "object"
+      },
+      "SortDirection": {
+        "description": "Database-independent sort direction accepted by list endpoints.",
+        "enum": [
+          "asc",
+          "desc"
+        ],
+        "title": "SortDirection",
+        "type": "string"
+      },
+      "SortMeta": {
+        "description": "Effective sorting echoed to the caller.",
+        "properties": {
+          "direction": {
+            "$ref": "#/components/schemas/SortDirection"
+          },
+          "field": {
+            "title": "Field",
+            "type": "string"
+          }
+        },
+        "required": [
+          "field",
+          "direction"
+        ],
+        "title": "SortMeta",
+        "type": "object"
       }
     },
     "securitySchemes": {
@@ -268,6 +559,224 @@
   },
   "openapi": "3.1.0",
   "paths": {
+    "/api/v1/audit-logs": {
+      "get": {
+        "operationId": "audit_list",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 1,
+              "maximum": 1000000,
+              "minimum": 1,
+              "title": "Page",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page_size",
+            "required": false,
+            "schema": {
+              "default": 25,
+              "maximum": 100,
+              "minimum": 1,
+              "title": "Page Size",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "sort_by",
+            "required": false,
+            "schema": {
+              "$ref": "#/components/schemas/AuditSortField",
+              "default": "created_at"
+            }
+          },
+          {
+            "in": "query",
+            "name": "sort_direction",
+            "required": false,
+            "schema": {
+              "$ref": "#/components/schemas/SortDirection",
+              "default": "desc"
+            }
+          },
+          {
+            "in": "query",
+            "name": "keyword",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "maxLength": 100,
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Keyword"
+            }
+          },
+          {
+            "in": "query",
+            "name": "action",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "maxLength": 128,
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Action"
+            }
+          },
+          {
+            "in": "query",
+            "name": "entity_type",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "maxLength": 64,
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Entity Type"
+            }
+          },
+          {
+            "in": "query",
+            "name": "request_id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "format": "uuid",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Request Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListResponse_AuditLogResponse_AuditFilterSummary_"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "請求格式錯誤"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "尚未通過身分驗證"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "沒有執行此操作的權限"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "資源不存在"
+          },
+          "405": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "HTTP method 不允許用於此資源"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "資料狀態或版本衝突"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "輸入資料驗證失敗"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "伺服器發生未預期錯誤"
+          }
+        },
+        "security": [
+          {
+            "SessionCookie": []
+          }
+        ],
+        "summary": "查詢目前公司的不可變稽核紀錄",
+        "tags": [
+          "audit"
+        ]
+      }
+    },
     "/api/v1/auth/login": {
       "post": {
         "operationId": "auth_login",
@@ -834,6 +1343,10 @@
     }
   },
   "tags": [
+    {
+      "description": "具權限者查詢目前公司的不可變操作紀錄。",
+      "name": "audit"
+    },
     {
       "description": "登入、登出與伺服器 Session 狀態。",
       "name": "auth"

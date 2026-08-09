@@ -23,6 +23,7 @@ from app.core.database import (
 from app.core.database.lifecycle import build_database_lifespan
 from app.core.errors import register_exception_handlers
 from app.core.readiness import ReadinessCheck
+from app.core.request_context import attach_request_id
 
 
 def create_app(
@@ -52,6 +53,7 @@ def create_app(
     )
     app.state.settings = configured_settings
     app.state.database = configured_database
+    app.middleware("http")(attach_request_id)
     register_exception_handlers(app)
 
     configured_checks = (

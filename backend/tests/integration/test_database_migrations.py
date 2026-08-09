@@ -73,6 +73,8 @@ AUTHORIZATION_TABLES = [
     "roles",
 ]
 
+AUDIT_TABLES = ["audit_logs"]
+
 
 def test_schema_upgrade_downgrade_upgrade_round_trip(
     monkeypatch: pytest.MonkeyPatch,
@@ -86,10 +88,12 @@ def test_schema_upgrade_downgrade_upgrade_round_trip(
     assert REGISTERED_MODELS
 
     command.upgrade(config, "head")
-    assert _current_revision() == "0005_authorization_foundation"
+    assert _current_revision() == "0006_audit_foundation"
     assert _table_names() == [
         "alembic_version",
-        *sorted([*IMPORT_TABLES, *AUTHORIZATION_TABLES, *IDENTITY_TABLES]),
+        *sorted(
+            [*IMPORT_TABLES, *AUTHORIZATION_TABLES, *AUDIT_TABLES, *IDENTITY_TABLES]
+        ),
     ]
 
     command.check(config)
@@ -99,10 +103,12 @@ def test_schema_upgrade_downgrade_upgrade_round_trip(
     assert _table_names() == ["alembic_version"]
 
     command.upgrade(config, "head")
-    assert _current_revision() == "0005_authorization_foundation"
+    assert _current_revision() == "0006_audit_foundation"
     assert _table_names() == [
         "alembic_version",
-        *sorted([*IMPORT_TABLES, *AUTHORIZATION_TABLES, *IDENTITY_TABLES]),
+        *sorted(
+            [*IMPORT_TABLES, *AUTHORIZATION_TABLES, *AUDIT_TABLES, *IDENTITY_TABLES]
+        ),
     ]
 
 
@@ -149,7 +155,7 @@ def test_identity_downgrade_preserves_existing_import_foundation(
         resources.dispose()
 
     command.upgrade(config, "head")
-    assert _current_revision() == "0005_authorization_foundation"
+    assert _current_revision() == "0006_audit_foundation"
     command.check(config)
 
     resources = create_database_resources(settings)

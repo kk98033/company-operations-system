@@ -1,0 +1,65 @@
+.audit-log-search {
+  display: grid;
+  grid-template-columns: auto minmax(12rem, 28rem) auto;
+  align-items: end;
+  gap: var(--space-3);
+}
+
+.audit-log-search label {
+  align-self: center;
+  color: var(--color-ink-700);
+  font-size: 0.75rem;
+  font-weight: 800;
+}
+
+.audit-log-search input {
+  min-height: 2.5rem;
+  padding: 0 var(--space-3);
+  border: 1px solid var(--color-border-strong);
+  background: var(--color-surface);
+}
+
+.audit-log-pagination,
+.audit-log-pagination > div {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.audit-log-pagination {
+  width: 100%;
+  justify-content: space-between;
+}
+
+.audit-log-details summary {
+  color: var(--color-brand-700);
+  cursor: pointer;
+  font-weight: 800;
+}
+
+.audit-log-details pre {
+  max-width: 30rem;
+  max-height: 18rem;
+  overflow: auto;
+  padding: var(--space-3);
+  border: 1px solid var(--color-border);
+  background: var(--color-surface-subtle);
+  white-space: pre-wrap;
+}
+
+.audit-log-empty {
+  height: 7rem !important;
+  color: var(--color-ink-500);
+  text-align: center !important;
+}
+
+@media (max-width: 46rem) {
+  .audit-log-search {
+    grid-template-columns: 1fr;
+  }
+
+  .audit-log-pagination {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}

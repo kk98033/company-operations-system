@@ -100,6 +100,21 @@ def test_auth_openapi_declares_secret_input_and_cookie_transport() -> None:
     }
 
 
+def test_audit_openapi_is_read_only_bounded_and_cookie_protected() -> None:
+    schema = TestClient(create_app(settings=make_test_settings())).get(
+        "/openapi.json"
+    ).json()
+    operation = schema["paths"]["/api/v1/audit-logs"]["get"]
+    parameters = {item["name"]: item for item in operation["parameters"]}
+
+    assert operation["operationId"] == "audit_list"
+    assert operation["tags"] == ["audit"]
+    assert operation["security"] == [{"SessionCookie": []}]
+    assert parameters["page_size"]["schema"]["maximum"] == 100
+    assert parameters["request_id"]["in"] == "query"
+    assert "post" not in schema["paths"]["/api/v1/audit-logs"]
+
+
 def test_development_swagger_ui_remains_available() -> None:
     client = TestClient(create_app(settings=make_test_settings()))
 

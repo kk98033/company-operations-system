@@ -5,6 +5,7 @@ import { afterEach, beforeEach, vi } from 'vitest'
 
 import { workflowModules } from '../app/workflowModules'
 import { renderApp } from './renderApp'
+import { syntheticCurrentSession } from './sessionFixture'
 
 const accessibilityOptions: RunOptions = {
   runOnly: {
@@ -95,6 +96,31 @@ describe('自動無障礙基線', () => {
   it('單頁工單新增路由沒有 axe WCAG A／AA 與 best-practice 違規', async () => {
     await renderApp(['/work-orders/new'])
     expect(screen.getAllByRole('heading', { level: 1 })).toHaveLength(1)
+    await expectNoAccessibilityViolations()
+  })
+
+  it('操作稽核路由沒有 axe WCAG A／AA 與 best-practice 違規', async () => {
+    vi.stubGlobal('fetch', vi.fn<typeof fetch>().mockResolvedValue(Response.json({
+      items: [],
+      meta: {
+        filters: { action: null, entity_type: null, keyword: null, request_id: null },
+        pagination: {
+          has_next: false,
+          has_previous: false,
+          page: 1,
+          page_size: 25,
+          total_items: 0,
+          total_pages: 0,
+        },
+        sort: { direction: 'desc', field: 'created_at' },
+      },
+    })))
+    await renderApp(['/audit-logs'], {
+      session: { ...syntheticCurrentSession, capabilities: ['audit.read'] },
+    })
+
+    expect(await screen.findByRole('heading', { level: 1, name: '操作稽核' }))
+      .toBeInTheDocument()
     await expectNoAccessibilityViolations()
   })
 })

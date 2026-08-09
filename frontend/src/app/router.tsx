@@ -9,6 +9,7 @@ import {
 import { AuthenticatedBoundary } from '../auth/AuthenticatedBoundary'
 import { HomePage } from '../pages/HomePage'
 import { LoginPage } from '../pages/LoginPage'
+import { AuditLogPage } from '../pages/audit/AuditLogPage'
 import { CasePrototypePage } from '../pages/cases/CasePrototypePage'
 import { ModulePrototypePage } from '../pages/ModulePrototypePage'
 import { NotFoundPage } from '../pages/NotFoundPage'
@@ -55,6 +56,12 @@ const uiPatternsRoute = createRoute({
   component: UiPatternsPage,
 })
 
+const auditLogsRoute = createRoute({
+  getParentRoute: () => authenticatedRoute,
+  path: '/audit-logs',
+  component: AuditLogPage,
+})
+
 const workflowRoutes = workflowModules.map((module) => createRoute({
   getParentRoute: () => authenticatedRoute,
   path: module.path,
@@ -77,6 +84,7 @@ const routeTree = rootRoute.addChildren([
     indexRoute,
     ...workflowRoutes,
     workOrderNewRoute,
+    auditLogsRoute,
     uiPatternsRoute,
     stylePreviewRoute,
   ]),

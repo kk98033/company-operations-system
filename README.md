@@ -55,13 +55,13 @@
 | 項目 | 目前狀態 |
 |---|---|
 | 最後更新日期 | 2026-08-09 |
-| 計畫版本 | v1.11（Phase 1 Slice 1.7 完成，下一步 1.8） |
-| 架構版本 | v1.12（Session 公司 scope 契約同步） |
+| 計畫版本 | v1.12（Phase 1 Slice 1.8 完成，下一步 1.9） |
+| 架構版本 | v1.13（交易式稽核、Request ID 與第二家公司部署邊界同步） |
 | 目前階段 | Phase 1 進行中；身分與公司隔離基礎依小切片實作 |
-| 目前切片 | Slice 1.7：Session-only organization scope 與 A／B 公司讀寫拒絕已完成 |
-| 實作完成度 | Phase 0：完成；Import I-0：3／3；Phase 1：7／9；正式業務流程功能 0% |
+| 目前切片 | Slice 1.8：不可變交易式稽核、Request ID、遮罩與唯讀稽核頁已完成 |
+| 實作完成度 | Phase 0：完成；Import I-0：3／3；Phase 1：8／9；正式業務流程功能 0% |
 | 規劃文件完成度 | 100% |
-| 最新中型進度備份 | Git tag `checkpoint-phase1-organization-scope-v1`；經驗證 bundle 位於專案外層 `git-backups/` |
+| 最新中型進度備份 | Git tag `checkpoint-phase1-audit-foundation-v1`；經驗證 bundle 位於專案外層 `git-backups/` |
 | 正式遠端 Git 備份 | 尚未設定，必須在 Phase 1 完成前建立私人 repository |
 
 ### 已完成
@@ -111,10 +111,11 @@
 - 完成 Phase 1 Slice 1.5：新增 `GET /api/v1/auth/session`、ADR-010 平面工業風格 React 登入頁與受保護路由。重新整理會以 HttpOnly Cookie 向後端恢復使用者／公司資訊，Session 無效或過期回登入頁；登出送出 signed CSRF header、撤銷後清除 query cache。瀏覽器不使用 `localStorage`或保存密碼；公司 UUID 是公開部署設定，由 `VITE_ORGANIZATION_ID` 提供。
 - 完成 Phase 1 Slice 1.6：新增可逆 `0005_authorization_foundation`，建立 permissions、公司 roles、role grants 與 membership role assignment；兩組複合外鍵直接拒絕跨公司角色。後端 exact capability dependency 預設拒絕並回穩定 403，current Session 回傳啟用中的 capability；React 提供通用 `CapabilityGate`。P1-02 正式角色 mapping 尚待公司簽認，migration 沒有寫入候選業務權限。
 - 完成 Phase 1 Slice 1.7：新增 Session-only `OrganizationScope` dependency；SELECT／UPDATE／DELETE 由 model scope 加入公司條件，CREATE 由後端注入 ownership，caller 偽造 organization 會在 SQL 前失敗。A／B 公司真 PostgreSQL 測試證明 A 查不到也改不到 B，且 cross-company error 不暴露公司 ID。沒有新增 migration、RLS 或業務表。
+- 完成 Phase 1 Slice 1.8：新增可逆 `0006_audit_foundation`、交易式 audit service、遞迴敏感欄位遮罩及伺服器產生的 Request ID。稽核資料與業務異動由同一 transaction 提交或回滾，資料庫拒絕一般 UPDATE／DELETE；`GET /api/v1/audit-logs` 以 `audit.read`、Cookie Session 與公司 scope 保護。React `/audit-logs` 使用既有清單版型，具 loading、空資料、錯誤、無權限、RWD 與 axe 基線；A／B 公司真 PostgreSQL 測試確認紀錄不混用。
 
 ### 進行中
 
-- Phase 0 工程與公司 Gate 已完成；Phase 1 Slice 1.1～1.7 已建立 identity、登入／Cookie／CSRF／React、角色 capability 及 organization scope；P1-02 正式角色 mapping、稽核、登入限流與正式業務流程仍未完成。
+- Phase 0 工程與公司 Gate 已完成；Phase 1 Slice 1.1～1.8 已建立 identity、登入／Cookie／CSRF／React、角色 capability、organization scope 及稽核；P1-02 正式角色 mapping、登入限流與正式業務流程仍未完成。
 - 工單查詢與單頁建檔的介面邊界已依原稿修正；正式儲存、編輯、列印、API 與資料表仍屬 Phase 4，不把原型誤報為業務功能。
 - 介面正式方向已定案；`/style-preview` 只保留為歷史比較與 ADR-010 決策證據，不是正式業務頁。
 - 公司 P0 已確認 10／10。正式 migration、API 與舊客戶資料 apply 仍只會在對應 Phase／Import Slice 通過測試後逐批建立，不因 Gate 通過而提前寫入。
@@ -122,7 +123,7 @@
 
 ### 接下來要做
 
-1. 執行 Phase 1 Slice 1.8：建立 audit log、request ID 與敏感欄位遮罩，驗證前後值、原因及 Secret 不入 log；不提前建立客戶或工單資料表。
+1. 執行 Phase 1 Slice 1.9：建立登入失敗限制與安全事件紀錄；錯誤回應仍不可洩漏帳號是否存在，也不提前建立客戶或工單資料表。
 2. Phase 3／4 開工時依 `docs/Gmail附件需求逐項對照.md` 逐 Slice 建立測試，不可把整份報價或工單一次塞入單一元件。
 3. 客戶 Slice 2.6 完成並簽認 mapping 後，才執行 I-1.1 `cust` dry-run。
 

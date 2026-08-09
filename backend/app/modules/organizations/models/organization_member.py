@@ -38,6 +38,12 @@ class OrganizationMember(Base):
             "id",
             name="uq_organization_members_organization_id_id",
         ),
+        UniqueConstraint(
+            "organization_id",
+            "id",
+            "user_id",
+            name="uq_organization_members_organization_id_id_user_id",
+        ),
         Index(
             "ix_organization_members_organization_id_status",
             "organization_id",

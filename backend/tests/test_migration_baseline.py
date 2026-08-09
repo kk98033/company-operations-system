@@ -22,6 +22,7 @@ def _load_baseline() -> ModuleType:
 def test_base_metadata_contains_import_and_identity_foundation_tables() -> None:
     assert REGISTERED_MODELS
     assert set(Base.metadata.tables) == {
+        "audit_logs",
         "import_errors",
         "import_runs",
         "import_source_files",

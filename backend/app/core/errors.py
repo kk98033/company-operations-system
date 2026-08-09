@@ -13,6 +13,8 @@ from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
+from app.core.request_context import REQUEST_ID_HEADER, current_request_id
+
 logger = logging.getLogger(__name__)
 
 _PUBLIC_HTTP_HEADERS = frozenset(
@@ -105,6 +107,9 @@ def error_response(
         "Cache-Control": "no-store",
         "Pragma": "no-cache",
     }
+    request_id = current_request_id()
+    if request_id is not None:
+        response_headers[REQUEST_ID_HEADER] = str(request_id)
     response_headers.update(headers or {})
     return JSONResponse(
         status_code=status_code,
@@ -238,15 +243,24 @@ def register_exception_handlers(app: FastAPI) -> None:
 
     @app.exception_handler(Exception)
     async def unexpected_error_handler(
-        _request: Request,
+        request: Request,
         exc: Exception,
     ) -> JSONResponse:
+        request_id = getattr(request.state, "request_id", None)
         logger.error(
             "Unhandled API error",
-            extra={"exception_type": type(exc).__name__},
+            extra={
+                "exception_type": type(exc).__name__,
+                "request_id": str(request_id) if request_id is not None else None,
+            },
         )
         return error_response(
             status_code=500,
             code="INTERNAL_SERVER_ERROR",
             message="伺服器發生未預期錯誤",
+            headers=(
+                {REQUEST_ID_HEADER: str(request_id)}
+                if request_id is not None
+                else None
+            ),
         )

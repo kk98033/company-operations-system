@@ -3,6 +3,7 @@ import { Link, Outlet, useNavigate } from '@tanstack/react-router'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 
 import { getApiErrorMessage } from '../api/errorMessage'
+import { CapabilityGate } from '../auth/CapabilityGate'
 import { useAuthenticatedSession } from '../auth/authContext'
 import { CURRENT_SESSION_QUERY_KEY, logoutSession } from '../auth/session'
 import { workflowModules } from './workflowModules'
@@ -68,6 +69,19 @@ export function AppLayout() {
               <span className="sidebar__link-label">{item.label}</span>
             </Link>
           ))}
+
+          <CapabilityGate capability="audit.read">
+            <p className="sidebar__section-label sidebar__section-label--modules">系統管理</p>
+            <Link
+              activeOptions={{ exact: false }}
+              activeProps={{ className: 'sidebar__link--active' }}
+              className="sidebar__link"
+              to="/audit-logs"
+            >
+              <span className="sidebar__link-icon" aria-hidden="true">稽</span>
+              <span className="sidebar__link-label">操作稽核</span>
+            </Link>
+          </CapabilityGate>
 
           <p className="sidebar__section-label sidebar__section-label--modules">開發基準</p>
           {developmentNavigation.map((item) => (

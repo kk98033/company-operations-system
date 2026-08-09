@@ -1,5 +1,6 @@
 """Explicit model registry loaded by Alembic before metadata comparison."""
 
+from app.modules.audit.models import AuditLog
 from app.modules.auth.models import Session, User
 from app.modules.authorization.models import (
     OrganizationMemberRole,
@@ -30,6 +31,7 @@ REGISTERED_MODELS = (
     Role,
     RolePermission,
     OrganizationMemberRole,
+    AuditLog,
 )
 
 __all__ = ["REGISTERED_MODELS"]
