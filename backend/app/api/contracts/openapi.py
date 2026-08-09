@@ -11,6 +11,10 @@ API_DESCRIPTION = "公司內部報價、工單、生產、出貨與帳務系統 
 API_VERSION = "0.1.0"
 API_TAGS = [
     {
+        "name": "auth",
+        "description": "登入、登出與伺服器 Session 狀態。",
+    },
+    {
         "name": "health",
         "description": "進程存活與必要相依服務就緒狀態。",
     }

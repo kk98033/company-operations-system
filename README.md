@@ -55,13 +55,13 @@
 | 項目 | 目前狀態 |
 |---|---|
 | 最後更新日期 | 2026-08-09 |
-| 計畫版本 | v1.6（Phase 1 Slice 1.2 完成，下一步 1.3） |
+| 計畫版本 | v1.7（Phase 1 Slice 1.3 完成，下一步 1.4） |
 | 架構版本 | v1.10（identity schema 實作邊界同步） |
 | 目前階段 | Phase 1 進行中；身分與公司隔離基礎依小切片實作 |
-| 目前切片 | Slice 1.2：test-only identity seed 已完成並通過 PostgreSQL／CLI 驗證 |
-| 實作完成度 | Phase 0：完成；Import I-0：3／3；Phase 1：2／9；正式業務流程功能 0% |
+| 目前切片 | Slice 1.3：登入／登出與伺服器 Session 建立／撤銷 API 已完成 |
+| 實作完成度 | Phase 0：完成；Import I-0：3／3；Phase 1：3／9；正式業務流程功能 0% |
 | 規劃文件完成度 | 100% |
-| 最新中型進度備份 | Git tag `checkpoint-phase1-test-identity-seed-v1`；經驗證 bundle 位於專案外層 `git-backups/` |
+| 最新中型進度備份 | Git tag `checkpoint-phase1-auth-session-v1`；經驗證 bundle 位於專案外層 `git-backups/` |
 | 正式遠端 Git 備份 | 尚未設定，必須在 Phase 1 完成前建立私人 repository |
 
 ### 已完成
@@ -106,10 +106,11 @@
 - 完成 P0-FINAL-DECISION-001：P0-05 定案為「已有有效運送完成事件後，專用權限者同交易補登真實完工再出貨且永不負庫存」，建立 ADR-019。P0 10／10；公司同意 PDF 的欄位、分區、順序、單頁操作及列印內容為 UI 契約，外觀採現代工業 ERP 與 RWD，不複製 XP 像素外觀。
 - 完成 Phase 1 Slice 1.1：新增 `organizations`、`users`、`organization_members`、`sessions` 正式 identity schema。登入沿用舊系統「使用者代號」概念但不沿用舊密碼；帳號去除前後空白且不分大小寫比對後必須全域唯一。Session 只保存 SHA-256 digest 並綁定公司成員，不保存 raw cookie token。21 個隔離 PostgreSQL 測試已驗證 constraint、外鍵、索引、前版 Import 資料保留及 `upgrade → downgrade → upgrade`；尚未建立 seed、登入 API、Cookie、角色或權限。
 - 完成 Phase 1 Slice 1.2：採用 `argon2-cffi` 25.x 的明確 Argon2id profile，建立只允許 development／test 的顯式 identity seed。首次建立一間標示虛構的公司、`test.admin`、`test.operator` 及兩筆 membership；兩密碼只由隱藏提示或程序環境取得且必須不同，沒有預設值、CLI 參數或 Git 明文。重跑會驗證既有 hash 並保持逐 byte 不變；密碼、固定 ID、正規化 login 或 membership 衝突時整批 rollback。管理員／操作員目前只是名稱，角色留在 Slice 1.6；沒有建立 Session 或登入 API。本次 audit 另發現 Orval 8.23.0 的間接 `js-yaml` high advisory，已升級精確鎖版 Orval 8.24.0／`js-yaml` 4.3.1，重產 client 並恢復 0 vulnerabilities。
+- 完成 Phase 1 Slice 1.3：新增 `POST /api/v1/auth/login` 與 `POST /api/v1/auth/logout`。登入必須指定公司並驗證使用者、公司與 membership 皆啟用；所有帳密／停用失敗使用相同 401，未知帳號仍執行 Argon2 dummy verify。每次登入建立不同的 8 小時 server Session，raw 256-bit token 只在成功 response 回傳一次，資料庫只存 SHA-256 digest；登出只設 `revoked_at`，已撤銷、過期或未知但格式正確的 token 一律相同 204。登入建立 Session 與 `last_login_at` 更新同交易，衝突會完整 rollback；尚未加入 Cookie、CSRF、Origin、React 登入頁、角色或限流。
 
 ### 進行中
 
-- Phase 0 工程與公司 Gate 已完成；Phase 1 Slice 1.1～1.2 已建立 identity schema 與安全測試 seed，但仍沒有可操作的登入 API／UI、正式業務流程、資料移轉或列印功能。
+- Phase 0 工程與公司 Gate 已完成；Phase 1 Slice 1.1～1.3 已建立 identity schema、安全測試 seed 與後端登入／登出 API，但瀏覽器安全 Cookie／CSRF 與登入 UI 尚未完成，正式業務流程、資料移轉或列印功能仍為 0%。
 - 工單查詢與單頁建檔的介面邊界已依原稿修正；正式儲存、編輯、列印、API 與資料表仍屬 Phase 4，不把原型誤報為業務功能。
 - 介面正式方向已定案；`/style-preview` 只保留為歷史比較與 ADR-010 決策證據，不是正式業務頁。
 - 公司 P0 已確認 10／10。正式 migration、API 與舊客戶資料 apply 仍只會在對應 Phase／Import Slice 通過測試後逐批建立，不因 Gate 通過而提前寫入。
@@ -117,7 +118,7 @@
 
 ### 接下來要做
 
-1. 執行 Phase 1 Slice 1.3：建立登入、登出、密碼驗證、伺服器 Session 建立／撤銷與安全錯誤契約；尚不在此步加入 Cookie／CSRF 或 React 登入頁。
+1. 執行 Phase 1 Slice 1.4：把暫時 Bearer transport 收斂為安全 HttpOnly Cookie，加入 CSRF token、可信 Origin 驗證與目前 Session dependency；不提前製作 React 登入頁。
 2. Phase 3／4 開工時依 `docs/Gmail附件需求逐項對照.md` 逐 Slice 建立測試，不可把整份報價或工單一次塞入單一元件。
 3. 客戶 Slice 2.6 完成並簽認 mapping 後，才執行 I-1.1 `cust` dry-run。
 

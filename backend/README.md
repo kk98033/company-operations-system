@@ -1,6 +1,6 @@
 # Backend
 
-FastAPI 後端專案骨架。現階段提供環境防呆、統一 API 契約、真實資料庫就緒檢查、SQLAlchemy／Alembic、Import staging／trace，以及 Phase 1 identity schema。尚未建立登入 API、Cookie、角色權限或正式業務流程資料表。
+FastAPI 後端專案骨架。現階段提供環境防呆、統一 API 契約、真實資料庫就緒檢查、SQLAlchemy／Alembic、Import staging／trace、Phase 1 identity schema，以及登入／登出與伺服器 Session API。尚未建立 Cookie／CSRF、登入 UI、角色權限或正式業務流程資料表。
 
 ## 環境
 
@@ -152,6 +152,17 @@ make seed-test-identity
 
 自動化環境可用 `TEST_ADMIN_SEED_PASSWORD`、`TEST_OPERATOR_SEED_PASSWORD` 程序環境變數，但不得放入 `.env`、Git 或命令列參數。重跑不新增重複列、不重新 hash；若提供的密碼與既有 hash 不符，或固定 ID／login／membership 發生衝突，整筆交易安全失敗且不覆寫資料。production 在建立 engine 前即拒絕。
 
+## 登入與 Session API
+
+Slice 1.3 提供兩個後端端點：
+
+- `POST /api/v1/auth/login`：輸入 `organization_id`、`login_name`、`password`，成功建立固定 8 小時的 server Session。
+- `POST /api/v1/auth/logout`：以暫時的 `Authorization: Bearer <token>` 撤銷 Session；重複、過期或未知但格式正確的 token 都回相同 204。
+
+登入成功的 raw token 只在 JSON response 出現一次，並以 `Cache-Control: no-store`／`Pragma: no-cache` 禁止快取；資料庫只保存 SHA-256 digest。這個 Bearer transport 只供 Slice 1.3 API 驗證，不得存入 `localStorage`，也不是最終瀏覽器登入設計。Slice 1.4 必須改為 HttpOnly Cookie＋CSRF＋可信 Origin；Slice 1.5 才建立 React 登入頁與目前使用者載入。
+
+帳號不存在、密碼錯誤、錯誤公司、使用者停用／鎖定、公司停用或 membership 停用一律使用相同 401 response。Session 建立與 `last_login_at` 更新同一交易；登出只寫第一次 `revoked_at`，不刪除紀錄。
+
 一般 `make backend-test` 會排除整合測試，不需要 Docker。要用完全隔離的 PostgreSQL 驗證真實連線與 `upgrade -> downgrade -> upgrade`：
 
 ```bash
@@ -259,7 +270,7 @@ app/
 │  ├─ errors.py # 統一例外與 API error response
 │  └─ readiness.py # 可注入的就緒檢查
 ├─ modules/
-│  ├─ auth/          # user／session schema；登入行為尚未實作
+│  ├─ auth/          # user／session schema、Argon2、登入／登出與 Session services
 │  ├─ imports/       # Import run／source／staging／error／mapping；無正式資料 apply
 │  └─ organizations/ # organization／membership schema；角色尚未實作
 └─ main.py       # FastAPI app factory 與預設 app

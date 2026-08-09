@@ -5,6 +5,17 @@
  * 公司內部報價、工單、生產、出貨與帳務系統 API。
  * OpenAPI spec version: 0.1.0
  */
+export interface AuthenticatedOrganizationResponse {
+  id: string;
+  name: string;
+}
+
+export interface AuthenticatedUserResponse {
+  display_name: string;
+  id: string;
+  login_name: string;
+}
+
 /**
  * Stable, machine-readable API error fields.
  */
@@ -26,6 +37,32 @@ export const LiveResponseValue = {
   status: 'alive',
 } as const;
 export type LiveResponse = typeof LiveResponseValue;
+
+export interface LoginRequest {
+  /**
+     * @minLength 1
+     * @maxLength 128
+     */
+  login_name: string;
+  organization_id: string;
+  /**
+     * @minLength 1
+     * @maxLength 256
+     */
+  password: string;
+}
+
+export interface LoginResponse {
+  expires_at: string;
+  organization: AuthenticatedOrganizationResponse;
+  /**
+     * @minLength 43
+     * @maxLength 43
+     */
+  session_token: string;
+  token_type: 'Bearer';
+  user: AuthenticatedUserResponse;
+}
 
 export type ReadinessCheckResultStatus = typeof ReadinessCheckResultStatus[keyof typeof ReadinessCheckResultStatus];
 
@@ -49,6 +86,176 @@ export interface ReadyResponse {
   checks: ReadinessCheckResult[];
   status: 'ready';
 }
+
+export type authLoginResponse200 = {
+  data: LoginResponse
+  status: 200
+}
+
+export type authLoginResponse400 = {
+  data: ErrorResponse
+  status: 400
+}
+
+export type authLoginResponse401 = {
+  data: ErrorResponse
+  status: 401
+}
+
+export type authLoginResponse403 = {
+  data: ErrorResponse
+  status: 403
+}
+
+export type authLoginResponse404 = {
+  data: ErrorResponse
+  status: 404
+}
+
+export type authLoginResponse405 = {
+  data: ErrorResponse
+  status: 405
+}
+
+export type authLoginResponse409 = {
+  data: ErrorResponse
+  status: 409
+}
+
+export type authLoginResponse422 = {
+  data: ErrorResponse
+  status: 422
+}
+
+export type authLoginResponse500 = {
+  data: ErrorResponse
+  status: 500
+}
+
+export type authLoginResponseSuccess = (authLoginResponse200) & {
+  headers: Headers;
+};
+export type authLoginResponseError = (authLoginResponse400 | authLoginResponse401 | authLoginResponse403 | authLoginResponse404 | authLoginResponse405 | authLoginResponse409 | authLoginResponse422 | authLoginResponse500) & {
+  headers: Headers;
+};
+
+export type authLoginResponse = (authLoginResponseSuccess | authLoginResponseError)
+
+export const getAuthLoginUrl = () => {
+
+
+
+
+  return `${import.meta.env.VITE_API_ORIGIN || ''}/api/v1/auth/login`
+}
+
+/**
+ * @summary 以使用者代號建立伺服器登入 Session
+ */
+export const authLogin = async (loginRequest: LoginRequest, options?: RequestInit): Promise<authLoginResponse> => {
+
+  const res = await fetch(getAuthLoginUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(loginRequest)
+  }
+)
+
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+
+  const data: authLoginResponse['data'] = body ? JSON.parse(body) : {}
+  return { data, status: res.status, headers: res.headers } as authLoginResponse
+}
+
+
+
+export type authLogoutResponse204 = {
+  data: void
+  status: 204
+}
+
+export type authLogoutResponse400 = {
+  data: ErrorResponse
+  status: 400
+}
+
+export type authLogoutResponse401 = {
+  data: ErrorResponse
+  status: 401
+}
+
+export type authLogoutResponse403 = {
+  data: ErrorResponse
+  status: 403
+}
+
+export type authLogoutResponse404 = {
+  data: ErrorResponse
+  status: 404
+}
+
+export type authLogoutResponse405 = {
+  data: ErrorResponse
+  status: 405
+}
+
+export type authLogoutResponse409 = {
+  data: ErrorResponse
+  status: 409
+}
+
+export type authLogoutResponse422 = {
+  data: ErrorResponse
+  status: 422
+}
+
+export type authLogoutResponse500 = {
+  data: ErrorResponse
+  status: 500
+}
+
+export type authLogoutResponseSuccess = (authLogoutResponse204) & {
+  headers: Headers;
+};
+export type authLogoutResponseError = (authLogoutResponse400 | authLogoutResponse401 | authLogoutResponse403 | authLogoutResponse404 | authLogoutResponse405 | authLogoutResponse409 | authLogoutResponse422 | authLogoutResponse500) & {
+  headers: Headers;
+};
+
+export type authLogoutResponse = (authLogoutResponseSuccess | authLogoutResponseError)
+
+export const getAuthLogoutUrl = () => {
+
+
+
+
+  return `${import.meta.env.VITE_API_ORIGIN || ''}/api/v1/auth/logout`
+}
+
+/**
+ * @summary 撤銷目前伺服器 Session
+ */
+export const authLogout = async ( options?: RequestInit): Promise<authLogoutResponse> => {
+
+  const res = await fetch(getAuthLogoutUrl(),
+  {
+    ...options,
+    method: 'POST'
+
+
+  }
+)
+
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+
+  const data: authLogoutResponse['data'] = body ? JSON.parse(body) : undefined
+  return { data, status: res.status, headers: res.headers } as authLogoutResponse
+}
+
+
 
 export type healthLiveResponse200 = {
   data: LiveResponse

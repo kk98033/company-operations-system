@@ -78,12 +78,14 @@ class ApplicationError(Exception):
         code: str,
         message: str,
         details: Any | None = None,
+        headers: Mapping[str, str] | None = None,
     ) -> None:
         super().__init__(message)
         self.status_code = status_code
         self.code = code
         self.message = message
         self.details = details
+        self.headers = headers
 
 
 def error_response(
@@ -99,10 +101,15 @@ def error_response(
     body = ErrorResponse(
         error=ErrorBody(code=code, message=message, details=details)
     )
+    response_headers = {
+        "Cache-Control": "no-store",
+        "Pragma": "no-cache",
+    }
+    response_headers.update(headers or {})
     return JSONResponse(
         status_code=status_code,
         content=jsonable_encoder(body),
-        headers=headers,
+        headers=response_headers,
     )
 
 
@@ -202,6 +209,7 @@ def register_exception_handlers(app: FastAPI) -> None:
             code=exc.code,
             message=exc.message,
             details=exc.details,
+            headers=_safe_http_headers(exc.headers),
         )
 
     @app.exception_handler(RequestValidationError)

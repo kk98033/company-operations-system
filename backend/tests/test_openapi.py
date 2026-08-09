@@ -42,6 +42,38 @@ def test_development_openapi_has_stable_health_and_error_contracts() -> None:
     assert "HTTPValidationError" not in schema["components"]["schemas"]
 
 
+def test_auth_openapi_declares_secret_input_and_temporary_bearer_transport() -> None:
+    schema = TestClient(create_app(settings=make_test_settings())).get(
+        "/openapi.json"
+    ).json()
+    login = schema["paths"]["/api/v1/auth/login"]["post"]
+    logout = schema["paths"]["/api/v1/auth/logout"]["post"]
+    login_request = schema["components"]["schemas"]["LoginRequest"]
+
+    assert login["operationId"] == "auth_login"
+    assert logout["operationId"] == "auth_logout"
+    assert login["tags"] == ["auth"]
+    assert logout["tags"] == ["auth"]
+    assert "security" not in login
+    assert logout["security"] == [{"SessionBearer": []}]
+    assert schema["components"]["securitySchemes"]["SessionBearer"] == {
+        "type": "http",
+        "scheme": "bearer",
+    }
+    assert login_request["properties"]["password"]["format"] == "password"
+    assert login_request["properties"]["password"]["writeOnly"] is True
+    assert set(login_request["required"]) == {
+        "organization_id",
+        "login_name",
+        "password",
+    }
+    assert "token_type" in schema["components"]["schemas"]["LoginResponse"][
+        "required"
+    ]
+    assert logout["responses"]["204"] == {"description": "Successful Response"}
+    assert "/api/v1/auth/session" not in schema["paths"]
+
+
 def test_development_swagger_ui_remains_available() -> None:
     client = TestClient(create_app(settings=make_test_settings()))
 
