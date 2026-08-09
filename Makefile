@@ -10,7 +10,8 @@ COMPOSE_PARSE_ENV = POSTGRES_PASSWORD=company-system-compose-parse-only
 	docs-check toolchain-check env-init db-config db-up db-down db-status \
 	db-test-config db-test-up db-test-down backend-database-integration-check \
 	import-profile import-profile-test backend-test backend-check frontend-test \
-	frontend-lint frontend-build frontend-audit frontend-check backend-build
+	frontend-lint frontend-build frontend-audit frontend-check backend-build \
+	seed-test-identity
 
 bootstrap:
 	PYTHON_BIN=$(PYTHON) ./scripts/bootstrap.sh
@@ -60,6 +61,9 @@ db-down:
 
 db-status:
 	docker compose ps postgres
+
+seed-test-identity: env-check
+	cd backend && .venv/bin/python scripts/seed_test_identity.py
 
 db-test-config:
 	$(COMPOSE_PARSE_ENV) docker compose --profile test config --quiet

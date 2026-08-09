@@ -133,7 +133,24 @@ Identity schema 的邊界：
 - `organization_members` 只表達使用者屬於哪間公司；角色與 capability 留在 Slice 1.6。
 - `sessions` 只保存 64 字元的小寫 SHA-256 token digest 並綁定 membership；禁止保存 raw cookie token。
 - 父資料有 membership／session 時使用 `RESTRICT`，不以 cascade 抹除身分軌跡。
-- Slice 1.2 才加入可重跑的 test-only seed，且必須使用有效 Argon2id 雜湊。
+- Slice 1.2 已加入可重跑的 test-only seed，使用 `argon2-cffi` 25.x 與明確 RFC 9106 low-memory Argon2id profile；角色與登入 API 仍未建立。
+
+## 虛構 identity seed
+
+從專案根目錄顯式執行：
+
+```bash
+make db-up
+make seed-test-identity
+```
+
+這個命令不會掛入 `bootstrap`、`dev`、migration 或 API startup，也不會隱含啟動資料庫。它只允許 development／test；會先檢查環境與兩個不同密碼，通過後才執行 migration 並連接已啟動的本機 PostgreSQL，接著建立或核對以下虛構資料：
+
+- 公司：`測試印刷股份有限公司（虛構）`
+- 帳號：`test.admin`、`test.operator`
+- 兩筆 organization membership；尚無角色差異
+
+自動化環境可用 `TEST_ADMIN_SEED_PASSWORD`、`TEST_OPERATOR_SEED_PASSWORD` 程序環境變數，但不得放入 `.env`、Git 或命令列參數。重跑不新增重複列、不重新 hash；若提供的密碼與既有 hash 不符，或固定 ID／login／membership 發生衝突，整筆交易安全失敗且不覆寫資料。production 在建立 engine 前即拒絕。
 
 一般 `make backend-test` 會排除整合測試，不需要 Docker。要用完全隔離的 PostgreSQL 驗證真實連線與 `upgrade -> downgrade -> upgrade`：
 
