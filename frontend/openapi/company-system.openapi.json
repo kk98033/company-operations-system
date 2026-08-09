@@ -44,6 +44,28 @@
         "title": "AuthenticatedUserResponse",
         "type": "object"
       },
+      "CurrentSessionResponse": {
+        "properties": {
+          "expires_at": {
+            "format": "date-time",
+            "title": "Expires At",
+            "type": "string"
+          },
+          "organization": {
+            "$ref": "#/components/schemas/AuthenticatedOrganizationResponse"
+          },
+          "user": {
+            "$ref": "#/components/schemas/AuthenticatedUserResponse"
+          }
+        },
+        "required": [
+          "expires_at",
+          "user",
+          "organization"
+        ],
+        "title": "CurrentSessionResponse",
+        "type": "object"
+      },
       "ErrorBody": {
         "description": "Stable, machine-readable API error fields.",
         "properties": {
@@ -469,6 +491,112 @@
           }
         ],
         "summary": "撤銷目前伺服器 Session",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/api/v1/auth/session": {
+      "get": {
+        "operationId": "auth_current_session",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CurrentSessionResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "請求格式錯誤"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "尚未通過身分驗證"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "沒有執行此操作的權限"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "資源不存在"
+          },
+          "405": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "HTTP method 不允許用於此資源"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "資料狀態或版本衝突"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "輸入資料驗證失敗"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "伺服器發生未預期錯誤"
+          }
+        },
+        "security": [
+          {
+            "SessionCookie": []
+          }
+        ],
+        "summary": "載入目前使用者與公司 Session",
         "tags": [
           "auth"
         ]

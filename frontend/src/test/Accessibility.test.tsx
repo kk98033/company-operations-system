@@ -23,7 +23,10 @@ beforeEach(() => {
   ))
 })
 
-afterEach(() => vi.unstubAllGlobals())
+afterEach(() => {
+  vi.unstubAllEnvs()
+  vi.unstubAllGlobals()
+})
 
 async function expectNoAccessibilityViolations(context: ElementContext = document.body) {
   const results = await axe.run(context, accessibilityOptions)
@@ -37,6 +40,21 @@ async function expectNoAccessibilityViolations(context: ElementContext = documen
 }
 
 describe('自動無障礙基線', () => {
+  it('登入頁沒有 axe WCAG A／AA 與 best-practice 違規', async () => {
+    vi.stubEnv('VITE_ORGANIZATION_ID', '10000000-0000-4000-8000-000000000001')
+    vi.stubGlobal('fetch', vi.fn<typeof fetch>().mockImplementation(async () => (
+      Response.json({
+        error: { code: 'SESSION_INVALID', details: null, message: '請重新登入' },
+      }, { status: 401 })
+    )))
+
+    await renderApp(['/login'], { session: null })
+
+    expect(await screen.findByRole('heading', { level: 1, name: '公司管理系統' }))
+      .toBeInTheDocument()
+    await expectNoAccessibilityViolations()
+  })
+
   it.each([
     ['首頁', '/'],
     ['404', '/not-a-real-page'],

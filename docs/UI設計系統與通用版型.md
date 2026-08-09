@@ -1,10 +1,12 @@
 # UI 設計系統與通用版型
 
-> 狀態：v1.0 正式基準（2026-08-05）｜決策：ADR-010
+> 狀態：v1.1 正式基準（2026-08-09）｜決策：ADR-010
 >
 > 可操作示範：`http://127.0.0.1:5173/ui-patterns`
 >
 > 適用範圍：新版 React 系統的所有登入後頁面、對話框、抽屜與列印入口
+
+> 登入頁是無側邊欄的身分邊界例外，仍必須沿用本文件的平面工業色彩、Tokens、`Field`、`SystemState`、按鈕、無障礙與 RWD；不可自建浮動陰影卡片或另一套登入設計系統。
 
 > 公司 UI 驗收邊界（2026-08-09）：報價／工單 PDF 鎖定欄位、分區、順序、單頁操作及列印內容；螢幕介面採本設計系統的現代工業 ERP 視覺與 RWD，不逐像素複製 Windows XP。附件未明示的必填、預設值與上限不得自行加入。
 
@@ -341,7 +343,7 @@ Drawer 適用：不離開清單的輔助資訊，例如欄位設定、稽核摘�
 - 常用快捷鍵需先在頁面提示並避開瀏覽器／作業系統快捷鍵；B 方案只作習慣參考。
 - 動畫保持短暫，並尊重 `prefers-reduced-motion`。
 
-Slice 0.7b 已把上述規格落成正式基線：首頁、404 及 `/ui-patterns` 四種狀態由 axe-core 執行 WCAG A／AA 與 best-practice 掃描；每個正式路由只有一個 H1。版型切換使用 tablist／tab／tabpanel、aria-selected／aria-controls 與 roving tabIndex，支援左右方向鍵、Home、End；跳轉連結可把焦點送到 `main`，全域焦點外框為 3px。JSDOM 無真實像素排版，因此自動掃描不假裝驗證色彩對比；顏色、焦點可見性與破版仍須在實際瀏覽器人工驗收。
+Slice 0.7b 已把上述規格落成正式基線：首頁、404 及 `/ui-patterns` 四種狀態由 axe-core 執行 WCAG A／AA 與 best-practice 掃描；每個正式路由只有一個 H1。版型切換使用 tablist／tab／tabpanel、aria-selected／aria-controls 與 roving tabIndex，支援左右方向鍵、Home、End；跳轉連結可把焦點送到 `main`，全域焦點外框為 3px。Slice 1.5 又將獨立 `/login` 納入相同 axe 基線，並以可點 label、必填文字、錯誤 `role=alert` 及窄螢幕單欄作為登入契約。JSDOM 無真實像素排版，因此自動掃描不假裝驗證色彩對比；顏色、焦點可見性與破版仍須在實際瀏覽器人工驗收。
 
 ## 9. 共用 React 元件對照
 

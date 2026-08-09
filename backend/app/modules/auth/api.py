@@ -13,6 +13,7 @@ from app.core.errors import ApplicationError
 from app.modules.auth.cookies import clear_auth_cookies, set_auth_cookies
 from app.modules.auth.dependencies import (
     optional_logout_session,
+    require_current_session,
     require_trusted_origin,
 )
 from app.modules.auth.errors import (
@@ -22,10 +23,12 @@ from app.modules.auth.errors import (
 from app.modules.auth.schemas import (
     AuthenticatedOrganizationResponse,
     AuthenticatedUserResponse,
+    CurrentSessionResponse,
     LoginRequest,
     LoginResponse,
 )
 from app.modules.auth.services import (
+    AuthenticatedSession,
     create_login_session,
     revoke_session,
 )
@@ -36,6 +39,21 @@ def _authentication_error() -> ApplicationError:
         status_code=401,
         code="AUTHENTICATION_FAILED",
         message="登入資料不正確或帳號目前無法使用",
+    )
+
+
+def _session_response(context: AuthenticatedSession) -> CurrentSessionResponse:
+    return CurrentSessionResponse(
+        expires_at=context.expires_at,
+        user=AuthenticatedUserResponse(
+            id=context.user_id,
+            login_name=context.login_name,
+            display_name=context.display_name,
+        ),
+        organization=AuthenticatedOrganizationResponse(
+            id=context.organization_id,
+            name=context.organization_name,
+        ),
     )
 
 
@@ -90,6 +108,20 @@ def build_auth_router() -> APIRouter:
                 name=result.organization_name,
             ),
         )
+
+    @router.get(
+        "/session",
+        response_model=CurrentSessionResponse,
+        operation_id="auth_current_session",
+        summary="載入目前使用者與公司 Session",
+    )
+    def current_session(
+        response: Response,
+        context: Annotated[AuthenticatedSession, Depends(require_current_session)],
+    ) -> CurrentSessionResponse:
+        response.headers["Cache-Control"] = "no-store"
+        response.headers["Pragma"] = "no-cache"
+        return _session_response(context)
 
     @router.post(
         "/logout",

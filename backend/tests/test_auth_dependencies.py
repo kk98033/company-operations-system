@@ -90,3 +90,20 @@ def test_current_session_dependency_rejects_duplicate_session_cookies(
 
     assert response.status_code == 401
     assert response.json()["error"]["code"] == "SESSION_INVALID"
+
+
+def test_production_current_session_endpoint_uses_cookie_dependency(
+    dependency_client: TestClient,
+) -> None:
+    raw_token = token_urlsafe(32)
+    dependency_client.cookies.set(
+        SESSION_COOKIE_NAME,
+        raw_token,
+        path="/api/v1",
+    )
+
+    response = dependency_client.get("/api/v1/auth/session")
+
+    assert response.status_code == 200
+    assert response.headers["cache-control"] == "no-store"
+    assert response.json()["user"]["login_name"] == "synthetic.operator"

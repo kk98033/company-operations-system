@@ -1,6 +1,10 @@
 import { useState, type MouseEvent } from 'react'
-import { Link, Outlet } from '@tanstack/react-router'
+import { Link, Outlet, useNavigate } from '@tanstack/react-router'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 
+import { getApiErrorMessage } from '../api/errorMessage'
+import { useAuthenticatedSession } from '../auth/authContext'
+import { CURRENT_SESSION_QUERY_KEY, logoutSession } from '../auth/session'
 import { workflowModules } from './workflowModules'
 
 const developmentNavigation = [
@@ -10,6 +14,16 @@ const developmentNavigation = [
 
 export function AppLayout() {
   const [isCollapsed, setIsCollapsed] = useState(false)
+  const navigate = useNavigate()
+  const queryClient = useQueryClient()
+  const session = useAuthenticatedSession()
+  const logoutMutation = useMutation({
+    mutationFn: logoutSession,
+    onSuccess: async () => {
+      queryClient.removeQueries({ queryKey: CURRENT_SESSION_QUERY_KEY })
+      await navigate({ to: '/login', replace: true })
+    },
+  })
 
   function moveFocusToMain(event: MouseEvent<HTMLAnchorElement>) {
     event.preventDefault()
@@ -90,8 +104,26 @@ export function AppLayout() {
             <div><span className="topbar__label">目前環境</span><strong>本機開發</strong></div>
           </div>
           <div className="topbar__account" aria-label="使用者狀態">
-            <div><strong>測試使用者</strong><span>登入功能尚未建立</span></div>
-            <span className="topbar__avatar" aria-hidden="true">測</span>
+            <div className="topbar__account-copy">
+              <strong>{session.user.display_name}</strong>
+              <span>{session.organization.name}</span>
+            </div>
+            {logoutMutation.isError ? (
+              <span className="topbar__logout-error" role="alert">
+                {getApiErrorMessage(logoutMutation.error)}
+              </span>
+            ) : null}
+            <button
+              className="ui-button ui-button--secondary topbar__logout"
+              disabled={logoutMutation.isPending}
+              onClick={() => logoutMutation.mutate()}
+              type="button"
+            >
+              {logoutMutation.isPending ? '登出中…' : '登出'}
+            </button>
+            <span className="topbar__avatar" aria-hidden="true">
+              {session.user.display_name.slice(0, 1)}
+            </span>
           </div>
         </header>
 

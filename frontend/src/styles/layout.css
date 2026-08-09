@@ -221,6 +221,16 @@
   text-align: right;
 }
 
+.topbar__logout {
+  min-height: 2rem;
+  padding-inline: var(--space-3);
+}
+
+.topbar__logout-error {
+  max-width: 16rem;
+  color: var(--color-danger-700) !important;
+}
+
 .topbar__avatar {
   display: grid !important;
   width: 2rem;
@@ -355,8 +365,14 @@
   }
 
   .topbar__sidebar-toggle,
-  .topbar__account {
+  .topbar__account-copy,
+  .topbar__avatar,
+  .topbar__logout-error {
     display: none;
+  }
+
+  .topbar__account {
+    margin-left: auto;
   }
 
   .page {

@@ -47,15 +47,19 @@ def test_auth_openapi_declares_secret_input_and_cookie_transport() -> None:
         "/openapi.json"
     ).json()
     login = schema["paths"]["/api/v1/auth/login"]["post"]
+    current = schema["paths"]["/api/v1/auth/session"]["get"]
     logout = schema["paths"]["/api/v1/auth/logout"]["post"]
     login_request = schema["components"]["schemas"]["LoginRequest"]
 
     assert login["operationId"] == "auth_login"
     assert logout["operationId"] == "auth_logout"
+    assert current["operationId"] == "auth_current_session"
     assert login["tags"] == ["auth"]
     assert logout["tags"] == ["auth"]
+    assert current["tags"] == ["auth"]
     assert "security" not in login
     assert logout["security"] == [{"SessionCookie": []}]
+    assert current["security"] == [{"SessionCookie": []}]
     assert schema["components"]["securitySchemes"] == {
         "SessionCookie": {
             "type": "apiKey",
@@ -82,7 +86,12 @@ def test_auth_openapi_declares_secret_input_and_cookie_transport() -> None:
     assert csrf_parameter["in"] == "header"
     assert csrf_parameter["required"] is False
     assert logout["responses"]["204"] == {"description": "Successful Response"}
-    assert "/api/v1/auth/session" not in schema["paths"]
+    current_response = schema["components"]["schemas"]["CurrentSessionResponse"]
+    assert set(current_response["required"]) == {
+        "expires_at",
+        "user",
+        "organization",
+    }
 
 
 def test_development_swagger_ui_remains_available() -> None:

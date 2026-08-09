@@ -16,6 +16,12 @@ export interface AuthenticatedUserResponse {
   login_name: string;
 }
 
+export interface CurrentSessionResponse {
+  expires_at: string;
+  organization: AuthenticatedOrganizationResponse;
+  user: AuthenticatedUserResponse;
+}
+
 /**
  * Stable, machine-readable API error fields.
  */
@@ -247,6 +253,91 @@ export const authLogout = async ( options?: RequestInit): Promise<authLogoutResp
 
   const data: authLogoutResponse['data'] = body ? JSON.parse(body) : undefined
   return { data, status: res.status, headers: res.headers } as authLogoutResponse
+}
+
+
+
+export type authCurrentSessionResponse200 = {
+  data: CurrentSessionResponse
+  status: 200
+}
+
+export type authCurrentSessionResponse400 = {
+  data: ErrorResponse
+  status: 400
+}
+
+export type authCurrentSessionResponse401 = {
+  data: ErrorResponse
+  status: 401
+}
+
+export type authCurrentSessionResponse403 = {
+  data: ErrorResponse
+  status: 403
+}
+
+export type authCurrentSessionResponse404 = {
+  data: ErrorResponse
+  status: 404
+}
+
+export type authCurrentSessionResponse405 = {
+  data: ErrorResponse
+  status: 405
+}
+
+export type authCurrentSessionResponse409 = {
+  data: ErrorResponse
+  status: 409
+}
+
+export type authCurrentSessionResponse422 = {
+  data: ErrorResponse
+  status: 422
+}
+
+export type authCurrentSessionResponse500 = {
+  data: ErrorResponse
+  status: 500
+}
+
+export type authCurrentSessionResponseSuccess = (authCurrentSessionResponse200) & {
+  headers: Headers;
+};
+export type authCurrentSessionResponseError = (authCurrentSessionResponse400 | authCurrentSessionResponse401 | authCurrentSessionResponse403 | authCurrentSessionResponse404 | authCurrentSessionResponse405 | authCurrentSessionResponse409 | authCurrentSessionResponse422 | authCurrentSessionResponse500) & {
+  headers: Headers;
+};
+
+export type authCurrentSessionResponse = (authCurrentSessionResponseSuccess | authCurrentSessionResponseError)
+
+export const getAuthCurrentSessionUrl = () => {
+
+
+
+
+  return `${import.meta.env.VITE_API_ORIGIN || ''}/api/v1/auth/session`
+}
+
+/**
+ * @summary 載入目前使用者與公司 Session
+ */
+export const authCurrentSession = async ( options?: RequestInit): Promise<authCurrentSessionResponse> => {
+
+  const res = await fetch(getAuthCurrentSessionUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+)
+
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+
+  const data: authCurrentSessionResponse['data'] = body ? JSON.parse(body) : {}
+  return { data, status: res.status, headers: res.headers } as authCurrentSessionResponse
 }
 
 

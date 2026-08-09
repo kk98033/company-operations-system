@@ -1,6 +1,6 @@
 # Backend
 
-FastAPI 後端專案骨架。現階段提供環境防呆、統一 API 契約、真實資料庫就緒檢查、SQLAlchemy／Alembic、Import staging／trace、Phase 1 identity schema，以及 Cookie Session／CSRF 保護的登入與登出 API。尚未建立登入 UI、角色權限或正式業務流程資料表。
+FastAPI 後端專案骨架。現階段提供環境防呆、統一 API 契約、真實資料庫就緒檢查、SQLAlchemy／Alembic、Import staging／trace、Phase 1 identity schema，以及 Cookie Session／CSRF 保護的登入、登出與載入目前使用者 API。React 登入頁已接上這份契約；尚未建立角色權限或正式業務流程資料表。
 
 ## 環境
 
@@ -41,7 +41,7 @@ python -m pip install -e ".[dev]"
 ```bash
 cd company-system
 cp .env.example .env
-# 更換 POSTGRES_PASSWORD，並以 secrets.token_urlsafe(32) 產生 CSRF_HMAC_KEY
+# 更換 POSTGRES_PASSWORD，以 secrets.token_urlsafe(32) 產生 CSRF_HMAC_KEY，並設定 VITE_ORGANIZATION_ID
 cd backend
 source .venv/bin/activate
 uvicorn app.main:app --reload --host 127.0.0.1 --port 8000
@@ -61,6 +61,15 @@ uvicorn app.main:app --reload --host 127.0.0.1 --port 8000
 | `DATABASE_URL` | PostgreSQL DSN | 必須含帳號與密碼，資料庫名稱與帳號都要隔離；視為 Secret，錯誤訊息不回顯連線值 |
 | `APP_PUBLIC_ORIGIN` | 瀏覽器正式來源 | 單一完整 origin；production 必須是 HTTPS，不接受 wildcard、path 或 query |
 | `CSRF_HMAC_KEY` | CSRF 簽章密鑰 | `secrets.token_urlsafe(32)` 產生的 43 字元值；不得提交 Git 或沿用範例值 |
+
+### Secret 儲存與上線
+
+- 本機開發：真實 `CSRF_HMAC_KEY` 只放專案根目錄 `.env`；該檔已由 Git 排除，建議權限收緊為 owner-only。本機值可隨時重產，但不可使用 `.env.example` marker、人類可猜文字或他人的正式值。
+- 單機正式 VM：放在專案目錄外、僅服務帳號／部署帳號可讀的系統環境檔，例如 `/etc/company-system/company-system.env`，再由 systemd `EnvironmentFile` 注入。檔案不得打包進 image、備份到公開位置或被 Web server 提供下載。
+- 雲端／容器：優先使用平台 Secret Manager、Docker Secret 或等價的 runtime injection；秘密值不進 React `VITE_*`、Git、Dockerfile、CI log 或 image layer。
+- 輪替：更換 `CSRF_HMAC_KEY` 不需 Alembic migration，但舊 CSRF token 會立即無效。上線操作應同時撤銷現有 Session 或通知使用者清除 Cookie 後重新登入。
+
+`VITE_ORGANIZATION_ID` 只是前端部署公開設定，用來免除員工手動輸入 UUID，不是 Secret。後端仍必須以使用者 membership 驗證公司範圍，不信任前端值。
 
 ### 資料庫環境隔離
 
@@ -156,14 +165,15 @@ make seed-test-identity
 
 ## 登入與瀏覽器 Session API
 
-Slice 1.4 提供兩個後端端點：
+Slice 1.5 完成三個後端端點：
 
 - `POST /api/v1/auth/login`：輸入 `organization_id`、`login_name`、`password`，成功建立固定 8 小時的 server Session。
+- `GET /api/v1/auth/session`：只由 HttpOnly Session Cookie 載入目前使用者、公司與到期時間；無效、過期、已撤銷或停用身分都回相同 401。
 - `POST /api/v1/auth/logout`：驗證可信 Origin 與 Session-bound CSRF 後撤銷 Session；沒有可用 Cookie 時仍安全地清除瀏覽器狀態並回 204。
 
 登入成功的 raw token 只寫入 host-only、HttpOnly、SameSite=Strict 的瀏覽器 Session Cookie，JSON、OpenAPI、generated client、log 與資料庫都不含 raw token；資料庫只保存 SHA-256 digest。production Cookie 固定使用 `Secure`，development／test 才容許本機 HTTP。Cookie 不設持久 Max-Age／Expires，關閉瀏覽器即移除；server Session 的固定 8 小時期限仍是權威上限。
 
-CSRF Cookie 可由 React 讀取，但其內容是由 `CSRF_HMAC_KEY` 簽章且綁定 Session digest 的 token；unsafe request 必須同時提供相同的 `X-CSRF-Token`，只做 Cookie／Header 相等比較並不足夠。登入與登出都先 exact-match `APP_PUBLIC_ORIGIN`，缺少 Origin 時只接受相同來源的 Referer fallback；兩者都缺少時 fail closed。系統維持同源 Vite proxy，不啟用寬鬆 CORS。Slice 1.5 才建立 React 登入頁與載入目前使用者 API。
+CSRF Cookie 可由 React 讀取，但其內容是由 `CSRF_HMAC_KEY` 簽章且綁定 Session digest 的 token；unsafe request 必須同時提供相同的 `X-CSRF-Token`，只做 Cookie／Header 相等比較並不足夠。登入與登出都先 exact-match `APP_PUBLIC_ORIGIN`，缺少 Origin 時只接受相同來源的 Referer fallback；兩者都缺少時 fail closed。系統維持同源 Vite proxy，不啟用寬鬆 CORS。React 登入頁不保存 raw Session token、密碼或虛構登入旗標；重新整理必須透過 `GET /auth/session` 向後端重新確認。
 
 帳號不存在、密碼錯誤、錯誤公司、使用者停用／鎖定、公司停用或 membership 停用一律使用相同 401 response。Session 建立與 `last_login_at` 更新同一交易；登出只寫第一次 `revoked_at`，不刪除紀錄。
 

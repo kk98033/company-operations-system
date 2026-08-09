@@ -55,13 +55,13 @@
 | 項目 | 目前狀態 |
 |---|---|
 | 最後更新日期 | 2026-08-09 |
-| 計畫版本 | v1.8（Phase 1 Slice 1.4 完成，下一步 1.5） |
+| 計畫版本 | v1.9（Phase 1 Slice 1.5 完成，下一步 1.6） |
 | 架構版本 | v1.10（identity schema 實作邊界同步） |
 | 目前階段 | Phase 1 進行中；身分與公司隔離基礎依小切片實作 |
-| 目前切片 | Slice 1.4：安全瀏覽器 Cookie、CSRF 與可信來源驗證已完成 |
-| 實作完成度 | Phase 0：完成；Import I-0：3／3；Phase 1：4／9；正式業務流程功能 0% |
+| 目前切片 | Slice 1.5：React 登入頁、目前 Session 載入、登出與過期導向已完成 |
+| 實作完成度 | Phase 0：完成；Import I-0：3／3；Phase 1：5／9；正式業務流程功能 0% |
 | 規劃文件完成度 | 100% |
-| 最新中型進度備份 | Git tag `checkpoint-phase1-browser-session-v1`；經驗證 bundle 位於專案外層 `git-backups/` |
+| 最新中型進度備份 | Git tag `checkpoint-phase1-login-ui-v1`；經驗證 bundle 位於專案外層 `git-backups/` |
 | 正式遠端 Git 備份 | 尚未設定，必須在 Phase 1 完成前建立私人 repository |
 
 ### 已完成
@@ -108,10 +108,11 @@
 - 完成 Phase 1 Slice 1.2：採用 `argon2-cffi` 25.x 的明確 Argon2id profile，建立只允許 development／test 的顯式 identity seed。首次建立一間標示虛構的公司、`test.admin`、`test.operator` 及兩筆 membership；兩密碼只由隱藏提示或程序環境取得且必須不同，沒有預設值、CLI 參數或 Git 明文。重跑會驗證既有 hash 並保持逐 byte 不變；密碼、固定 ID、正規化 login 或 membership 衝突時整批 rollback。管理員／操作員目前只是名稱，角色留在 Slice 1.6；沒有建立 Session 或登入 API。本次 audit 另發現 Orval 8.23.0 的間接 `js-yaml` high advisory，已升級精確鎖版 Orval 8.24.0／`js-yaml` 4.3.1，重產 client 並恢復 0 vulnerabilities。
 - 完成 Phase 1 Slice 1.3：新增 `POST /api/v1/auth/login` 與 `POST /api/v1/auth/logout`。登入必須指定公司並驗證使用者、公司與 membership 皆啟用；所有帳密／停用失敗使用相同 401，未知帳號仍執行 Argon2 dummy verify。每次登入建立不同的 8 小時 server Session，raw 256-bit token 只在成功 response 回傳一次，資料庫只存 SHA-256 digest；登出只設 `revoked_at`，已撤銷、過期或未知但格式正確的 token 一律相同 204。登入建立 Session 與 `last_login_at` 更新同交易，衝突會完整 rollback；尚未加入 Cookie、CSRF、Origin、React 登入頁、角色或限流。
 - 完成 Phase 1 Slice 1.4：移除公開 Bearer transport，raw Session token 只放 host-only HttpOnly Cookie；JSON、OpenAPI、generated client、log 與資料庫都不含 raw token。Cookie 採 SameSite=Strict、production 固定 Secure、不設瀏覽器持久期限；CSRF token 由伺服器 HMAC 簽章並綁定 Session digest。登入與登出 exact-match `APP_PUBLIC_ORIGIN`，缺 Origin 時只接受同源 Referer；錯來源、偽造 token 與跨 Session token 均拒絕。已建立 Cookie-only current Session dependency，但登入頁與載入目前使用者 endpoint 留在 Slice 1.5。
+- 完成 Phase 1 Slice 1.5：新增 `GET /api/v1/auth/session`、ADR-010 平面工業風格 React 登入頁與受保護路由。重新整理會以 HttpOnly Cookie 向後端恢復使用者／公司資訊，Session 無效或過期回登入頁；登出送出 signed CSRF header、撤銷後清除 query cache。瀏覽器不使用 `localStorage`或保存密碼；公司 UUID 是公開部署設定，由 `VITE_ORGANIZATION_ID` 提供。
 
 ### 進行中
 
-- Phase 0 工程與公司 Gate 已完成；Phase 1 Slice 1.1～1.4 已建立 identity schema、安全測試 seed、後端登入／登出 API及安全瀏覽器 Cookie／CSRF；React 登入 UI 尚未完成，正式業務流程、資料移轉或列印功能仍為 0%。
+- Phase 0 工程與公司 Gate 已完成；Phase 1 Slice 1.1～1.5 已建立 identity schema、安全測試 seed、後端登入／登出／目前 Session API、安全瀏覽器 Cookie／CSRF 與 React 登入流程；角色權限與正式業務流程、資料移轉、列印功能仍未完成。
 - 工單查詢與單頁建檔的介面邊界已依原稿修正；正式儲存、編輯、列印、API 與資料表仍屬 Phase 4，不把原型誤報為業務功能。
 - 介面正式方向已定案；`/style-preview` 只保留為歷史比較與 ADR-010 決策證據，不是正式業務頁。
 - 公司 P0 已確認 10／10。正式 migration、API 與舊客戶資料 apply 仍只會在對應 Phase／Import Slice 通過測試後逐批建立，不因 Gate 通過而提前寫入。
@@ -119,7 +120,7 @@
 
 ### 接下來要做
 
-1. 執行 Phase 1 Slice 1.5：建立 React 登入頁、載入目前使用者 endpoint 與 Session 過期處理；嚴格使用既有 ADR-010 通用 UI，不提前建立角色或業務功能。
+1. 執行 Phase 1 Slice 1.6：建立 permissions、roles 與角色指派，以 allow／deny 測試鍵定管理員與一般操作員的差異；不提前建立業務資料表。
 2. Phase 3／4 開工時依 `docs/Gmail附件需求逐項對照.md` 逐 Slice 建立測試，不可把整份報價或工單一次塞入單一元件。
 3. 客戶 Slice 2.6 完成並簽認 mapping 後，才執行 I-1.1 `cust` dry-run。
 
@@ -179,11 +180,20 @@
 ```bash
 make toolchain-check
 make bootstrap
-# 編輯 .env：更換 POSTGRES_PASSWORD，並以 secrets.token_urlsafe(32) 產生 CSRF_HMAC_KEY
+# 編輯 .env：更換 POSTGRES_PASSWORD，以 secrets.token_urlsafe(32) 產生 CSRF_HMAC_KEY，並設定 VITE_ORGANIZATION_ID
 make env-check
 ```
 
-若 `.env` 是 Slice 1.4 前建立的舊檔，需同步目前 `.env.example` 的 `APP_PUBLIC_ORIGIN` 與 `CSRF_HMAC_KEY`，並將 `DATABASE_URL` 保持為變數引用寫法。`CSRF_HMAC_KEY` 應以 Python `secrets.token_urlsafe(32)` 產生，不得沿用範例或提交 Git；程式不會覆寫本機私密設定。
+產生本機 CSRF key 的範例指令（產生後貼到 `.env`，不要把輸出貼到 issue、log 或 Git）：
+
+```bash
+python3 -c 'import secrets; print(secrets.token_urlsafe(32))'
+chmod 600 .env
+```
+
+若 `.env` 是 Slice 1.4 前建立的舊檔，需同步目前 `.env.example` 的 `APP_PUBLIC_ORIGIN`、`CSRF_HMAC_KEY` 與 `VITE_ORGANIZATION_ID`，並將 `DATABASE_URL` 保持為變數引用寫法。`CSRF_HMAC_KEY` 應以 Python `secrets.token_urlsafe(32)` 產生，不得沿用範例或提交 Git；本機 `.env` 建議權限設為只有本人可讀。`VITE_ORGANIZATION_ID` 是公開的部署識別碼，不是 Secret，但仍不可當成後端公司 scope 驗證的代替品。
+
+正式伺服器不要把真實密鑰放在 React bundle、Git、Dockerfile 或可公開的 `.env`。單機 VM 可使用僅部署帳號可讀的系統環境檔（例如 `/etc/company-system/company-system.env`，owner-only）由 systemd 注入；雲端／容器環境優先使用 Secret Manager、Docker Secret 或等價機制在啟動時注入。輪替 `CSRF_HMAC_KEY` 不需要資料庫 migration，但現有 CSRF token 會失效，應搭配撤銷現有 Session 或安排使用者重新登入。
 
 日常操作：
 
