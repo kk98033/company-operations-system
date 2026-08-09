@@ -9,6 +9,8 @@ CHECK_SCRIPT = REPO_ROOT / "scripts" / "check-local-env.sh"
 
 
 class CheckLocalEnvTests(unittest.TestCase):
+    VALID_CSRF_KEY = "dGVzdC1vbmx5LWNzcmYta2V5LTMyLWJ5dGVzISEhISE"
+
     def run_check(self, content: str | None) -> subprocess.CompletedProcess[str]:
         with tempfile.TemporaryDirectory() as temporary_directory:
             env_path = Path(temporary_directory) / ".env"
@@ -22,7 +24,10 @@ class CheckLocalEnvTests(unittest.TestCase):
             )
 
     def test_accepts_non_placeholder_password_without_echoing_it(self) -> None:
-        result = self.run_check("POSTGRES_PASSWORD=local-secret-canary\n")
+        result = self.run_check(
+            "POSTGRES_PASSWORD=local-secret-canary\n"
+            f"CSRF_HMAC_KEY={self.VALID_CSRF_KEY}\n"
+        )
 
         self.assertEqual(result.returncode, 0)
         self.assertNotIn("local-secret-canary", result.stdout + result.stderr)
@@ -42,6 +47,22 @@ class CheckLocalEnvTests(unittest.TestCase):
             with self.subTest(content=content):
                 result = self.run_check(content)
                 self.assertNotEqual(result.returncode, 0)
+
+    def test_rejects_missing_placeholder_and_malformed_csrf_keys(self) -> None:
+        for csrf_value in (
+            None,
+            "",
+            "replace-with-token-urlsafe-32-byte-value",
+            "too-short",
+            "!" * 43,
+        ):
+            csrf_line = "" if csrf_value is None else f"CSRF_HMAC_KEY={csrf_value}\n"
+            result = self.run_check(
+                "POSTGRES_PASSWORD=local-secret-canary\n" + csrf_line
+            )
+            self.assertNotEqual(result.returncode, 0)
+            if csrf_value:
+                self.assertNotIn(csrf_value, result.stdout + result.stderr)
 
 
 if __name__ == "__main__":

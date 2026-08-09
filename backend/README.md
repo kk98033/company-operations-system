@@ -1,6 +1,6 @@
 # Backend
 
-FastAPI 後端專案骨架。現階段提供環境防呆、統一 API 契約、真實資料庫就緒檢查、SQLAlchemy／Alembic、Import staging／trace、Phase 1 identity schema，以及登入／登出與伺服器 Session API。尚未建立 Cookie／CSRF、登入 UI、角色權限或正式業務流程資料表。
+FastAPI 後端專案骨架。現階段提供環境防呆、統一 API 契約、真實資料庫就緒檢查、SQLAlchemy／Alembic、Import staging／trace、Phase 1 identity schema，以及 Cookie Session／CSRF 保護的登入與登出 API。尚未建立登入 UI、角色權限或正式業務流程資料表。
 
 ## 環境
 
@@ -41,7 +41,7 @@ python -m pip install -e ".[dev]"
 ```bash
 cd company-system
 cp .env.example .env
-# 只需更換 POSTGRES_PASSWORD；DATABASE_URL 會引用同一組 PostgreSQL 變數
+# 更換 POSTGRES_PASSWORD，並以 secrets.token_urlsafe(32) 產生 CSRF_HMAC_KEY
 cd backend
 source .venv/bin/activate
 uvicorn app.main:app --reload --host 127.0.0.1 --port 8000
@@ -59,6 +59,8 @@ uvicorn app.main:app --reload --host 127.0.0.1 --port 8000
 | `APP_HOST` | 本機 API 綁定位址 | 不可為空 |
 | `APP_PORT` | 本機 API port | 1–65535 |
 | `DATABASE_URL` | PostgreSQL DSN | 必須含帳號與密碼，資料庫名稱與帳號都要隔離；視為 Secret，錯誤訊息不回顯連線值 |
+| `APP_PUBLIC_ORIGIN` | 瀏覽器正式來源 | 單一完整 origin；production 必須是 HTTPS，不接受 wildcard、path 或 query |
+| `CSRF_HMAC_KEY` | CSRF 簽章密鑰 | `secrets.token_urlsafe(32)` 產生的 43 字元值；不得提交 Git 或沿用範例值 |
 
 ### 資料庫環境隔離
 
@@ -152,14 +154,16 @@ make seed-test-identity
 
 自動化環境可用 `TEST_ADMIN_SEED_PASSWORD`、`TEST_OPERATOR_SEED_PASSWORD` 程序環境變數，但不得放入 `.env`、Git 或命令列參數。重跑不新增重複列、不重新 hash；若提供的密碼與既有 hash 不符，或固定 ID／login／membership 發生衝突，整筆交易安全失敗且不覆寫資料。production 在建立 engine 前即拒絕。
 
-## 登入與 Session API
+## 登入與瀏覽器 Session API
 
-Slice 1.3 提供兩個後端端點：
+Slice 1.4 提供兩個後端端點：
 
 - `POST /api/v1/auth/login`：輸入 `organization_id`、`login_name`、`password`，成功建立固定 8 小時的 server Session。
-- `POST /api/v1/auth/logout`：以暫時的 `Authorization: Bearer <token>` 撤銷 Session；重複、過期或未知但格式正確的 token 都回相同 204。
+- `POST /api/v1/auth/logout`：驗證可信 Origin 與 Session-bound CSRF 後撤銷 Session；沒有可用 Cookie 時仍安全地清除瀏覽器狀態並回 204。
 
-登入成功的 raw token 只在 JSON response 出現一次，並以 `Cache-Control: no-store`／`Pragma: no-cache` 禁止快取；資料庫只保存 SHA-256 digest。這個 Bearer transport 只供 Slice 1.3 API 驗證，不得存入 `localStorage`，也不是最終瀏覽器登入設計。Slice 1.4 必須改為 HttpOnly Cookie＋CSRF＋可信 Origin；Slice 1.5 才建立 React 登入頁與目前使用者載入。
+登入成功的 raw token 只寫入 host-only、HttpOnly、SameSite=Strict 的瀏覽器 Session Cookie，JSON、OpenAPI、generated client、log 與資料庫都不含 raw token；資料庫只保存 SHA-256 digest。production Cookie 固定使用 `Secure`，development／test 才容許本機 HTTP。Cookie 不設持久 Max-Age／Expires，關閉瀏覽器即移除；server Session 的固定 8 小時期限仍是權威上限。
+
+CSRF Cookie 可由 React 讀取，但其內容是由 `CSRF_HMAC_KEY` 簽章且綁定 Session digest 的 token；unsafe request 必須同時提供相同的 `X-CSRF-Token`，只做 Cookie／Header 相等比較並不足夠。登入與登出都先 exact-match `APP_PUBLIC_ORIGIN`，缺少 Origin 時只接受相同來源的 Referer fallback；兩者都缺少時 fail closed。系統維持同源 Vite proxy，不啟用寬鬆 CORS。Slice 1.5 才建立 React 登入頁與載入目前使用者 API。
 
 帳號不存在、密碼錯誤、錯誤公司、使用者停用／鎖定、公司停用或 membership 停用一律使用相同 401 response。Session 建立與 `last_login_at` 更新同一交易；登出只寫第一次 `revoked_at`，不刪除紀錄。
 

@@ -30,6 +30,8 @@ export_schema() {
     APP_ENV=test \
     APP_HOST=127.0.0.1 \
     APP_PORT=8000 \
+    APP_PUBLIC_ORIGIN=http://testserver \
+    CSRF_HMAC_KEY=dGVzdC1vbmx5LWNzcmYta2V5LTMyLWJ5dGVzISEhISE \
     DATABASE_URL='postgresql+psycopg://company_system_test:openapi-only@127.0.0.1/company_system_test' \
       .venv/bin/python scripts/export_openapi.py --output "$output_path"
   )

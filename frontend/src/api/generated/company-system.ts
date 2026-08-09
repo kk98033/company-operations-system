@@ -55,12 +55,6 @@ export interface LoginRequest {
 export interface LoginResponse {
   expires_at: string;
   organization: AuthenticatedOrganizationResponse;
-  /**
-     * @minLength 43
-     * @maxLength 43
-     */
-  session_token: string;
-  token_type: 'Bearer';
   user: AuthenticatedUserResponse;
 }
 

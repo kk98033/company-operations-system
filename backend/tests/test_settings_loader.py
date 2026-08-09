@@ -19,7 +19,8 @@ def test_missing_required_variables_are_reported_together() -> None:
         load_settings(environ={}, env_file=None)
 
     assert str(error.value) == (
-        "缺少必要環境變數: APP_ENV, APP_HOST, APP_PORT, DATABASE_URL"
+        "缺少必要環境變數: APP_ENV, APP_HOST, APP_PORT, DATABASE_URL, "
+        "APP_PUBLIC_ORIGIN, CSRF_HMAC_KEY"
     )
 
 
@@ -35,6 +36,8 @@ def test_process_environment_overrides_dotenv_file(tmp_path: Path) -> None:
                     "DATABASE_URL=postgresql+psycopg://company_system_dev:"
                     "secret@127.0.0.1/company_system_dev"
                 ),
+                "APP_PUBLIC_ORIGIN=http://127.0.0.1:5173",
+                "CSRF_HMAC_KEY=dGVzdC1vbmx5LWNzcmYta2V5LTMyLWJ5dGVzISEhISE",
             ]
         ),
         encoding="utf-8",
@@ -76,6 +79,8 @@ def test_dotenv_expands_postgres_components_into_database_url(
                     "${POSTGRES_PASSWORD}@${POSTGRES_HOST}:${POSTGRES_PORT}/"
                     "${POSTGRES_DB}"
                 ),
+                "APP_PUBLIC_ORIGIN=http://127.0.0.1:5173",
+                "CSRF_HMAC_KEY=dGVzdC1vbmx5LWNzcmYta2V5LTMyLWJ5dGVzISEhISE",
             ]
         ),
         encoding="utf-8",
@@ -129,3 +134,58 @@ def test_invalid_environment_has_clear_variable_name() -> None:
 
     assert "APP_ENV" in str(error.value)
     assert "staging" not in str(error.value)
+
+
+@pytest.mark.parametrize(
+    "origin",
+    [
+        "https://company.example/path",
+        "https://user@company.example",
+        "https://company.example?query=1",
+        "https://*.company.example",
+        "https://company.example:notaport",
+    ],
+)
+def test_public_origin_rejects_non_origin_values(origin: str) -> None:
+    with pytest.raises(SettingsLoadError) as error:
+        load_settings(
+            environ=valid_settings_values(APP_PUBLIC_ORIGIN=origin),
+            env_file=None,
+        )
+
+    assert "APP_PUBLIC_ORIGIN" in str(error.value)
+    assert origin not in str(error.value)
+
+
+def test_production_requires_https_public_origin() -> None:
+    with pytest.raises(SettingsLoadError) as error:
+        load_settings(
+            environ=valid_settings_values(
+                APP_ENV="production",
+                APP_PUBLIC_ORIGIN="http://company.example",
+                DATABASE_URL=(
+                    "postgresql+psycopg://company_system_prod:production-only"
+                    "@database.internal/company_system_prod"
+                ),
+            ),
+            env_file=None,
+        )
+
+    assert "APP_PUBLIC_ORIGIN" in str(error.value)
+
+
+@pytest.mark.parametrize(
+    "csrf_key",
+    ["short", "replace-with-token-urlsafe-32-byte-value", "!" * 43],
+)
+def test_csrf_key_rejects_weak_or_placeholder_values_without_echo(
+    csrf_key: str,
+) -> None:
+    with pytest.raises(SettingsLoadError) as error:
+        load_settings(
+            environ=valid_settings_values(CSRF_HMAC_KEY=csrf_key),
+            env_file=None,
+        )
+
+    assert "CSRF_HMAC_KEY" in str(error.value)
+    assert csrf_key not in str(error.value)

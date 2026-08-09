@@ -117,6 +117,8 @@ frontend-check: frontend-test
 backend-build:
 	cd backend && .venv/bin/python -m compileall -q app scripts
 	cd backend && APP_ENV=test APP_HOST=127.0.0.1 APP_PORT=8000 \
+		APP_PUBLIC_ORIGIN='http://testserver' \
+		CSRF_HMAC_KEY='dGVzdC1vbmx5LWNzcmYta2V5LTMyLWJ5dGVzISEhISE' \
 		DATABASE_URL='postgresql+psycopg://company_system_test:build-only@127.0.0.1/company_system_test' \
 		.venv/bin/python -c 'from app.main import app; assert app.title'
 

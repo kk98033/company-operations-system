@@ -14,8 +14,12 @@ def valid_settings_values(**overrides: object) -> dict[str, object]:
             "postgresql+psycopg://company_system_dev:local-only@127.0.0.1/"
             "company_system_dev"
         ),
+        "APP_PUBLIC_ORIGIN": "http://testserver",
+        "CSRF_HMAC_KEY": "dGVzdC1vbmx5LWNzcmYta2V5LTMyLWJ5dGVzISEhISE",
     }
     values.update(overrides)
+    if values["APP_ENV"] == "production" and "APP_PUBLIC_ORIGIN" not in overrides:
+        values["APP_PUBLIC_ORIGIN"] = "https://company.example"
     return values
 
 

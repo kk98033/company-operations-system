@@ -14,7 +14,14 @@ from app.core.config.models import AppSettings
 
 PROJECT_ROOT = Path(__file__).resolve().parents[4]
 DEFAULT_ENV_FILE = PROJECT_ROOT / ".env"
-_REQUIRED_VARIABLES = ("APP_ENV", "APP_HOST", "APP_PORT", "DATABASE_URL")
+_REQUIRED_VARIABLES = (
+    "APP_ENV",
+    "APP_HOST",
+    "APP_PORT",
+    "DATABASE_URL",
+    "APP_PUBLIC_ORIGIN",
+    "CSRF_HMAC_KEY",
+)
 
 
 class SettingsLoadError(RuntimeError):

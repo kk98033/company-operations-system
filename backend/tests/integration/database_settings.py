@@ -48,5 +48,7 @@ def load_database_test_settings() -> AppSettings:
             "APP_HOST": "127.0.0.1",
             "APP_PORT": "8000",
             "DATABASE_URL": database_url,
+            "APP_PUBLIC_ORIGIN": "http://testserver",
+            "CSRF_HMAC_KEY": "dGVzdC1vbmx5LWNzcmYta2V5LTMyLWJ5dGVzISEhISE",
         }
     )

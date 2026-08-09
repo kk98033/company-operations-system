@@ -42,7 +42,7 @@ def test_development_openapi_has_stable_health_and_error_contracts() -> None:
     assert "HTTPValidationError" not in schema["components"]["schemas"]
 
 
-def test_auth_openapi_declares_secret_input_and_temporary_bearer_transport() -> None:
+def test_auth_openapi_declares_secret_input_and_cookie_transport() -> None:
     schema = TestClient(create_app(settings=make_test_settings())).get(
         "/openapi.json"
     ).json()
@@ -55,10 +55,13 @@ def test_auth_openapi_declares_secret_input_and_temporary_bearer_transport() -> 
     assert login["tags"] == ["auth"]
     assert logout["tags"] == ["auth"]
     assert "security" not in login
-    assert logout["security"] == [{"SessionBearer": []}]
-    assert schema["components"]["securitySchemes"]["SessionBearer"] == {
-        "type": "http",
-        "scheme": "bearer",
+    assert logout["security"] == [{"SessionCookie": []}]
+    assert schema["components"]["securitySchemes"] == {
+        "SessionCookie": {
+            "type": "apiKey",
+            "in": "cookie",
+            "name": "company_system_session",
+        }
     }
     assert login_request["properties"]["password"]["format"] == "password"
     assert login_request["properties"]["password"]["writeOnly"] is True
@@ -67,9 +70,17 @@ def test_auth_openapi_declares_secret_input_and_temporary_bearer_transport() -> 
         "login_name",
         "password",
     }
-    assert "token_type" in schema["components"]["schemas"]["LoginResponse"][
-        "required"
-    ]
+    login_response = schema["components"]["schemas"]["LoginResponse"]
+    assert set(login_response["required"]) == {"expires_at", "user", "organization"}
+    assert "session_token" not in login_response["properties"]
+    assert "token_type" not in login_response["properties"]
+    csrf_parameter = next(
+        parameter
+        for parameter in logout["parameters"]
+        if parameter["name"] == "X-CSRF-Token"
+    )
+    assert csrf_parameter["in"] == "header"
+    assert csrf_parameter["required"] is False
     assert logout["responses"]["204"] == {"description": "Successful Response"}
     assert "/api/v1/auth/session" not in schema["paths"]
 

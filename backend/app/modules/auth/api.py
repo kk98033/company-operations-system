@@ -4,13 +4,17 @@ from __future__ import annotations
 
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, Response, Security, status
-from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
+from fastapi import APIRouter, Depends, Request, Response, status
 from pydantic import SecretStr
 from sqlalchemy.orm import Session as OrmSession
 
 from app.core.database.session import get_database_session
 from app.core.errors import ApplicationError
+from app.modules.auth.cookies import clear_auth_cookies, set_auth_cookies
+from app.modules.auth.dependencies import (
+    optional_logout_session,
+    require_trusted_origin,
+)
 from app.modules.auth.errors import (
     AuthenticationFailedError,
     SessionCreationError,
@@ -25,38 +29,14 @@ from app.modules.auth.services import (
     create_login_session,
     revoke_session,
 )
-from app.modules.auth.tokens import is_session_token_format
-
-_bearer = HTTPBearer(auto_error=False, scheme_name="SessionBearer")
-_AUTH_CHALLENGE = {"WWW-Authenticate": 'Bearer realm="company-system"'}
 
 
-def _authentication_error(*, session_invalid: bool = False) -> ApplicationError:
+def _authentication_error() -> ApplicationError:
     return ApplicationError(
         status_code=401,
-        code="SESSION_INVALID" if session_invalid else "AUTHENTICATION_FAILED",
-        message=(
-            "登入狀態已失效"
-            if session_invalid
-            else "登入資料不正確或帳號目前無法使用"
-        ),
-        headers=_AUTH_CHALLENGE,
+        code="AUTHENTICATION_FAILED",
+        message="登入資料不正確或帳號目前無法使用",
     )
-
-
-def _require_bearer_token(
-    credentials: Annotated[
-        HTTPAuthorizationCredentials | None,
-        Security(_bearer),
-    ],
-) -> SecretStr:
-    if (
-        credentials is None
-        or credentials.scheme.lower() != "bearer"
-        or not is_session_token_format(credentials.credentials)
-    ):
-        raise _authentication_error(session_invalid=True)
-    return SecretStr(credentials.credentials)
 
 
 def build_auth_router() -> APIRouter:
@@ -70,7 +50,9 @@ def build_auth_router() -> APIRouter:
     )
     def login(
         payload: LoginRequest,
+        request: Request,
         response: Response,
+        _trusted_origin: Annotated[None, Depends(require_trusted_origin)],
         database_session: Annotated[OrmSession, Depends(get_database_session)],
     ) -> LoginResponse:
         try:
@@ -91,9 +73,12 @@ def build_auth_router() -> APIRouter:
 
         response.headers["Cache-Control"] = "no-store"
         response.headers["Pragma"] = "no-cache"
+        set_auth_cookies(
+            response,
+            raw_session_token=result.raw_session_token,
+            settings=request.app.state.settings,
+        )
         return LoginResponse(
-            session_token=result.raw_session_token.get_secret_value(),
-            token_type="Bearer",
             expires_at=result.expires_at,
             user=AuthenticatedUserResponse(
                 id=result.user_id,
@@ -113,10 +98,14 @@ def build_auth_router() -> APIRouter:
         summary="撤銷目前伺服器 Session",
     )
     def logout(
-        raw_token: Annotated[SecretStr, Depends(_require_bearer_token)],
+        request: Request,
+        raw_token: Annotated[SecretStr | None, Depends(optional_logout_session)],
         database_session: Annotated[OrmSession, Depends(get_database_session)],
     ) -> Response:
-        revoke_session(database_session, raw_token=raw_token)
-        return Response(status_code=status.HTTP_204_NO_CONTENT)
+        if raw_token is not None:
+            revoke_session(database_session, raw_token=raw_token)
+        response = Response(status_code=status.HTTP_204_NO_CONTENT)
+        clear_auth_cookies(response, settings=request.app.state.settings)
+        return response
 
     return router

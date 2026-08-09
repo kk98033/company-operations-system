@@ -55,13 +55,13 @@
 | 項目 | 目前狀態 |
 |---|---|
 | 最後更新日期 | 2026-08-09 |
-| 計畫版本 | v1.7（Phase 1 Slice 1.3 完成，下一步 1.4） |
+| 計畫版本 | v1.8（Phase 1 Slice 1.4 完成，下一步 1.5） |
 | 架構版本 | v1.10（identity schema 實作邊界同步） |
 | 目前階段 | Phase 1 進行中；身分與公司隔離基礎依小切片實作 |
-| 目前切片 | Slice 1.3：登入／登出與伺服器 Session 建立／撤銷 API 已完成 |
-| 實作完成度 | Phase 0：完成；Import I-0：3／3；Phase 1：3／9；正式業務流程功能 0% |
+| 目前切片 | Slice 1.4：安全瀏覽器 Cookie、CSRF 與可信來源驗證已完成 |
+| 實作完成度 | Phase 0：完成；Import I-0：3／3；Phase 1：4／9；正式業務流程功能 0% |
 | 規劃文件完成度 | 100% |
-| 最新中型進度備份 | Git tag `checkpoint-phase1-auth-session-v1`；經驗證 bundle 位於專案外層 `git-backups/` |
+| 最新中型進度備份 | Git tag `checkpoint-phase1-browser-session-v1`；經驗證 bundle 位於專案外層 `git-backups/` |
 | 正式遠端 Git 備份 | 尚未設定，必須在 Phase 1 完成前建立私人 repository |
 
 ### 已完成
@@ -107,10 +107,11 @@
 - 完成 Phase 1 Slice 1.1：新增 `organizations`、`users`、`organization_members`、`sessions` 正式 identity schema。登入沿用舊系統「使用者代號」概念但不沿用舊密碼；帳號去除前後空白且不分大小寫比對後必須全域唯一。Session 只保存 SHA-256 digest 並綁定公司成員，不保存 raw cookie token。21 個隔離 PostgreSQL 測試已驗證 constraint、外鍵、索引、前版 Import 資料保留及 `upgrade → downgrade → upgrade`；尚未建立 seed、登入 API、Cookie、角色或權限。
 - 完成 Phase 1 Slice 1.2：採用 `argon2-cffi` 25.x 的明確 Argon2id profile，建立只允許 development／test 的顯式 identity seed。首次建立一間標示虛構的公司、`test.admin`、`test.operator` 及兩筆 membership；兩密碼只由隱藏提示或程序環境取得且必須不同，沒有預設值、CLI 參數或 Git 明文。重跑會驗證既有 hash 並保持逐 byte 不變；密碼、固定 ID、正規化 login 或 membership 衝突時整批 rollback。管理員／操作員目前只是名稱，角色留在 Slice 1.6；沒有建立 Session 或登入 API。本次 audit 另發現 Orval 8.23.0 的間接 `js-yaml` high advisory，已升級精確鎖版 Orval 8.24.0／`js-yaml` 4.3.1，重產 client 並恢復 0 vulnerabilities。
 - 完成 Phase 1 Slice 1.3：新增 `POST /api/v1/auth/login` 與 `POST /api/v1/auth/logout`。登入必須指定公司並驗證使用者、公司與 membership 皆啟用；所有帳密／停用失敗使用相同 401，未知帳號仍執行 Argon2 dummy verify。每次登入建立不同的 8 小時 server Session，raw 256-bit token 只在成功 response 回傳一次，資料庫只存 SHA-256 digest；登出只設 `revoked_at`，已撤銷、過期或未知但格式正確的 token 一律相同 204。登入建立 Session 與 `last_login_at` 更新同交易，衝突會完整 rollback；尚未加入 Cookie、CSRF、Origin、React 登入頁、角色或限流。
+- 完成 Phase 1 Slice 1.4：移除公開 Bearer transport，raw Session token 只放 host-only HttpOnly Cookie；JSON、OpenAPI、generated client、log 與資料庫都不含 raw token。Cookie 採 SameSite=Strict、production 固定 Secure、不設瀏覽器持久期限；CSRF token 由伺服器 HMAC 簽章並綁定 Session digest。登入與登出 exact-match `APP_PUBLIC_ORIGIN`，缺 Origin 時只接受同源 Referer；錯來源、偽造 token 與跨 Session token 均拒絕。已建立 Cookie-only current Session dependency，但登入頁與載入目前使用者 endpoint 留在 Slice 1.5。
 
 ### 進行中
 
-- Phase 0 工程與公司 Gate 已完成；Phase 1 Slice 1.1～1.3 已建立 identity schema、安全測試 seed 與後端登入／登出 API，但瀏覽器安全 Cookie／CSRF 與登入 UI 尚未完成，正式業務流程、資料移轉或列印功能仍為 0%。
+- Phase 0 工程與公司 Gate 已完成；Phase 1 Slice 1.1～1.4 已建立 identity schema、安全測試 seed、後端登入／登出 API及安全瀏覽器 Cookie／CSRF；React 登入 UI 尚未完成，正式業務流程、資料移轉或列印功能仍為 0%。
 - 工單查詢與單頁建檔的介面邊界已依原稿修正；正式儲存、編輯、列印、API 與資料表仍屬 Phase 4，不把原型誤報為業務功能。
 - 介面正式方向已定案；`/style-preview` 只保留為歷史比較與 ADR-010 決策證據，不是正式業務頁。
 - 公司 P0 已確認 10／10。正式 migration、API 與舊客戶資料 apply 仍只會在對應 Phase／Import Slice 通過測試後逐批建立，不因 Gate 通過而提前寫入。
@@ -118,7 +119,7 @@
 
 ### 接下來要做
 
-1. 執行 Phase 1 Slice 1.4：把暫時 Bearer transport 收斂為安全 HttpOnly Cookie，加入 CSRF token、可信 Origin 驗證與目前 Session dependency；不提前製作 React 登入頁。
+1. 執行 Phase 1 Slice 1.5：建立 React 登入頁、載入目前使用者 endpoint 與 Session 過期處理；嚴格使用既有 ADR-010 通用 UI，不提前建立角色或業務功能。
 2. Phase 3／4 開工時依 `docs/Gmail附件需求逐項對照.md` 逐 Slice 建立測試，不可把整份報價或工單一次塞入單一元件。
 3. 客戶 Slice 2.6 完成並簽認 mapping 後，才執行 I-1.1 `cust` dry-run。
 
@@ -178,11 +179,11 @@
 ```bash
 make toolchain-check
 make bootstrap
-# 編輯 .env，把 POSTGRES_PASSWORD 換成只供本機使用的非範例密碼
+# 編輯 .env：更換 POSTGRES_PASSWORD，並以 secrets.token_urlsafe(32) 產生 CSRF_HMAC_KEY
 make env-check
 ```
 
-若 `.env` 是 Slice 0.2 前建立的舊檔，需先將其中的 `DATABASE_URL` 同步為目前 `.env.example` 的變數引用寫法，再設定 `POSTGRES_PASSWORD`；程式不會覆寫本機私密設定。
+若 `.env` 是 Slice 1.4 前建立的舊檔，需同步目前 `.env.example` 的 `APP_PUBLIC_ORIGIN` 與 `CSRF_HMAC_KEY`，並將 `DATABASE_URL` 保持為變數引用寫法。`CSRF_HMAC_KEY` 應以 Python `secrets.token_urlsafe(32)` 產生，不得沿用範例或提交 Git；程式不會覆寫本機私密設定。
 
 日常操作：
 
@@ -205,7 +206,7 @@ make seed-test-identity  # 顯式建立／核對虛構本機帳號；不會由 d
 
 先以 `make db-up` 顯式啟動本機 PostgreSQL，再執行 `make seed-test-identity`。seed 只允許 development／test；它會先檢查環境與兩個密碼，通過後才升級 migration 並連接資料庫。密碼以隱藏提示分別讀取；非互動環境只能用 `TEST_ADMIN_SEED_PASSWORD`、`TEST_OPERATOR_SEED_PASSWORD` 程序環境變數。不要把兩個值寫進 `.env`、指令列參數、Git 或文件。
 
-`make dev` 因範例密碼或缺少 `.env` 拒絕啟動時，先執行 `make bootstrap`並修改密碼。port 5173、8000 或 5432 被佔用時，先停掉佔用該 port 的本專案過程，不可使用寬鬆 `pkill node/python`。若只需停掉容器，執行 `make down`；它在 `.env` 不存在時仍可用，且不會刪除開發資料。
+`make dev` 因範例密碼、範例 CSRF key 或缺少 `.env` 拒絕啟動時，先執行 `make bootstrap`並修改兩項 Secret。port 5173、8000 或 5432 被佔用時，先停掉佔用該 port 的本專案過程，不可使用寬鬆 `pkill node/python`。若只需停掉容器，執行 `make down`；它在 `.env` 不存在時仍可用，且不會刪除開發資料。
 
 前端有完整 `package-lock.json`；Python 依賴目前是受控版本範圍而非 bit-for-bit lock，Phase 1 前會再評估 lockfile。`.env`、資料庫 volume、舊資料、Import 報告與正式資料都不得提交 Git。
 

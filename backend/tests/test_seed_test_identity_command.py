@@ -21,6 +21,8 @@ def test_production_is_rejected_before_resource_factory_is_called() -> None:
                 "production",
                 "company_system_prod",
             ),
+            "APP_PUBLIC_ORIGIN": "https://company.example",
+            "CSRF_HMAC_KEY": "dGVzdC1vbmx5LWNzcmYta2V5LTMyLWJ5dGVzISEhISE",
         }
     )
     resource_factory_called = False

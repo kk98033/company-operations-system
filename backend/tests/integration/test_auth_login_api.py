@@ -13,6 +13,7 @@ from pydantic import SecretStr
 from sqlalchemy import Engine, event, func, select, update
 from sqlalchemy.orm import Session as OrmSession
 
+from app.modules.auth.cookies import SESSION_COOKIE_NAME
 from app.modules.auth.models import Session, User
 from app.modules.auth.passwords import hash_password
 from app.modules.auth.services import login as login_service
@@ -49,7 +50,7 @@ def test_login_normalizes_name_and_persists_only_digest_atomically(
     )
 
     assert response.status_code == 200
-    raw_token = response.json()["session_token"]
+    raw_token = response.cookies[SESSION_COOKIE_NAME]
     with OrmSession(identity_engine) as session:
         stored_session = session.scalars(select(Session)).one()
         stored_user = session.get(User, identity.user_id)
@@ -63,6 +64,8 @@ def test_login_normalizes_name_and_persists_only_digest_atomically(
     assert stored_session.expires_at - stored_session.created_at == timedelta(hours=8)
     assert stored_user.password_hash == identity.password_hash
     assert response.headers["cache-control"] == "no-store"
+    assert "session_token" not in response.json()
+    assert "token_type" not in response.json()
     assert identity.password.get_secret_value() not in response.text
 
 
@@ -80,7 +83,7 @@ def test_each_successful_login_creates_a_distinct_active_session(
 
     assert first.status_code == 200
     assert second.status_code == 200
-    assert first.json()["session_token"] != second.json()["session_token"]
+    assert first.cookies[SESSION_COOKIE_NAME] != second.cookies[SESSION_COOKIE_NAME]
     with identity_engine.connect() as connection:
         digests = connection.scalars(select(Session.token_digest)).all()
     assert len(digests) == 2
@@ -267,7 +270,7 @@ def test_all_credential_and_status_failures_have_the_same_safe_401(
 
     assert response.status_code == 401
     assert select_count == 1
-    assert response.headers["www-authenticate"] == 'Bearer realm="company-system"'
+    assert "www-authenticate" not in response.headers
     assert response.json() == {
         "error": {
             "code": "AUTHENTICATION_FAILED",

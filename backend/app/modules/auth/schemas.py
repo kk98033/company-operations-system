@@ -3,12 +3,9 @@
 from __future__ import annotations
 
 from datetime import datetime
-from typing import Literal
 from uuid import UUID
 
 from pydantic import BaseModel, Field, SecretStr
-
-from app.modules.auth.tokens import SESSION_TOKEN_LENGTH
 
 
 class LoginRequest(BaseModel):
@@ -35,9 +32,4 @@ class CurrentSessionResponse(BaseModel):
 
 
 class LoginResponse(CurrentSessionResponse):
-    session_token: str = Field(
-        min_length=SESSION_TOKEN_LENGTH,
-        max_length=SESSION_TOKEN_LENGTH,
-        repr=False,
-    )
-    token_type: Literal["Bearer"]
+    pass

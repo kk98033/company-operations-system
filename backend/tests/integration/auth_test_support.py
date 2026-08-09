@@ -87,5 +87,6 @@ def make_auth_client(engine: Engine) -> TestClient:
             settings=make_test_settings(),
             database_resources=resources,
             readiness_checks=[],
-        )
+        ),
+        headers={"Origin": "http://testserver"},
     )

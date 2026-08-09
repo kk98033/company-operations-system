@@ -145,17 +145,6 @@
           "organization": {
             "$ref": "#/components/schemas/AuthenticatedOrganizationResponse"
           },
-          "session_token": {
-            "maxLength": 43,
-            "minLength": 43,
-            "title": "Session Token",
-            "type": "string"
-          },
-          "token_type": {
-            "const": "Bearer",
-            "title": "Token Type",
-            "type": "string"
-          },
           "user": {
             "$ref": "#/components/schemas/AuthenticatedUserResponse"
           }
@@ -163,9 +152,7 @@
         "required": [
           "expires_at",
           "user",
-          "organization",
-          "session_token",
-          "token_type"
+          "organization"
         ],
         "title": "LoginResponse",
         "type": "object"
@@ -229,9 +216,10 @@
       }
     },
     "securitySchemes": {
-      "SessionBearer": {
-        "scheme": "bearer",
-        "type": "http"
+      "SessionCookie": {
+        "in": "cookie",
+        "name": "company_system_session",
+        "type": "apiKey"
       }
     }
   },
@@ -356,6 +344,40 @@
     "/api/v1/auth/logout": {
       "post": {
         "operationId": "auth_logout",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-CSRF-Token",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Csrf-Token"
+            }
+          },
+          {
+            "in": "cookie",
+            "name": "company_system_csrf",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Company System Csrf"
+            }
+          }
+        ],
         "responses": {
           "204": {
             "description": "Successful Response"
@@ -443,7 +465,7 @@
         },
         "security": [
           {
-            "SessionBearer": []
+            "SessionCookie": []
           }
         ],
         "summary": "撤銷目前伺服器 Session",

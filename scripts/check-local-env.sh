@@ -29,6 +29,22 @@ if [[ -z "$password_line" || -z "$password_without_whitespace" || "$password" ==
   exit 1
 fi
 
+csrf_key_line="$(grep -E '^CSRF_HMAC_KEY=' "$env_file" | tail -n 1 || true)"
+csrf_key="${csrf_key_line#CSRF_HMAC_KEY=}"
+csrf_key="$(printf '%s' "$csrf_key" | sed -E 's/^[[:space:]]+//; s/[[:space:]]+$//')"
+if [[ "$csrf_key" == \"*\" && "$csrf_key" == *\" ]]; then
+  csrf_key="${csrf_key:1:${#csrf_key}-2}"
+elif [[ "$csrf_key" == \'*\' && "$csrf_key" == *\' ]]; then
+  csrf_key="${csrf_key:1:${#csrf_key}-2}"
+else
+  csrf_key="$(printf '%s' "$csrf_key" | sed -E 's/[[:space:]]+#.*$//; s/[[:space:]]+$//')"
+fi
+
+if [[ ! "$csrf_key" =~ ^[A-Za-z0-9_-]{43}$ ]]; then
+  echo "CSRF_HMAC_KEY must be replaced with a token_urlsafe(32) local key." >&2
+  exit 1
+fi
+
 if [[ "$env_file" == "$repo_root/.env" ]]; then
   python_bin="$repo_root/backend/.venv/bin/python"
   if [[ ! -x "$python_bin" ]]; then

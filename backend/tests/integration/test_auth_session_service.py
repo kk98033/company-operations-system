@@ -11,6 +11,8 @@ from pydantic import SecretStr
 from sqlalchemy import Engine, func, select
 from sqlalchemy.orm import Session as OrmSession
 
+from app.modules.auth.cookies import CSRF_COOKIE_NAME, SESSION_COOKIE_NAME
+from app.modules.auth.csrf import derive_csrf_token
 from app.modules.auth.errors import SessionCreationError
 from app.modules.auth.models import Session, User
 from app.modules.auth.services import (
@@ -20,6 +22,7 @@ from app.modules.auth.services import (
 from app.modules.auth.tokens import IssuedSessionToken, digest_session_token
 from app.modules.organizations.models import Organization, OrganizationMember
 from tests.integration.auth_test_support import create_auth_identity, make_auth_client
+from tests.settings_factory import make_test_settings
 
 pytestmark = [
     pytest.mark.database_integration,
@@ -42,6 +45,23 @@ def _login(identity_engine: Engine, identity, *, now: datetime | None = None):
         )
 
 
+def _logout(client, raw_token: SecretStr):
+    csrf_token = derive_csrf_token(
+        raw_token,
+        signing_key=make_test_settings().csrf_hmac_key_value(),
+    ).get_secret_value()
+    client.cookies.set(
+        SESSION_COOKIE_NAME,
+        raw_token.get_secret_value(),
+        path="/api/v1",
+    )
+    client.cookies.set(CSRF_COOKIE_NAME, csrf_token, path="/")
+    return client.post(
+        "/api/v1/auth/logout",
+        headers={"X-CSRF-Token": csrf_token},
+    )
+
+
 def test_logout_is_idempotent_and_invalidates_the_old_session(
     identity_engine: Engine,
 ) -> None:
@@ -51,15 +71,14 @@ def test_logout_is_idempotent_and_invalidates_the_old_session(
     )
     result = _login(identity_engine, identity)
     raw_token = result.raw_session_token
-    headers = {"Authorization": f"Bearer {raw_token.get_secret_value()}"}
     client = make_auth_client(identity_engine)
 
     with OrmSession(identity_engine) as session:
         active_context = get_active_session(session, raw_token=raw_token)
-    first = client.post("/api/v1/auth/logout", headers=headers)
+    first = _logout(client, raw_token)
     with identity_engine.connect() as connection:
         first_revoked_at = connection.scalar(select(Session.revoked_at))
-    second = client.post("/api/v1/auth/logout", headers=headers)
+    second = _logout(client, raw_token)
     with identity_engine.connect() as connection:
         second_revoked_at = connection.scalar(select(Session.revoked_at))
     with OrmSession(identity_engine) as session:
@@ -79,9 +98,9 @@ def test_unknown_well_formed_token_has_the_same_logout_result(
     identity_engine: Engine,
 ) -> None:
     unknown_token = token_urlsafe(32)
-    response = make_auth_client(identity_engine).post(
-        "/api/v1/auth/logout",
-        headers={"Authorization": f"Bearer {unknown_token}"},
+    response = _logout(
+        make_auth_client(identity_engine),
+        SecretStr(unknown_token),
     )
 
     assert response.status_code == 204
@@ -100,12 +119,7 @@ def test_expired_token_has_the_same_logout_result_and_resolver_rejects_unknown(
         identity,
         now=datetime.now(UTC) - timedelta(hours=9),
     )
-    response = make_auth_client(identity_engine).post(
-        "/api/v1/auth/logout",
-        headers={
-            "Authorization": f"Bearer {result.raw_session_token.get_secret_value()}"
-        },
-    )
+    response = _logout(make_auth_client(identity_engine), result.raw_session_token)
     unknown_token = SecretStr(token_urlsafe(32))
     with OrmSession(identity_engine) as session:
         assert get_active_session(session, raw_token=unknown_token) is None
