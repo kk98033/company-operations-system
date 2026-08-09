@@ -1,6 +1,6 @@
 # Backend
 
-FastAPI 後端專案骨架。現階段提供環境防呆、統一 API 契約、真實資料庫就緒檢查、SQLAlchemy／Alembic，以及不含正式資料的 Import staging／trace 基礎。尚未建立正式業務資料表、登入或權限。
+FastAPI 後端專案骨架。現階段提供環境防呆、統一 API 契約、真實資料庫就緒檢查、SQLAlchemy／Alembic、Import staging／trace，以及 Phase 1 identity schema。尚未建立登入 API、Cookie、角色權限或正式業務流程資料表。
 
 ## 環境
 
@@ -125,7 +125,15 @@ python -m pytest -ra
 
 ## Alembic migration
 
-Alembic 設定在 `alembic.ini`，版本檔在 `migrations/versions/`。`0001_empty_baseline` 是空白起點；`0002_import_staging` 建立 run／source file／staging，`0003_import_trace` 建立 errors／mappings。這些都只是 Import infrastructure，不建立或 seed `customers` 等正式業務資料。應用程式啟動不會自動 migration。
+Alembic 設定在 `alembic.ini`，版本檔在 `migrations/versions/`。`0001_empty_baseline` 是空白起點；`0002_import_staging` 建立 run／source file／staging，`0003_import_trace` 建立 errors／mappings；`0004_identity_foundation` 建立 organizations／users／organization_members／sessions。`0004` 不建立 seed、角色、權限或登入行為，也不建立 `customers` 等正式業務流程資料。應用程式啟動不會自動 migration。
+
+Identity schema 的邊界：
+
+- `users.login_name` 是全域使用者代號，trim 且不分大小寫後唯一；不把 email 擅自設為必填。
+- `organization_members` 只表達使用者屬於哪間公司；角色與 capability 留在 Slice 1.6。
+- `sessions` 只保存 64 字元的小寫 SHA-256 token digest 並綁定 membership；禁止保存 raw cookie token。
+- 父資料有 membership／session 時使用 `RESTRICT`，不以 cascade 抹除身分軌跡。
+- Slice 1.2 才加入可重跑的 test-only seed，且必須使用有效 Argon2id 雜湊。
 
 一般 `make backend-test` 會排除整合測試，不需要 Docker。要用完全隔離的 PostgreSQL 驗證真實連線與 `upgrade -> downgrade -> upgrade`：
 
@@ -234,9 +242,11 @@ app/
 │  ├─ errors.py # 統一例外與 API error response
 │  └─ readiness.py # 可注入的就緒檢查
 ├─ modules/
-│  └─ imports/  # Import run／source／staging／error／mapping models；無正式資料 apply
+│  ├─ auth/          # user／session schema；登入行為尚未實作
+│  ├─ imports/       # Import run／source／staging／error／mapping；無正式資料 apply
+│  └─ organizations/ # organization／membership schema；角色尚未實作
 └─ main.py       # FastAPI app factory 與預設 app
-migrations/        # Alembic 可回復 migration；目前為空白 baseline＋Import infrastructure
+migrations/        # Alembic 可回復 migration；目前到 0004 identity foundation
 tests/             # API、核心元件及明確標記的 DB integration 測試
 ```
 

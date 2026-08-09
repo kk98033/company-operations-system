@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import os
 from pathlib import Path
+from uuid import uuid4
 
 import pytest
 from alembic import command
@@ -13,6 +14,7 @@ from sqlalchemy import inspect
 
 from app.core.database import create_database_resources
 from app.core.database.model_registry import REGISTERED_MODELS
+from app.modules.imports.models import ImportRun
 from tests.integration.database_settings import load_database_test_settings
 
 pytestmark = [
@@ -55,8 +57,15 @@ IMPORT_TABLES = [
     "legacy_mappings",
 ]
 
+IDENTITY_TABLES = [
+    "organization_members",
+    "organizations",
+    "sessions",
+    "users",
+]
 
-def test_import_foundation_upgrade_downgrade_upgrade_round_trip(
+
+def test_schema_upgrade_downgrade_upgrade_round_trip(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     settings = load_database_test_settings()
@@ -68,8 +77,8 @@ def test_import_foundation_upgrade_downgrade_upgrade_round_trip(
     assert REGISTERED_MODELS
 
     command.upgrade(config, "head")
-    assert _current_revision() == "0003_import_trace"
-    assert _table_names() == ["alembic_version", *IMPORT_TABLES]
+    assert _current_revision() == "0004_identity_foundation"
+    assert _table_names() == ["alembic_version", *IMPORT_TABLES, *IDENTITY_TABLES]
 
     command.check(config)
 
@@ -78,5 +87,66 @@ def test_import_foundation_upgrade_downgrade_upgrade_round_trip(
     assert _table_names() == ["alembic_version"]
 
     command.upgrade(config, "head")
+    assert _current_revision() == "0004_identity_foundation"
+    assert _table_names() == ["alembic_version", *IMPORT_TABLES, *IDENTITY_TABLES]
+
+
+def test_identity_downgrade_preserves_existing_import_foundation(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    settings = load_database_test_settings()
+    monkeypatch.setenv("APP_ENV", "test")
+    monkeypatch.setenv("APP_HOST", settings.host)
+    monkeypatch.setenv("APP_PORT", str(settings.port))
+    monkeypatch.setenv("DATABASE_URL", settings.database_url_value())
+    config = _alembic_config()
+    run_id = uuid4()
+
+    command.upgrade(config, "head")
+    resources = create_database_resources(settings)
+    try:
+        with resources.engine.begin() as connection:
+            connection.execute(
+                ImportRun.__table__.insert(),
+                {
+                    "id": run_id,
+                    "source_system": "synthetic_identity_roundtrip",
+                    "source_manifest_sha256": "9" * 64,
+                    "importer_version": "test-only-v1",
+                },
+            )
+    finally:
+        resources.dispose()
+
+    command.downgrade(config, "0003_import_trace")
     assert _current_revision() == "0003_import_trace"
     assert _table_names() == ["alembic_version", *IMPORT_TABLES]
+
+    resources = create_database_resources(settings)
+    try:
+        with resources.engine.connect() as connection:
+            assert connection.scalar(
+                ImportRun.__table__.select()
+                .with_only_columns(ImportRun.id)
+                .where(ImportRun.id == run_id)
+            ) == run_id
+    finally:
+        resources.dispose()
+
+    command.upgrade(config, "head")
+    assert _current_revision() == "0004_identity_foundation"
+    command.check(config)
+
+    resources = create_database_resources(settings)
+    try:
+        with resources.engine.begin() as connection:
+            assert connection.scalar(
+                ImportRun.__table__.select()
+                .with_only_columns(ImportRun.id)
+                .where(ImportRun.id == run_id)
+            ) == run_id
+            connection.execute(
+                ImportRun.__table__.delete().where(ImportRun.id == run_id)
+            )
+    finally:
+        resources.dispose()

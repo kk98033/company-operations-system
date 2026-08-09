@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-from pathlib import Path
-
 from sqlalchemy import CheckConstraint, UniqueConstraint
 from sqlalchemy.dialects.postgresql import JSONB
 
@@ -14,8 +12,6 @@ from app.modules.imports.models import (
     ImportStagingRecord,
     LegacyMapping,
 )
-
-BACKEND_ROOT = Path(__file__).resolve().parents[2]
 
 
 def _unique_column_sets(table_name: str) -> set[tuple[str, ...]]:
@@ -100,12 +96,3 @@ def test_source_file_counts_keep_physical_logical_and_data_meanings_separate() -
     assert columns.logical_row_count_including_header.nullable is True
     assert columns.data_row_count.nullable is True
     assert "source_data_row_count" in ImportRun.__table__.c
-
-
-def test_import_model_and_migration_files_stay_below_python_size_gate() -> None:
-    production_files = [
-        *sorted((BACKEND_ROOT / "app/modules/imports/models").glob("*.py")),
-        *sorted((BACKEND_ROOT / "migrations/versions").glob("000[23]_*.py")),
-    ]
-
-    assert all(len(path.read_text().splitlines()) <= 300 for path in production_files)

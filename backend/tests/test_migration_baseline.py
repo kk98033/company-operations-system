@@ -19,7 +19,7 @@ def _load_baseline() -> ModuleType:
     return module
 
 
-def test_base_metadata_contains_only_import_infrastructure_tables() -> None:
+def test_base_metadata_contains_import_and_identity_foundation_tables() -> None:
     assert REGISTERED_MODELS
     assert set(Base.metadata.tables) == {
         "import_errors",
@@ -27,6 +27,10 @@ def test_base_metadata_contains_only_import_infrastructure_tables() -> None:
         "import_source_files",
         "import_staging_records",
         "legacy_mappings",
+        "organization_members",
+        "organizations",
+        "sessions",
+        "users",
     }
     assert "customers" not in Base.metadata.tables
 

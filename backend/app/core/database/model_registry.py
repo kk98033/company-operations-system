@@ -1,5 +1,6 @@
 """Explicit model registry loaded by Alembic before metadata comparison."""
 
+from app.modules.auth.models import Session, User
 from app.modules.imports.models import (
     ImportError,
     ImportRun,
@@ -7,6 +8,7 @@ from app.modules.imports.models import (
     ImportStagingRecord,
     LegacyMapping,
 )
+from app.modules.organizations.models import Organization, OrganizationMember
 
 REGISTERED_MODELS = (
     ImportError,
@@ -14,6 +16,10 @@ REGISTERED_MODELS = (
     ImportSourceFile,
     ImportStagingRecord,
     LegacyMapping,
+    Organization,
+    User,
+    OrganizationMember,
+    Session,
 )
 
 __all__ = ["REGISTERED_MODELS"]

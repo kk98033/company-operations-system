@@ -11,6 +11,8 @@ from alembic.config import Config
 from sqlalchemy import Engine
 
 from app.core.database import create_database_resources
+from app.modules.auth.models import Session, User
+from app.modules.organizations.models import Organization, OrganizationMember
 from tests.integration.database_settings import load_database_test_settings
 
 BACKEND_ROOT = Path(__file__).resolve().parents[2]
@@ -32,3 +34,17 @@ def migrated_engine(monkeypatch: pytest.MonkeyPatch) -> Generator[Engine, None, 
         yield resources.engine
     finally:
         resources.dispose()
+
+
+@pytest.fixture
+def identity_engine(migrated_engine: Engine) -> Generator[Engine, None, None]:
+    """Keep committed identity fixtures isolated from every neighboring test."""
+
+    try:
+        yield migrated_engine
+    finally:
+        with migrated_engine.begin() as connection:
+            connection.execute(Session.__table__.delete())
+            connection.execute(OrganizationMember.__table__.delete())
+            connection.execute(User.__table__.delete())
+            connection.execute(Organization.__table__.delete())
