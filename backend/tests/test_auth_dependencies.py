@@ -11,6 +11,7 @@ from fastapi import Depends
 from fastapi.testclient import TestClient
 
 from app.main import create_app
+from app.modules.auth import api as auth_api
 from app.modules.auth import dependencies as auth_dependencies
 from app.modules.auth.cookies import SESSION_COOKIE_NAME
 from app.modules.auth.services import AuthenticatedSession
@@ -22,6 +23,7 @@ from tests.settings_factory import make_test_settings
 def dependency_client(monkeypatch: pytest.MonkeyPatch) -> TestClient:
     context = AuthenticatedSession(
         expires_at=datetime.now(UTC) + timedelta(hours=8),
+        organization_member_id=uuid4(),
         user_id=uuid4(),
         login_name="synthetic.operator",
         display_name="Synthetic Operator",
@@ -29,6 +31,7 @@ def dependency_client(monkeypatch: pytest.MonkeyPatch) -> TestClient:
         organization_name="Synthetic Organization",
     )
     monkeypatch.setattr(auth_dependencies, "get_active_session", Mock(return_value=context))
+    monkeypatch.setattr(auth_api, "list_capabilities", Mock(return_value=()))
     app = create_app(
         settings=make_test_settings(),
         database_resources=make_database_resources(session_factory=Mock(return_value=Mock())),

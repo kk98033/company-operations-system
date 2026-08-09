@@ -17,6 +17,7 @@ export interface AuthenticatedUserResponse {
 }
 
 export interface CurrentSessionResponse {
+  capabilities: string[];
   expires_at: string;
   organization: AuthenticatedOrganizationResponse;
   user: AuthenticatedUserResponse;
@@ -59,6 +60,7 @@ export interface LoginRequest {
 }
 
 export interface LoginResponse {
+  capabilities: string[];
   expires_at: string;
   organization: AuthenticatedOrganizationResponse;
   user: AuthenticatedUserResponse;

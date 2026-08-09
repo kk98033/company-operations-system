@@ -196,6 +196,7 @@ def test_logout_database_failure_does_not_clear_browser_credentials(
 def test_production_login_cookies_are_always_secure(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
+    monkeypatch.setattr(auth_api, "list_capabilities", Mock(return_value=()))
     settings = AppSettings.model_validate(
         valid_settings_values(
             APP_ENV="production",
@@ -221,6 +222,7 @@ def test_production_login_cookies_are_always_secure(
             return_value=LoginResult(
                 raw_session_token=SecretStr(token_urlsafe(32)),
                 expires_at=datetime.now(UTC) + timedelta(hours=8),
+                organization_member_id=uuid4(),
                 user_id=uuid4(),
                 login_name="test.operator",
                 display_name="Synthetic Operator",

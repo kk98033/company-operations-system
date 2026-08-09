@@ -22,7 +22,8 @@ TRUSTED_ORIGIN = "http://testserver"
 
 
 @pytest.fixture
-def auth_client() -> TestClient:
+def auth_client(monkeypatch: pytest.MonkeyPatch) -> TestClient:
+    monkeypatch.setattr(auth_api, "list_capabilities", Mock(return_value=()))
     session_factory = Mock(return_value=Mock())
     return TestClient(
         create_app(
@@ -52,6 +53,7 @@ def _login_result(raw_token: str) -> LoginResult:
     return LoginResult(
         raw_session_token=SecretStr(raw_token),
         expires_at=now + timedelta(hours=8),
+        organization_member_id=uuid4(),
         user_id=uuid4(),
         login_name="test.operator",
         display_name="Synthetic Operator",

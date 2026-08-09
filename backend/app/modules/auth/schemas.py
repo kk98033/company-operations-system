@@ -29,6 +29,7 @@ class CurrentSessionResponse(BaseModel):
     expires_at: datetime
     user: AuthenticatedUserResponse
     organization: AuthenticatedOrganizationResponse
+    capabilities: list[str]
 
 
 class LoginResponse(CurrentSessionResponse):

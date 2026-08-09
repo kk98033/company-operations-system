@@ -27,8 +27,12 @@ def test_base_metadata_contains_import_and_identity_foundation_tables() -> None:
         "import_source_files",
         "import_staging_records",
         "legacy_mappings",
+        "organization_member_roles",
         "organization_members",
         "organizations",
+        "permissions",
+        "role_permissions",
+        "roles",
         "sessions",
         "users",
     }

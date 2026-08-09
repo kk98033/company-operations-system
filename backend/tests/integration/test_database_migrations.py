@@ -14,7 +14,9 @@ from sqlalchemy import inspect
 
 from app.core.database import create_database_resources
 from app.core.database.model_registry import REGISTERED_MODELS
+from app.modules.auth.models import User
 from app.modules.imports.models import ImportRun
+from app.modules.organizations.models import Organization, OrganizationMember
 from tests.integration.database_settings import load_database_test_settings
 
 pytestmark = [
@@ -64,6 +66,13 @@ IDENTITY_TABLES = [
     "users",
 ]
 
+AUTHORIZATION_TABLES = [
+    "organization_member_roles",
+    "permissions",
+    "role_permissions",
+    "roles",
+]
+
 
 def test_schema_upgrade_downgrade_upgrade_round_trip(
     monkeypatch: pytest.MonkeyPatch,
@@ -77,8 +86,11 @@ def test_schema_upgrade_downgrade_upgrade_round_trip(
     assert REGISTERED_MODELS
 
     command.upgrade(config, "head")
-    assert _current_revision() == "0004_identity_foundation"
-    assert _table_names() == ["alembic_version", *IMPORT_TABLES, *IDENTITY_TABLES]
+    assert _current_revision() == "0005_authorization_foundation"
+    assert _table_names() == [
+        "alembic_version",
+        *sorted([*IMPORT_TABLES, *AUTHORIZATION_TABLES, *IDENTITY_TABLES]),
+    ]
 
     command.check(config)
 
@@ -87,8 +99,11 @@ def test_schema_upgrade_downgrade_upgrade_round_trip(
     assert _table_names() == ["alembic_version"]
 
     command.upgrade(config, "head")
-    assert _current_revision() == "0004_identity_foundation"
-    assert _table_names() == ["alembic_version", *IMPORT_TABLES, *IDENTITY_TABLES]
+    assert _current_revision() == "0005_authorization_foundation"
+    assert _table_names() == [
+        "alembic_version",
+        *sorted([*IMPORT_TABLES, *AUTHORIZATION_TABLES, *IDENTITY_TABLES]),
+    ]
 
 
 def test_identity_downgrade_preserves_existing_import_foundation(
@@ -134,7 +149,7 @@ def test_identity_downgrade_preserves_existing_import_foundation(
         resources.dispose()
 
     command.upgrade(config, "head")
-    assert _current_revision() == "0004_identity_foundation"
+    assert _current_revision() == "0005_authorization_foundation"
     command.check(config)
 
     resources = create_database_resources(settings)
@@ -147,6 +162,80 @@ def test_identity_downgrade_preserves_existing_import_foundation(
             ) == run_id
             connection.execute(
                 ImportRun.__table__.delete().where(ImportRun.id == run_id)
+            )
+    finally:
+        resources.dispose()
+
+
+def test_authorization_downgrade_preserves_existing_identity_rows(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    settings = load_database_test_settings()
+    monkeypatch.setenv("APP_ENV", "test")
+    monkeypatch.setenv("APP_HOST", settings.host)
+    monkeypatch.setenv("APP_PORT", str(settings.port))
+    monkeypatch.setenv("DATABASE_URL", settings.database_url_value())
+    config = _alembic_config()
+    organization_id, user_id, member_id = uuid4(), uuid4(), uuid4()
+
+    command.upgrade(config, "head")
+    resources = create_database_resources(settings)
+    try:
+        with resources.engine.begin() as connection:
+            connection.execute(
+                Organization.__table__.insert(),
+                {"id": organization_id, "name": "Synthetic Migration Organization"},
+            )
+            connection.execute(
+                User.__table__.insert(),
+                {
+                    "id": user_id,
+                    "login_name": f"synthetic.migration.{user_id.hex}",
+                    "display_name": "Synthetic Migration User",
+                    "password_hash": "$argon2id$synthetic-migration-only",
+                },
+            )
+            connection.execute(
+                OrganizationMember.__table__.insert(),
+                {
+                    "id": member_id,
+                    "organization_id": organization_id,
+                    "user_id": user_id,
+                },
+            )
+    finally:
+        resources.dispose()
+
+    command.downgrade(config, "0004_identity_foundation")
+    assert _current_revision() == "0004_identity_foundation"
+    assert _table_names() == ["alembic_version", *IMPORT_TABLES, *IDENTITY_TABLES]
+
+    resources = create_database_resources(settings)
+    try:
+        with resources.engine.connect() as connection:
+            assert connection.scalar(
+                OrganizationMember.__table__.select()
+                .with_only_columns(OrganizationMember.id)
+                .where(OrganizationMember.id == member_id)
+            ) == member_id
+    finally:
+        resources.dispose()
+
+    command.upgrade(config, "head")
+    command.check(config)
+    resources = create_database_resources(settings)
+    try:
+        with resources.engine.begin() as connection:
+            connection.execute(
+                OrganizationMember.__table__.delete().where(
+                    OrganizationMember.id == member_id
+                )
+            )
+            connection.execute(User.__table__.delete().where(User.id == user_id))
+            connection.execute(
+                Organization.__table__.delete().where(
+                    Organization.id == organization_id
+                )
             )
     finally:
         resources.dispose()

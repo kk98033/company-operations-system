@@ -75,7 +75,12 @@ def test_auth_openapi_declares_secret_input_and_cookie_transport() -> None:
         "password",
     }
     login_response = schema["components"]["schemas"]["LoginResponse"]
-    assert set(login_response["required"]) == {"expires_at", "user", "organization"}
+    assert set(login_response["required"]) == {
+        "capabilities",
+        "expires_at",
+        "user",
+        "organization",
+    }
     assert "session_token" not in login_response["properties"]
     assert "token_type" not in login_response["properties"]
     csrf_parameter = next(
@@ -88,6 +93,7 @@ def test_auth_openapi_declares_secret_input_and_cookie_transport() -> None:
     assert logout["responses"]["204"] == {"description": "Successful Response"}
     current_response = schema["components"]["schemas"]["CurrentSessionResponse"]
     assert set(current_response["required"]) == {
+        "capabilities",
         "expires_at",
         "user",
         "organization",

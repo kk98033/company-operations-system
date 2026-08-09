@@ -32,6 +32,7 @@ from app.modules.auth.services import (
     create_login_session,
     revoke_session,
 )
+from app.modules.authorization import list_capabilities
 
 
 def _authentication_error() -> ApplicationError:
@@ -42,7 +43,10 @@ def _authentication_error() -> ApplicationError:
     )
 
 
-def _session_response(context: AuthenticatedSession) -> CurrentSessionResponse:
+def _session_response(
+    context: AuthenticatedSession,
+    database_session: OrmSession,
+) -> CurrentSessionResponse:
     return CurrentSessionResponse(
         expires_at=context.expires_at,
         user=AuthenticatedUserResponse(
@@ -53,6 +57,13 @@ def _session_response(context: AuthenticatedSession) -> CurrentSessionResponse:
         organization=AuthenticatedOrganizationResponse(
             id=context.organization_id,
             name=context.organization_name,
+        ),
+        capabilities=list(
+            list_capabilities(
+                database_session,
+                organization_member_id=context.organization_member_id,
+                organization_id=context.organization_id,
+            )
         ),
     )
 
@@ -96,6 +107,11 @@ def build_auth_router() -> APIRouter:
             raw_session_token=result.raw_session_token,
             settings=request.app.state.settings,
         )
+        capabilities = list_capabilities(
+            database_session,
+            organization_member_id=result.organization_member_id,
+            organization_id=result.organization_id,
+        )
         return LoginResponse(
             expires_at=result.expires_at,
             user=AuthenticatedUserResponse(
@@ -107,6 +123,7 @@ def build_auth_router() -> APIRouter:
                 id=result.organization_id,
                 name=result.organization_name,
             ),
+            capabilities=list(capabilities),
         )
 
     @router.get(
@@ -118,10 +135,11 @@ def build_auth_router() -> APIRouter:
     def current_session(
         response: Response,
         context: Annotated[AuthenticatedSession, Depends(require_current_session)],
+        database_session: Annotated[OrmSession, Depends(get_database_session)],
     ) -> CurrentSessionResponse:
         response.headers["Cache-Control"] = "no-store"
         response.headers["Pragma"] = "no-cache"
-        return _session_response(context)
+        return _session_response(context, database_session)
 
     @router.post(
         "/logout",

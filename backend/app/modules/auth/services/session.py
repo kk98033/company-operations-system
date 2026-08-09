@@ -19,6 +19,7 @@ from app.modules.organizations.models import Organization, OrganizationMember
 @dataclass(frozen=True, slots=True)
 class AuthenticatedSession:
     expires_at: datetime
+    organization_member_id: UUID
     user_id: UUID
     login_name: str
     display_name: str
@@ -60,6 +61,7 @@ def get_active_session(
         return None
     return AuthenticatedSession(
         expires_at=login_session.expires_at,
+        organization_member_id=membership.id,
         user_id=user.id,
         login_name=user.login_name,
         display_name=user.display_name,

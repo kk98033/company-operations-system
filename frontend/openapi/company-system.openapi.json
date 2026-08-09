@@ -46,6 +46,13 @@
       },
       "CurrentSessionResponse": {
         "properties": {
+          "capabilities": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Capabilities",
+            "type": "array"
+          },
           "expires_at": {
             "format": "date-time",
             "title": "Expires At",
@@ -61,7 +68,8 @@
         "required": [
           "expires_at",
           "user",
-          "organization"
+          "organization",
+          "capabilities"
         ],
         "title": "CurrentSessionResponse",
         "type": "object"
@@ -159,6 +167,13 @@
       },
       "LoginResponse": {
         "properties": {
+          "capabilities": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Capabilities",
+            "type": "array"
+          },
           "expires_at": {
             "format": "date-time",
             "title": "Expires At",
@@ -174,7 +189,8 @@
         "required": [
           "expires_at",
           "user",
-          "organization"
+          "organization",
+          "capabilities"
         ],
         "title": "LoginResponse",
         "type": "object"

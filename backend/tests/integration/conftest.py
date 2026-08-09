@@ -12,6 +12,12 @@ from sqlalchemy import Engine
 
 from app.core.database import create_database_resources
 from app.modules.auth.models import Session, User
+from app.modules.authorization.models import (
+    OrganizationMemberRole,
+    Permission,
+    Role,
+    RolePermission,
+)
 from app.modules.organizations.models import Organization, OrganizationMember
 from tests.integration.database_settings import load_database_test_settings
 
@@ -45,6 +51,10 @@ def identity_engine(migrated_engine: Engine) -> Generator[Engine, None, None]:
     finally:
         with migrated_engine.begin() as connection:
             connection.execute(Session.__table__.delete())
+            connection.execute(OrganizationMemberRole.__table__.delete())
+            connection.execute(RolePermission.__table__.delete())
+            connection.execute(Role.__table__.delete())
+            connection.execute(Permission.__table__.delete())
             connection.execute(OrganizationMember.__table__.delete())
             connection.execute(User.__table__.delete())
             connection.execute(Organization.__table__.delete())
