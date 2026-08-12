@@ -23,6 +23,7 @@ def test_base_metadata_contains_import_and_identity_foundation_tables() -> None:
     assert REGISTERED_MODELS
     assert set(Base.metadata.tables) == {
         "audit_logs",
+        "customers",
         "import_errors",
         "import_runs",
         "import_source_files",
@@ -40,7 +41,6 @@ def test_base_metadata_contains_import_and_identity_foundation_tables() -> None:
         "sessions",
         "users",
     }
-    assert "customers" not in Base.metadata.tables
 
 
 def test_empty_baseline_upgrade_and_downgrade_are_safe_no_ops() -> None:

@@ -57,35 +57,61 @@ export interface CurrentSessionResponse {
   user: AuthenticatedUserResponse;
 }
 
-export type DocumentNumberPolicyResponseResetPeriod = typeof DocumentNumberPolicyResponseResetPeriod[keyof typeof DocumentNumberPolicyResponseResetPeriod];
+export interface CustomerCreate {
+  address?: string | null;
+  city?: string | null;
+  /**
+     * @minLength 1
+     * @maxLength 32
+     */
+  code: string;
+  contact_name?: string | null;
+  email?: string | null;
+  fax?: string | null;
+  mobile?: string | null;
+  /**
+     * @minLength 1
+     * @maxLength 200
+     */
+  name: string;
+  phone?: string | null;
+  phone_secondary?: string | null;
+  postal_code?: string | null;
+  short_name?: string | null;
+  tax_identifier?: string | null;
+}
+
+export type CustomerStatus = typeof CustomerStatus[keyof typeof CustomerStatus];
 
 
-export const DocumentNumberPolicyResponseResetPeriod = {
-  daily: 'daily',
-  monthly: 'monthly',
+export const CustomerStatus = {
+  active: 'active',
+  inactive: 'inactive',
 } as const;
 
-export interface DocumentNumberPolicyResponse {
-  document_type: string;
-  format: string;
-  label: string;
-  reset_period: DocumentNumberPolicyResponseResetPeriod;
+export interface CustomerFilterSummary {
+  keyword: string | null;
+  status: CustomerStatus | null;
 }
 
-/**
- * Stable, machine-readable API error fields.
- */
-export interface ErrorBody {
+export interface CustomerResponse {
+  address: string | null;
+  city: string | null;
   code: string;
-  details?: unknown | null;
-  message: string;
-}
-
-/**
- * Public JSON envelope for every handled API error.
- */
-export interface ErrorResponse {
-  error: ErrorBody;
+  contact_name: string | null;
+  created_at: string;
+  email: string | null;
+  fax: string | null;
+  id: string;
+  mobile: string | null;
+  name: string;
+  phone: string | null;
+  phone_secondary: string | null;
+  postal_code: string | null;
+  short_name: string | null;
+  status: CustomerStatus;
+  tax_identifier: string | null;
+  updated_at: string;
 }
 
 /**
@@ -127,6 +153,87 @@ export const SortDirection = {
 export interface SortMeta {
   direction: SortDirection;
   field: string;
+}
+
+export interface ListResponseMetaCustomerFilterSummary {
+  filters: CustomerFilterSummary;
+  pagination: PaginationMeta;
+  sort: SortMeta;
+}
+
+export interface CustomerListResponse {
+  items: CustomerResponse[];
+  meta: ListResponseMetaCustomerFilterSummary;
+}
+
+export type CustomerSortField = typeof CustomerSortField[keyof typeof CustomerSortField];
+
+
+export const CustomerSortField = {
+  code: 'code',
+  name: 'name',
+  updated_at: 'updated_at',
+} as const;
+
+export interface CustomerStatusUpdate {
+  expected_updated_at: string;
+  status: CustomerStatus;
+}
+
+export interface CustomerUpdate {
+  address?: string | null;
+  city?: string | null;
+  /**
+     * @minLength 1
+     * @maxLength 32
+     */
+  code: string;
+  contact_name?: string | null;
+  email?: string | null;
+  expected_updated_at: string;
+  fax?: string | null;
+  mobile?: string | null;
+  /**
+     * @minLength 1
+     * @maxLength 200
+     */
+  name: string;
+  phone?: string | null;
+  phone_secondary?: string | null;
+  postal_code?: string | null;
+  short_name?: string | null;
+  tax_identifier?: string | null;
+}
+
+export type DocumentNumberPolicyResponseResetPeriod = typeof DocumentNumberPolicyResponseResetPeriod[keyof typeof DocumentNumberPolicyResponseResetPeriod];
+
+
+export const DocumentNumberPolicyResponseResetPeriod = {
+  daily: 'daily',
+  monthly: 'monthly',
+} as const;
+
+export interface DocumentNumberPolicyResponse {
+  document_type: string;
+  format: string;
+  label: string;
+  reset_period: DocumentNumberPolicyResponseResetPeriod;
+}
+
+/**
+ * Stable, machine-readable API error fields.
+ */
+export interface ErrorBody {
+  code: string;
+  details?: unknown | null;
+  message: string;
+}
+
+/**
+ * Public JSON envelope for every handled API error.
+ */
+export interface ErrorResponse {
+  error: ErrorBody;
 }
 
 export interface ListResponseMetaAuditFilterSummary {
@@ -309,6 +416,23 @@ keyword?: string | null;
 action?: string | null;
 entity_type?: string | null;
 request_id?: string | null;
+};
+
+export type CustomerListParams = {
+status?: CustomerStatus | null;
+sort_by?: CustomerSortField;
+sort_direction?: SortDirection;
+/**
+ * @minimum 1
+ * @maximum 1000000
+ */
+page?: number;
+/**
+ * @minimum 1
+ * @maximum 100
+ */
+page_size?: number;
+keyword?: string | null;
 };
 
 export type auditListResponse200 = {
@@ -674,6 +798,465 @@ export const authCurrentSession = async ( options?: RequestInit): Promise<authCu
 
   const data: authCurrentSessionResponse['data'] = body ? JSON.parse(body) : {}
   return { data, status: res.status, headers: res.headers } as authCurrentSessionResponse
+}
+
+
+
+export type customerListResponse200 = {
+  data: CustomerListResponse
+  status: 200
+}
+
+export type customerListResponse400 = {
+  data: ErrorResponse
+  status: 400
+}
+
+export type customerListResponse401 = {
+  data: ErrorResponse
+  status: 401
+}
+
+export type customerListResponse403 = {
+  data: ErrorResponse
+  status: 403
+}
+
+export type customerListResponse404 = {
+  data: ErrorResponse
+  status: 404
+}
+
+export type customerListResponse405 = {
+  data: ErrorResponse
+  status: 405
+}
+
+export type customerListResponse409 = {
+  data: ErrorResponse
+  status: 409
+}
+
+export type customerListResponse422 = {
+  data: ErrorResponse
+  status: 422
+}
+
+export type customerListResponse429 = {
+  data: ErrorResponse
+  status: 429
+}
+
+export type customerListResponse500 = {
+  data: ErrorResponse
+  status: 500
+}
+
+export type customerListResponseSuccess = (customerListResponse200) & {
+  headers: Headers;
+};
+export type customerListResponseError = (customerListResponse400 | customerListResponse401 | customerListResponse403 | customerListResponse404 | customerListResponse405 | customerListResponse409 | customerListResponse422 | customerListResponse429 | customerListResponse500) & {
+  headers: Headers;
+};
+
+export type customerListResponse = (customerListResponseSuccess | customerListResponseError)
+
+export const getCustomerListUrl = (params?: CustomerListParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `${import.meta.env.VITE_API_ORIGIN || ''}/api/v1/customers?${stringifiedParams}` : `${import.meta.env.VITE_API_ORIGIN || ''}/api/v1/customers`
+}
+
+/**
+ * @summary Customer List
+ */
+export const customerList = async (params?: CustomerListParams, options?: RequestInit): Promise<customerListResponse> => {
+
+  const res = await fetch(getCustomerListUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+)
+
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+
+  const data: customerListResponse['data'] = body ? JSON.parse(body) : {}
+  return { data, status: res.status, headers: res.headers } as customerListResponse
+}
+
+
+
+export type customerCreateResponse201 = {
+  data: CustomerResponse
+  status: 201
+}
+
+export type customerCreateResponse400 = {
+  data: ErrorResponse
+  status: 400
+}
+
+export type customerCreateResponse401 = {
+  data: ErrorResponse
+  status: 401
+}
+
+export type customerCreateResponse403 = {
+  data: ErrorResponse
+  status: 403
+}
+
+export type customerCreateResponse404 = {
+  data: ErrorResponse
+  status: 404
+}
+
+export type customerCreateResponse405 = {
+  data: ErrorResponse
+  status: 405
+}
+
+export type customerCreateResponse409 = {
+  data: ErrorResponse
+  status: 409
+}
+
+export type customerCreateResponse422 = {
+  data: ErrorResponse
+  status: 422
+}
+
+export type customerCreateResponse429 = {
+  data: ErrorResponse
+  status: 429
+}
+
+export type customerCreateResponse500 = {
+  data: ErrorResponse
+  status: 500
+}
+
+export type customerCreateResponseSuccess = (customerCreateResponse201) & {
+  headers: Headers;
+};
+export type customerCreateResponseError = (customerCreateResponse400 | customerCreateResponse401 | customerCreateResponse403 | customerCreateResponse404 | customerCreateResponse405 | customerCreateResponse409 | customerCreateResponse422 | customerCreateResponse429 | customerCreateResponse500) & {
+  headers: Headers;
+};
+
+export type customerCreateResponse = (customerCreateResponseSuccess | customerCreateResponseError)
+
+export const getCustomerCreateUrl = () => {
+
+
+
+
+  return `${import.meta.env.VITE_API_ORIGIN || ''}/api/v1/customers`
+}
+
+/**
+ * @summary Customer Create
+ */
+export const customerCreate = async (customerCreateBody: CustomerCreate, options?: RequestInit): Promise<customerCreateResponse> => {
+
+  const res = await fetch(getCustomerCreateUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(customerCreateBody)
+  }
+)
+
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+
+  const data: customerCreateResponse['data'] = body ? JSON.parse(body) : {}
+  return { data, status: res.status, headers: res.headers } as customerCreateResponse
+}
+
+
+
+export type customerGetResponse200 = {
+  data: CustomerResponse
+  status: 200
+}
+
+export type customerGetResponse400 = {
+  data: ErrorResponse
+  status: 400
+}
+
+export type customerGetResponse401 = {
+  data: ErrorResponse
+  status: 401
+}
+
+export type customerGetResponse403 = {
+  data: ErrorResponse
+  status: 403
+}
+
+export type customerGetResponse404 = {
+  data: ErrorResponse
+  status: 404
+}
+
+export type customerGetResponse405 = {
+  data: ErrorResponse
+  status: 405
+}
+
+export type customerGetResponse409 = {
+  data: ErrorResponse
+  status: 409
+}
+
+export type customerGetResponse422 = {
+  data: ErrorResponse
+  status: 422
+}
+
+export type customerGetResponse429 = {
+  data: ErrorResponse
+  status: 429
+}
+
+export type customerGetResponse500 = {
+  data: ErrorResponse
+  status: 500
+}
+
+export type customerGetResponseSuccess = (customerGetResponse200) & {
+  headers: Headers;
+};
+export type customerGetResponseError = (customerGetResponse400 | customerGetResponse401 | customerGetResponse403 | customerGetResponse404 | customerGetResponse405 | customerGetResponse409 | customerGetResponse422 | customerGetResponse429 | customerGetResponse500) & {
+  headers: Headers;
+};
+
+export type customerGetResponse = (customerGetResponseSuccess | customerGetResponseError)
+
+export const getCustomerGetUrl = (customerId: string,) => {
+
+
+
+
+  return `${import.meta.env.VITE_API_ORIGIN || ''}/api/v1/customers/${customerId}`
+}
+
+/**
+ * @summary Customer Get
+ */
+export const customerGet = async (customerId: string, options?: RequestInit): Promise<customerGetResponse> => {
+
+  const res = await fetch(getCustomerGetUrl(customerId),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+)
+
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+
+  const data: customerGetResponse['data'] = body ? JSON.parse(body) : {}
+  return { data, status: res.status, headers: res.headers } as customerGetResponse
+}
+
+
+
+export type customerUpdateResponse200 = {
+  data: CustomerResponse
+  status: 200
+}
+
+export type customerUpdateResponse400 = {
+  data: ErrorResponse
+  status: 400
+}
+
+export type customerUpdateResponse401 = {
+  data: ErrorResponse
+  status: 401
+}
+
+export type customerUpdateResponse403 = {
+  data: ErrorResponse
+  status: 403
+}
+
+export type customerUpdateResponse404 = {
+  data: ErrorResponse
+  status: 404
+}
+
+export type customerUpdateResponse405 = {
+  data: ErrorResponse
+  status: 405
+}
+
+export type customerUpdateResponse409 = {
+  data: ErrorResponse
+  status: 409
+}
+
+export type customerUpdateResponse422 = {
+  data: ErrorResponse
+  status: 422
+}
+
+export type customerUpdateResponse429 = {
+  data: ErrorResponse
+  status: 429
+}
+
+export type customerUpdateResponse500 = {
+  data: ErrorResponse
+  status: 500
+}
+
+export type customerUpdateResponseSuccess = (customerUpdateResponse200) & {
+  headers: Headers;
+};
+export type customerUpdateResponseError = (customerUpdateResponse400 | customerUpdateResponse401 | customerUpdateResponse403 | customerUpdateResponse404 | customerUpdateResponse405 | customerUpdateResponse409 | customerUpdateResponse422 | customerUpdateResponse429 | customerUpdateResponse500) & {
+  headers: Headers;
+};
+
+export type customerUpdateResponse = (customerUpdateResponseSuccess | customerUpdateResponseError)
+
+export const getCustomerUpdateUrl = (customerId: string,) => {
+
+
+
+
+  return `${import.meta.env.VITE_API_ORIGIN || ''}/api/v1/customers/${customerId}`
+}
+
+/**
+ * @summary Customer Update
+ */
+export const customerUpdate = async (customerId: string,
+    customerUpdateBody: CustomerUpdate, options?: RequestInit): Promise<customerUpdateResponse> => {
+
+  const res = await fetch(getCustomerUpdateUrl(customerId),
+  {
+    ...options,
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(customerUpdateBody)
+  }
+)
+
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+
+  const data: customerUpdateResponse['data'] = body ? JSON.parse(body) : {}
+  return { data, status: res.status, headers: res.headers } as customerUpdateResponse
+}
+
+
+
+export type customerStatusUpdateResponse200 = {
+  data: CustomerResponse
+  status: 200
+}
+
+export type customerStatusUpdateResponse400 = {
+  data: ErrorResponse
+  status: 400
+}
+
+export type customerStatusUpdateResponse401 = {
+  data: ErrorResponse
+  status: 401
+}
+
+export type customerStatusUpdateResponse403 = {
+  data: ErrorResponse
+  status: 403
+}
+
+export type customerStatusUpdateResponse404 = {
+  data: ErrorResponse
+  status: 404
+}
+
+export type customerStatusUpdateResponse405 = {
+  data: ErrorResponse
+  status: 405
+}
+
+export type customerStatusUpdateResponse409 = {
+  data: ErrorResponse
+  status: 409
+}
+
+export type customerStatusUpdateResponse422 = {
+  data: ErrorResponse
+  status: 422
+}
+
+export type customerStatusUpdateResponse429 = {
+  data: ErrorResponse
+  status: 429
+}
+
+export type customerStatusUpdateResponse500 = {
+  data: ErrorResponse
+  status: 500
+}
+
+export type customerStatusUpdateResponseSuccess = (customerStatusUpdateResponse200) & {
+  headers: Headers;
+};
+export type customerStatusUpdateResponseError = (customerStatusUpdateResponse400 | customerStatusUpdateResponse401 | customerStatusUpdateResponse403 | customerStatusUpdateResponse404 | customerStatusUpdateResponse405 | customerStatusUpdateResponse409 | customerStatusUpdateResponse422 | customerStatusUpdateResponse429 | customerStatusUpdateResponse500) & {
+  headers: Headers;
+};
+
+export type customerStatusUpdateResponse = (customerStatusUpdateResponseSuccess | customerStatusUpdateResponseError)
+
+export const getCustomerStatusUpdateUrl = (customerId: string,) => {
+
+
+
+
+  return `${import.meta.env.VITE_API_ORIGIN || ''}/api/v1/customers/${customerId}/status`
+}
+
+/**
+ * @summary Customer Status Update
+ */
+export const customerStatusUpdate = async (customerId: string,
+    customerStatusUpdateBody: CustomerStatusUpdate, options?: RequestInit): Promise<customerStatusUpdateResponse> => {
+
+  const res = await fetch(getCustomerStatusUpdateUrl(customerId),
+  {
+    ...options,
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(customerStatusUpdateBody)
+  }
+)
+
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+
+  const data: customerStatusUpdateResponse['data'] = body ? JSON.parse(body) : {}
+  return { data, status: res.status, headers: res.headers } as customerStatusUpdateResponse
 }
 
 

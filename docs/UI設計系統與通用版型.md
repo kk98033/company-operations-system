@@ -267,6 +267,9 @@ Slice 0.8 原型頁只允許共用 `PageHeader`、`Section`、`StatusLabel`、`D
 |---|---|
 | `/work-orders` | 現行／歷史工單的單一查詢清單；提供關鍵字、日期及客戶條件，結果優先顯示工單號、客戶、品名、數量、單價、版費、刀模費及交期 |
 | `/work-orders/new` | 新增工單；客戶、訂單、價格、備紙、印刷、製程、備註及圖片都在同一個 form |
+| `/customers` | 正式客戶清單；代號／名稱／簡稱關鍵字、狀態篩選、固定代號欄與新增入口 |
+| `/customers/new` | 正式新增客戶；基本資料、主要聯絡、地址三區塊共用表單 |
+| `/customers/:id` | 正式編輯／唯讀客戶；依 `customers.manage` 決定可否存檔與停用，歷史資料不硬刪除 |
 | `/work-orders/:workOrderId/edit` | 沿用同一張整合表單編輯，不另造第二套欄位與排列 |
 | `/work-orders/:workOrderId` | 唯讀詳情、來源鏈、附件與稽核 |
 | `/work-orders/:workOrderId/print` | 由同一筆快照產生 A4 列印，不重複建檔 |

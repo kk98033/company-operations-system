@@ -34,9 +34,9 @@
 
 ## 3. 強制執行規則
 
-1. 嚴格依照 `03_最終實作計畫.md` 的 Phase 與 Slice 順序實作。
-2. 一個 Agent 一次只進行一個小切片；只有互不依賴、檔案範圍不重疊的工程工作可平行進行，整合時仍須逐項驗證，不得把多個未驗證功能混成一批。
-3. 每個切片都必須通過該切片指定的自動測試與人工驗證，才能標記完成。
+1. 嚴格依照 `03_最終實作計畫.md` 的 Phase 與 Slice 順序實作；可把相鄰且同一功能的 Slice 合成一個垂直交付批次，但不可跳過中間業務依賴。
+2. 預設以可實際操作的垂直功能批次交付（schema＋API＋UI＋測試＋文件），降低反覆切換與溝通成本；只有高風險規則、資料移轉或無法安全一起回滾的工作才拆成更小批次。
+3. 批次內每個 Slice 仍須通過原定自動測試與必要人工驗證，全部通過後才能一起標記完成與建立 checkpoint。
 4. 未列在計畫內的新功能，必須先加入需求追蹤矩陣與計畫，必要時新增決策紀錄，才可實作。
 5. 業務規則必須由後端與資料庫保護；前端檢查只能改善操作體驗，不能作為唯一保護。
 6. 正式資料不得放進開發 seed、測試檔、Git、螢幕截圖或公開問題紀錄。
@@ -55,13 +55,13 @@
 | 項目 | 目前狀態 |
 |---|---|
 | 最後更新日期 | 2026-08-13 |
-| 計畫版本 | v1.15（Phase 2 Slice 2.2 完成，下一步 Slice 2.3） |
-| 架構版本 | v1.16（公司帳務草稿、單號與列印政策版本同步） |
-| 目前階段 | Phase 2 公司與主檔基礎進行中（2／10） |
-| 目前切片 | Slice 2.2：帳務、單號與列印預設設定骨架已完成 |
-| 實作完成度 | Phase 0：完成；Import I-0：3／3；Phase 1：9／9；Phase 2：2／10；正式業務流程功能 0% |
+| 計畫版本 | v1.16（Phase 2 Slice 2.3～2.5 客戶管理垂直功能完成） |
+| 架構版本 | v1.17（客戶主檔、公司隔離 API 與正式 React 頁面同步） |
+| 目前階段 | Phase 2 公司與主檔基礎進行中（5／10） |
+| 目前切片 | Slice 2.3～2.5：客戶資料庫、API、查詢／新增／編輯／停用頁已完成 |
+| 實作完成度 | Phase 0：完成；Import I-0：3／3；Phase 1：9／9；Phase 2：5／10；客戶管理首個正式業務垂直功能已可用 |
 | 規劃文件完成度 | 100% |
-| 最新中型進度備份 | Git tag `checkpoint-phase2-organization-settings-v1`；經驗證 bundle 位於專案外層 `git-backups/` |
+| 最新中型進度備份 | Git tag `checkpoint-phase2-customer-master-v1`；經驗證 bundle 位於專案外層 `git-backups/` |
 | 正式遠端 Git 備份 | 尚未設定；R-11 維持 Open，Phase 2 開始前優先建立私人 repository |
 
 ### 已完成
@@ -115,10 +115,11 @@
 - 完成 Phase 1 Slice 1.9：新增可逆 `0007_login_security`、公司範圍 HMAC 登入 bucket、15 分鐘內第五次失敗起限制 15 分鐘，以及 append-only 安全事件。已知／未知帳號使用相同門檻；成功登入會清除失敗狀態。資料庫不保存 raw 帳號、密碼或 IP，A／B 公司不共用計數。184 個非 DB、77 個 PostgreSQL integration 與 69 個 React 測試通過。
 - 完成 Phase 2 Slice 2.1：以可逆 `0008_organization_profile` 擴充公司名稱、統編、負責人、電話、傳真、Email、地址與完整 Logo metadata；Logo object key 不對前端公開，也不能在表單手填。`GET／PUT /api/v1/organizations/current/profile` 只使用 Session 公司、`settings.manage`、signed CSRF、樂觀衝突與同交易 audit。React `/settings/company` 沿用 ADR-010 表單版型，具即時文件頁首預覽、無權限／loading／錯誤狀態及 RWD；185 個非 DB、80 個 PostgreSQL integration 與 72 個 React 測試通過。
 - 完成 Phase 2 Slice 2.2：新增可逆 `0009_organization_settings`，每家公司只有一筆設定；對帳單計稅預設關閉，啟用後稅率、取整範圍與小數位才必須完整。ADR-018 的七類單號格式及公司 PDF 已確認的報價 A4 橫向、工單 A4 直向九製程以唯讀政策版本呈現，不允許 UI 改寫。`GET／PUT /api/v1/organizations/current/settings` 受公司 scope、`settings.manage`、signed CSRF、更新衝突與同交易 audit 保護；React `/settings/defaults` 已通過 RWD、axe 與實際桌面存檔驗證。正式稅額計算、單號配發、文件與列印仍留在對應 Phase；186 個非 DB、84 個 PostgreSQL integration 與 76 個 React 測試通過。
+- 完成 Phase 2 Slice 2.3～2.5 客戶管理垂直功能：可逆 `0010_customers` 建立公司範圍客戶主檔，保存代號、名稱、簡稱、統編、主要聯絡與地址；同公司代號 trim＋不分大小寫唯一，停用不刪除。`GET／POST／PUT /api/v1/customers` 與狀態 API 使用 Cookie Session、`customers.read／manage`、公司 scope、signed CSRF、樂觀衝突及同交易 audit。React `/customers`、`/customers/new`、`/customers/:id` 完成查詢、新增、編輯、停用、唯讀權限、loading／empty／error、RWD 與 axe；186 個非 DB、86 個 PostgreSQL integration 與 78 個 React 測試通過。舊稅務／取整、付款條件及 221 筆舊客戶 Import 仍留在 Slice 2.6／I-1.1。
 
 ### 進行中
 
-- Phase 0 工程與公司 Gate、Phase 1 Slice 1.1～1.9、Phase 2 Slice 2.1～2.2 已完成；公司資料與設定已成為後續報價單、工單、對帳及列印政策的唯一公司範圍來源。P1-02 正式角色 mapping 與正式業務流程仍未完成。
+- Phase 0 工程與公司 Gate、Phase 1 Slice 1.1～1.9、Phase 2 Slice 2.1～2.5 已完成；公司資料、設定與客戶主檔已成為後續報價單、工單、對帳及列印政策的公司範圍來源。P1-02 正式角色 mapping 與其餘業務流程仍未完成。
 - 工單查詢與單頁建檔的介面邊界已依原稿修正；正式儲存、編輯、列印、API 與資料表仍屬 Phase 4，不把原型誤報為業務功能。
 - 介面正式方向已定案；`/style-preview` 只保留為歷史比較與 ADR-010 決策證據，不是正式業務頁。
 - 公司 P0 已確認 10／10。正式 migration、API 與舊客戶資料 apply 仍只會在對應 Phase／Import Slice 通過測試後逐批建立，不因 Gate 通過而提前寫入。
@@ -126,20 +127,20 @@
 
 ### 接下來要做
 
-1. 執行 Phase 2 Slice 2.3：建立 `customers` migration；只處理代號、名稱、簡稱、統編、聯絡與地址的資料約束，不提前建立客戶 API／UI、報價或工單 schema。
-2. Phase 3／4 開工時依 `docs/Gmail附件需求逐項對照.md` 逐 Slice 建立測試，不可把整份報價或工單一次塞入單一元件。
-3. 客戶 Slice 2.6 完成並簽認 mapping 後，才執行 I-1.1 `cust` dry-run。
+1. 下一個垂直批次完成 Phase 2 Slice 2.6＋Import I-1.1：建立舊稅額／取整與付款條件的只讀對照，對 221 筆 `cust` 做遮罩 dry-run 與 mapping 報告；不直接 apply 正式表。
+2. 公司簽認客戶 mapping 與例外分類後，才規劃正式 apply；舊值不得自動啟用新 statement 計稅。
+3. 後續以 2.7 供應商／協力廠作下一個完整 schema＋API＋UI 批次；Phase 3／4 仍嚴格依 Gmail 附件契約，但程式拆成可維護元件。
 
 ### 後續 Phase／UAT 仍待確認
 
 - 角色對 capability 的實際 mapping、出貨／對帳實際樣張、印表機及未由附件指定的欄位必填／上限；這些不回頭阻擋 P0，但必須在對應 Slice 前定案。
 
-## 5. 每個切片的固定工作循環
+## 5. 每個垂直批次的固定工作循環
 
 ```text
-確認切片目標與需求編號
+確認批次涵蓋的相鄰 Slice 與需求編號
 → 更新或新增測試
-→ 只實作該切片
+→ 完成 schema、API、UI 的必要垂直路徑
 → 執行自動測試
 → 執行人工驗證
 → 更新文件與 README 進度
@@ -148,7 +149,7 @@
 → 達中型進度時建立 tag、Git bundle 並推送遠端
 ```
 
-切片完成必須同時滿足：
+批次完成必須同時滿足：
 
 - 功能符合需求追蹤矩陣。
 - 單元、整合或 E2E 測試依風險通過。
@@ -160,7 +161,7 @@
 
 ## 6. Git 與備份規則
 
-- 每完成一個小切片：至少建立一個清楚、可單獨回復的 commit。
+- 每完成一個可操作的垂直批次：至少建立一個清楚、可單獨回復的 commit；高風險 migration 可另拆 checkpoint。
 - 每完成一個中型進度：更新 README、提交、建立 annotated tag，再執行 `scripts/create-checkpoint.sh <名稱>`。
 - 中型進度定義：一個 Phase 完成，或連續完成 3～5 個相關切片且形成可展示成果。
 - 每個中型進度建立 Git bundle 到專案外的 `../git-backups/`。
@@ -244,7 +245,7 @@ company-system/
 └─ docs/                    # 資料、測試、移轉、決策與進度文件
 ```
 
-目前 `frontend/` 與 `backend/` 已有可執行骨架，PostgreSQL 由根目錄 `compose.yaml` 啟動；`backend/app/modules/imports/` 包含 Import staging／trace infrastructure。登入、Cookie Session、公司 scope、capability、audit、登入限制、公司資料與公司預設設定骨架均已完成；正式角色 mapping、客戶、報價、工單、單號配發、稅額計算與帳務文件仍依後續 Slice 建立。
+目前 `frontend/` 與 `backend/` 已有可執行骨架，PostgreSQL 由根目錄 `compose.yaml` 啟動；`backend/app/modules/imports/` 包含 Import staging／trace infrastructure。登入、Cookie Session、公司 scope、capability、audit、登入限制、公司資料、公司預設設定與客戶管理均已完成；正式角色 mapping、舊客戶帳務欄位／Import、報價、工單、單號配發、稅額計算與帳務文件仍依後續 Slice 建立。
 
 ## 8. 完成定義
 

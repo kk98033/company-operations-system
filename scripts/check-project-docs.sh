@@ -44,8 +44,8 @@ for heading in "${required_readme_sections[@]}"; do
   fi
 done
 
-if ! rg --fixed-strings --quiet "一次只進行一個小切片" "$repo_root/README.md"; then
-  echo "README is missing the one-slice-at-a-time rule" >&2
+if ! rg --fixed-strings --quiet "垂直功能批次交付" "$repo_root/README.md"; then
+  echo "README is missing the vertical feature batch rule" >&2
   exit 1
 fi
 

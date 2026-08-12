@@ -11,6 +11,9 @@ import { HomePage } from '../pages/HomePage'
 import { LoginPage } from '../pages/LoginPage'
 import { AuditLogPage } from '../pages/audit/AuditLogPage'
 import { CasePrototypePage } from '../pages/cases/CasePrototypePage'
+import { CustomerCreatePage } from '../pages/customers/CustomerCreatePage'
+import { CustomerEditPage } from '../pages/customers/CustomerEditPage'
+import { CustomerListPage } from '../pages/customers/CustomerListPage'
 import { CompanyProfilePage } from '../pages/settings/CompanyProfilePage'
 import { CompanyDefaultsPage } from '../pages/settings/CompanyDefaultsPage'
 import { ModulePrototypePage } from '../pages/ModulePrototypePage'
@@ -81,6 +84,8 @@ const workflowRoutes = workflowModules.map((module) => createRoute({
   path: module.path,
   component: module.id === 'work-orders'
     ? WorkOrderListPrototypePage
+    : module.id === 'customers'
+      ? CustomerListPage
     : module.id === 'cases'
       ? () => <CasePrototypePage module={module} />
     : () => <ModulePrototypePage module={module} />,
@@ -92,11 +97,25 @@ const workOrderNewRoute = createRoute({
   component: WorkOrderPrototypePage,
 })
 
+const customerNewRoute = createRoute({
+  getParentRoute: () => authenticatedRoute,
+  path: '/customers/new',
+  component: CustomerCreatePage,
+})
+
+const customerEditRoute = createRoute({
+  getParentRoute: () => authenticatedRoute,
+  path: '/customers/$customerId',
+  component: CustomerEditPage,
+})
+
 const routeTree = rootRoute.addChildren([
   loginRoute,
   authenticatedRoute.addChildren([
     indexRoute,
     ...workflowRoutes,
+    customerNewRoute,
+    customerEditRoute,
     workOrderNewRoute,
     auditLogsRoute,
     companyProfileRoute,

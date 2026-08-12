@@ -13,6 +13,7 @@ from app.modules.authorization.models import (
     Role,
     RolePermission,
 )
+from app.modules.customers.models import Customer
 from app.modules.imports.models import (
     ImportError,
     ImportRun,
@@ -34,6 +35,7 @@ REGISTERED_MODELS = (
     LegacyMapping,
     Organization,
     OrganizationSettings,
+    Customer,
     User,
     OrganizationMember,
     Session,

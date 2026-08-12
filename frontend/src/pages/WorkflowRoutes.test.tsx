@@ -4,6 +4,8 @@ import userEvent from '@testing-library/user-event'
 import { workflowModules } from '../app/workflowModules'
 import { renderApp } from '../test/renderApp'
 
+const prototypeModules = workflowModules.filter((module) => module.id !== 'customers')
+
 describe('公司主流程路由', () => {
   it('報價、案件與工單模組追蹤到完整需求編號', () => {
     const quotations = workflowModules.find((module) => module.id === 'quotations')
@@ -23,7 +25,7 @@ describe('公司主流程路由', () => {
     ])
   })
 
-  it.each(workflowModules)('$label 可直接進入且明確標示為展示資料', async (module) => {
+  it.each(prototypeModules)('$label 可直接進入且明確標示為展示資料', async (module) => {
     await renderApp([module.path])
 
     expect(screen.getByRole('heading', { level: 1, name: module.label })).toBeInTheDocument()
@@ -33,7 +35,7 @@ describe('公司主流程路由', () => {
       .toHaveAttribute('aria-current', 'page')
   })
 
-  it.each(workflowModules.filter((module) => module.id !== 'work-orders'))(
+  it.each(prototypeModules.filter((module) => module.id !== 'work-orders'))(
     '$label 保留跨模組資料流導覽',
     async (module) => {
       await renderApp([module.path])
@@ -153,7 +155,8 @@ describe('公司主流程路由', () => {
 
     for (const module of workflowModules) {
       await user.click(within(navigation).getByRole('link', { name: module.label }))
-      expect(screen.getByRole('heading', { level: 1, name: module.label }))
+      const heading = module.id === 'customers' ? '沒有客戶資料權限' : module.label
+      expect(screen.getByRole('heading', { level: 1, name: heading }))
         .toBeInTheDocument()
     }
   })

@@ -1,0 +1,14 @@
+.customer-page { max-width: 92rem; }
+.customer-filter-action { align-self: end; }
+.customer-filter-action .ui-button { width: 100%; }
+.customer-table th:first-child { position: sticky; left: 0; z-index: 1; background: var(--color-surface); }
+.customer-table td:last-child { width: 6rem; }
+.customer-form { display: grid; gap: var(--space-5); }
+.customer-address-grid .ui-field:last-child { grid-column: 1 / -1; }
+.customer-form-footer { border-top: 1px solid var(--color-border); padding-top: var(--space-4); }
+
+@media (max-width: 46rem) {
+  .customer-table { min-width: 52rem; }
+  .customer-form-footer { align-items: stretch; flex-direction: column; }
+  .customer-form-footer .ui-button { width: 100%; }
+}

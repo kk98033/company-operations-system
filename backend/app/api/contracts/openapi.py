@@ -19,6 +19,10 @@ API_TAGS = [
         "description": "登入、登出與伺服器 Session 狀態。",
     },
     {
+        "name": "customers",
+        "description": "目前公司的客戶主檔查詢與維護。",
+    },
+    {
         "name": "health",
         "description": "進程存活與必要相依服務就緒狀態。",
     },

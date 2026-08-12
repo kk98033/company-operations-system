@@ -67,6 +67,7 @@ IDENTITY_TABLES = [
 ]
 
 ORGANIZATION_SETTINGS_TABLES = ["organization_settings"]
+CUSTOMER_TABLES = ["customers"]
 
 AUTHORIZATION_TABLES = [
     "organization_member_roles",
@@ -91,7 +92,7 @@ def test_schema_upgrade_downgrade_upgrade_round_trip(
     assert REGISTERED_MODELS
 
     command.upgrade(config, "head")
-    assert _current_revision() == "0009_organization_settings"
+    assert _current_revision() == "0010_customers"
     assert _table_names() == [
         "alembic_version",
         *sorted(
@@ -102,6 +103,7 @@ def test_schema_upgrade_downgrade_upgrade_round_trip(
                 *LOGIN_SECURITY_TABLES,
                 *IDENTITY_TABLES,
                 *ORGANIZATION_SETTINGS_TABLES,
+                *CUSTOMER_TABLES,
             ]
         ),
     ]
@@ -113,7 +115,7 @@ def test_schema_upgrade_downgrade_upgrade_round_trip(
     assert _table_names() == ["alembic_version"]
 
     command.upgrade(config, "head")
-    assert _current_revision() == "0009_organization_settings"
+    assert _current_revision() == "0010_customers"
     assert _table_names() == [
         "alembic_version",
         *sorted(
@@ -124,6 +126,7 @@ def test_schema_upgrade_downgrade_upgrade_round_trip(
                 *LOGIN_SECURITY_TABLES,
                 *IDENTITY_TABLES,
                 *ORGANIZATION_SETTINGS_TABLES,
+                *CUSTOMER_TABLES,
             ]
         ),
     ]
@@ -172,7 +175,7 @@ def test_identity_downgrade_preserves_existing_import_foundation(
         resources.dispose()
 
     command.upgrade(config, "head")
-    assert _current_revision() == "0009_organization_settings"
+    assert _current_revision() == "0010_customers"
     command.check(config)
 
     resources = create_database_resources(settings)
