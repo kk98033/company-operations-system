@@ -24,7 +24,8 @@ from app.modules.authorization.models import (
     Role,
     RolePermission,
 )
-from app.modules.customers.models import Customer
+from app.modules.customers.models import Customer, CustomerWorkItem
+from app.modules.master_data.models import PaperMill, PaperType, ProcessDefinition, Vendor
 from app.modules.organizations.models import (
     Organization,
     OrganizationMember,
@@ -71,7 +72,12 @@ def identity_engine(migrated_engine: Engine) -> Generator[Engine, None, None]:
             connection.execute(RolePermission.__table__.delete())
             connection.execute(Role.__table__.delete())
             connection.execute(Permission.__table__.delete())
+            connection.execute(CustomerWorkItem.__table__.delete())
             connection.execute(Customer.__table__.delete())
+            connection.execute(Vendor.__table__.delete())
+            connection.execute(PaperType.__table__.delete())
+            connection.execute(PaperMill.__table__.delete())
+            connection.execute(ProcessDefinition.__table__.delete())
             connection.execute(OrganizationSettings.__table__.delete())
             connection.execute(OrganizationMember.__table__.delete())
             connection.execute(User.__table__.delete())

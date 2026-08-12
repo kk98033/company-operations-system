@@ -7,6 +7,7 @@ import { getApiErrorMessage } from '../../api/errorMessage'
 import { useHasCapability } from '../../auth/capabilities'
 import { DefinitionGrid, PageHeader, Section, StatusLabel, SystemState } from '../../ui/UiPatterns'
 import { CustomerForm } from './CustomerForm'
+import { CustomerWorkItemsSection } from './CustomerWorkItemsSection'
 import { customerPayload, emptyCustomerDraft, type CustomerDraft } from './customerDraft'
 
 export function CustomerEditPage() {
@@ -19,8 +20,8 @@ export function CustomerEditPage() {
   const query = useQuery({ queryKey: customerQueryKey(customerId), queryFn: () => getCustomer(customerId), enabled: canRead })
   useEffect(() => {
     if (!query.data) return
-    const { code, name, short_name, tax_identifier, contact_name, phone, phone_secondary, mobile, fax, email, postal_code, city, address } = query.data
-    setDraft({ code, name, short_name: short_name ?? '', tax_identifier: tax_identifier ?? '', contact_name: contact_name ?? '', phone: phone ?? '', phone_secondary: phone_secondary ?? '', mobile: mobile ?? '', fax: fax ?? '', email: email ?? '', postal_code: postal_code ?? '', city: city ?? '', address: address ?? '' })
+    const { code, name, short_name, tax_identifier, contact_name, phone, phone_secondary, mobile, fax, email, postal_code, city, address, payment_terms } = query.data
+    setDraft({ code, name, short_name: short_name ?? '', tax_identifier: tax_identifier ?? '', contact_name: contact_name ?? '', phone: phone ?? '', phone_secondary: phone_secondary ?? '', mobile: mobile ?? '', fax: fax ?? '', email: email ?? '', postal_code: postal_code ?? '', city: city ?? '', address: address ?? '', payment_terms: payment_terms ?? '' })
   }, [query.data])
   const mutation = useMutation({
     mutationFn: (value: CustomerDraft) => updateCustomer(customerId, {
@@ -68,6 +69,7 @@ export function CustomerEditPage() {
     { label: '郵遞區號', value: customer.postal_code || '—' },
     { label: '縣市', value: customer.city || '—' },
     { label: '完整地址', value: customer.address || '—' },
+    { label: '付款條件', value: customer.payment_terms || '—' },
   ]
   return (
     <div className="ui-pattern-stack customer-page">
@@ -87,6 +89,16 @@ export function CustomerEditPage() {
           <DefinitionGrid items={readOnlyItems} />
         </Section>
       )}
+      {customer.legacy_source_table ? (
+        <Section title="舊系統帳務對照" description="只供核對舊資料，不會自動開啟新版對帳單計稅。">
+          <DefinitionGrid items={[
+            { label: '來源', value: `${customer.legacy_source_table} / ${customer.legacy_source_key}` },
+            { label: '舊稅額請款值', value: customer.legacy_tax_setting_raw || '—' },
+            { label: '舊每筆合計值', value: customer.legacy_rounding_setting_raw || '—' },
+          ]} />
+        </Section>
+      ) : null}
+      <CustomerWorkItemsSection canManage={canManage} customerId={customerId} />
     </div>
   )
 }

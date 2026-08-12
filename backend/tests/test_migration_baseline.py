@@ -24,6 +24,11 @@ def test_base_metadata_contains_import_and_identity_foundation_tables() -> None:
     assert set(Base.metadata.tables) == {
         "audit_logs",
         "customers",
+        "customer_work_items",
+        "paper_mills",
+        "paper_types",
+        "process_definitions",
+        "vendors",
         "import_errors",
         "import_runs",
         "import_source_files",

@@ -1,7 +1,7 @@
 # 舊系統資料 Import 對照與分批計畫
 
-> 文件版本：v1.1
-> 日期：2026-08-07
+> 文件版本：v1.2
+> 日期：2026-08-13
 > 用途：把已提取的真實舊表對應到新版模組，規定每一批何時匯入、如何 dry-run、如何核對，以及何時才允許寫入正式資料。
 
 ## 1. Import 不是最後才做
@@ -212,9 +212,9 @@ P0-04 新版「基礎計價只取正式量」不回溯改寫舊金額。舊備�
 | I-0.1 | Phase -1 | source manifest、雜湊、檔案與表清單 | 同一來源重跑結果一致 |
 | I-0.2 | Phase -1 | CSV reader、編碼、邏輯筆數、欄位數 | `cust` 221／222 差異有正式報告 |
 | I-0.3 | Phase -1 | staging、import run、error、mapping schema 設計 | migration 尚不寫正式業務表 |
-| I-1.1 | Phase 2 customer 完成 | `cust` dry-run | 空鍵、重複、亂碼、稅額、取整報告 |
-| I-1.2 | Phase 2 vendor/master 完成 | `fact`、paper、gloss、paste 等 | 主檔 mapping 及停用項目簽認 |
-| I-1.3 | Phase 2 work item 完成 | `wpa` 小批與全量 dry-run | 客戶關聯、重複規格、效能 |
+| I-1.1 | DONE（未 apply） | `cust` 221 筆 aggregate-only dry-run | 無重複代號；109 個替代字元待修復／抽查 |
+| I-1.2 | DONE（未 apply） | `fact`、paper、gloss、paste aggregate-only dry-run | 筆數與重複統計已產生；mapping／停用仍須簽認 |
+| I-1.3 | DONE（未 apply） | `wpa` 9,831 筆全量 aggregate-only dry-run | 189 筆孤兒、6 筆缺客戶代號、1 筆缺名稱待處理 |
 | I-1.4 | Phase 3 quotation 完成 | `b_replay1`＋`b_replay2` 全量 dry-run | 4 主檔／10 明細、主從關聯、金額及不臆造工單關係 |
 | I-2.1 | Phase 4 work order 完成 | `subpoena`＋`quote` 現行工單 | 50 筆試匯＋公司抽樣 |
 | I-2.2 | Phase 4 history 完成 | `subpoena_his`＋`quote_his` | 現行／歷史去重、狀態及數量 |
@@ -228,7 +228,7 @@ P0-04 新版「基礎計價只取正式量」不回溯改寫舊金額。舊備�
 
 每個 Import Slice 都是小切片，必須各自測試、更新進度及 commit；不能把全部 Import 寫成一個超大腳本。
 
-I-0.1～I-0.3 已完成。I-0.3 實際以 `import_runs`、`import_source_files`、通用 `import_staging_records`、`import_errors` 與 `legacy_mappings` 建立不承載正式業務資料的基礎；檔案統計分開保存實體行、含表頭邏輯列及資料列，避免再次混淆 `cust` 221／222。下一個 Import slice 仍是客戶 Slice 2.6 後的 I-1.1，不得因 staging schema 已存在就提前匯入 221 筆客戶。
+I-0.1～I-0.3 與 I-1.1～I-1.3 dry-run 已完成。報告只保存雜湊、筆數與錯誤分類，不含客戶／工作項目值，且全部 `apply_performed=false`。目前正式 apply 仍被 `cust` 轉碼替代字元與 `wpa` 孤兒／缺鍵阻擋；修復來源或簽認 mapping 後必須重跑相同 dry-run 才能進入 staging／apply。
 
 ## 6. 預定程式結構
 

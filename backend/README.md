@@ -137,7 +137,7 @@ python -m pytest -ra
 
 ## Alembic migration
 
-Alembic 設定在 `alembic.ini`，版本檔在 `migrations/versions/`。`0001_empty_baseline` 是空白起點；`0002_import_staging` 建立 run／source file／staging，`0003_import_trace` 建立 errors／mappings；`0004_identity_foundation` 建立 organizations／users／organization_members／sessions；`0005_authorization_foundation` 建立 capability 與公司角色；`0006_audit_foundation` 建立 append-only audit；`0007_login_security` 建立登入限制；`0008_organization_profile` 擴充公司抬頭；`0009_organization_settings` 建立公司帳務草稿與固定政策版本；`0010_customers` 建立公司範圍客戶主檔。Migration 不提前建立報價、工單等尚未進入對應 Slice 的正式業務流程資料；應用程式啟動不會自動 migration。
+Alembic 設定在 `alembic.ini`，版本檔在 `migrations/versions/`。`0001`～`0010` 建立 Import、identity、authorization、audit、登入安全、公司設定與客戶主檔；`0011_customer_legacy_billing` 加入付款條件與唯讀舊帳務證據；`0012_master_data` 建立廠商、紙質、紙廠及固定 13 道製程；`0013_customer_work_items` 建立客戶常用工作項目。Migration 不提前建立報價、工單等尚未進入對應 Slice 的正式業務流程資料；應用程式啟動不會自動 migration。
 
 Identity schema 的邊界：
 

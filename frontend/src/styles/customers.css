@@ -6,8 +6,12 @@
 .customer-form { display: grid; gap: var(--space-5); }
 .customer-address-grid .ui-field:last-child { grid-column: 1 / -1; }
 .customer-form-footer { border-top: 1px solid var(--color-border); padding-top: var(--space-4); }
+.customer-work-item-form { align-items: end; background: var(--color-surface-subtle); border: 1px solid var(--color-border); display: grid; gap: 1rem; grid-template-columns: repeat(4, minmax(0, 1fr)) auto; margin-bottom: 1rem; padding: 1rem; }
+
+@media (max-width: 64rem) { .customer-work-item-form { grid-template-columns: 1fr 1fr; } }
 
 @media (max-width: 46rem) {
+  .customer-work-item-form { grid-template-columns: 1fr; }
   .customer-table { min-width: 52rem; }
   .customer-form-footer { align-items: stretch; flex-direction: column; }
   .customer-form-footer .ui-button { width: 100%; }

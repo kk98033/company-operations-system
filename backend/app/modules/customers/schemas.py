@@ -40,6 +40,11 @@ class CustomerResponse(BaseModel):
     postal_code: str | None
     city: str | None
     address: str | None
+    payment_terms: str | None
+    legacy_tax_setting_raw: str | None
+    legacy_rounding_setting_raw: str | None
+    legacy_source_table: str | None
+    legacy_source_key: str | None
     status: CustomerStatus
     created_at: datetime
     updated_at: datetime
@@ -65,10 +70,11 @@ class CustomerWriteBase(BaseModel):
     postal_code: str | None = Field(default=None, max_length=16)
     city: str | None = Field(default=None, max_length=100)
     address: str | None = Field(default=None, max_length=500)
+    payment_terms: str | None = Field(default=None, max_length=200)
 
     @field_validator(
         "short_name", "tax_identifier", "contact_name", "phone", "phone_secondary",
-        "mobile", "fax", "email", "postal_code", "city", "address",
+        "mobile", "fax", "email", "postal_code", "city", "address", "payment_terms",
     )
     @classmethod
     def empty_optional_is_none(cls, value: str | None) -> str | None:

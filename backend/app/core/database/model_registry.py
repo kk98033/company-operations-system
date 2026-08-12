@@ -13,7 +13,7 @@ from app.modules.authorization.models import (
     Role,
     RolePermission,
 )
-from app.modules.customers.models import Customer
+from app.modules.customers.models import Customer, CustomerWorkItem
 from app.modules.imports.models import (
     ImportError,
     ImportRun,
@@ -21,6 +21,7 @@ from app.modules.imports.models import (
     ImportStagingRecord,
     LegacyMapping,
 )
+from app.modules.master_data.models import PaperMill, PaperType, ProcessDefinition, Vendor
 from app.modules.organizations.models import (
     Organization,
     OrganizationMember,
@@ -36,6 +37,11 @@ REGISTERED_MODELS = (
     Organization,
     OrganizationSettings,
     Customer,
+    CustomerWorkItem,
+    Vendor,
+    PaperType,
+    PaperMill,
+    ProcessDefinition,
     User,
     OrganizationMember,
     Session,

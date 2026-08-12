@@ -24,6 +24,11 @@ export function CustomerForm({
           <Field label="統一編號"><input maxLength={20} onChange={(event) => field('tax_identifier')(event.target.value)} value={draft.tax_identifier} /></Field>
         </div>
       </Section>
+      <Section title="交易條件" description="供報價與工單帶入的文字條件；新對帳單計稅仍依公司設定且預設關閉。">
+        <div className="ui-form-grid">
+          <Field label="付款條件"><textarea maxLength={200} onChange={(event) => field('payment_terms')(event.target.value)} rows={3} value={draft.payment_terms} /></Field>
+        </div>
+      </Section>
       <Section title="主要聯絡方式" description="先保存公司日常最常使用的一組聯絡資料；多聯絡人會在後續主檔擴充。">
         <div className="ui-form-grid">
           <Field label="聯絡人"><input maxLength={100} onChange={(event) => field('contact_name')(event.target.value)} value={draft.contact_name} /></Field>

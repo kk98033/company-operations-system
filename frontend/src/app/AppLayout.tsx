@@ -19,7 +19,8 @@ export function AppLayout() {
   const session = useAuthenticatedSession()
   const canReadAudit = session.capabilities.includes('audit.read')
   const canManageSettings = session.capabilities.includes('settings.manage')
-  const canSeeSystemManagement = canReadAudit || canManageSettings
+  const canReadMasterData = session.capabilities.includes('master_data.read')
+  const canSeeSystemManagement = canReadAudit || canManageSettings || canReadMasterData
   const logoutMutation = useMutation({
     mutationFn: logoutSession,
     onSuccess: async () => {
@@ -96,6 +97,17 @@ export function AppLayout() {
                     <span className="sidebar__link-label">文件與帳務預設</span>
                   </Link>
                 </>
+              ) : null}
+              {canReadMasterData ? (
+                <Link
+                  activeOptions={{ exact: false }}
+                  activeProps={{ className: 'sidebar__link--active' }}
+                  className="sidebar__link"
+                  to="/master-data"
+                >
+                  <span className="sidebar__link-icon" aria-hidden="true">主</span>
+                  <span className="sidebar__link-label">生產與採購主檔</span>
+                </Link>
               ) : null}
               {canReadAudit ? (
                 <Link

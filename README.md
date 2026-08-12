@@ -55,13 +55,13 @@
 | 項目 | 目前狀態 |
 |---|---|
 | 最後更新日期 | 2026-08-13 |
-| 計畫版本 | v1.16（Phase 2 Slice 2.3～2.5 客戶管理垂直功能完成） |
-| 架構版本 | v1.17（客戶主檔、公司隔離 API 與正式 React 頁面同步） |
-| 目前階段 | Phase 2 公司與主檔基礎進行中（5／10） |
-| 目前切片 | Slice 2.3～2.5：客戶資料庫、API、查詢／新增／編輯／停用頁已完成 |
-| 實作完成度 | Phase 0：完成；Import I-0：3／3；Phase 1：9／9；Phase 2：5／10；客戶管理首個正式業務垂直功能已可用 |
+| 計畫版本 | v1.17（Phase 2 Slice 2.1～2.10 全部完成） |
+| 架構版本 | v1.18（客戶、主檔、常用工作項目與 legacy dry-run 同步） |
+| 目前階段 | Phase 2 公司與主檔基礎完成（10／10） |
+| 目前切片 | Phase 2 收尾：主檔、常用工作項目與 Import I-1.1～I-1.3 dry-run 已完成 |
+| 實作完成度 | Phase 0：完成；Import I-0：3／3；Phase 1：9／9；Phase 2：10／10；下一階段為 Phase 3 報價 |
 | 規劃文件完成度 | 100% |
-| 最新中型進度備份 | Git tag `checkpoint-phase2-customer-master-v1`；經驗證 bundle 位於專案外層 `git-backups/` |
+| 最新中型進度備份 | Git tag `checkpoint-phase-2`；經驗證 bundle 位於專案外層 `git-backups/` |
 | 正式遠端 Git 備份 | 尚未設定；R-11 維持 Open，Phase 2 開始前優先建立私人 repository |
 
 ### 已完成
@@ -116,10 +116,11 @@
 - 完成 Phase 2 Slice 2.1：以可逆 `0008_organization_profile` 擴充公司名稱、統編、負責人、電話、傳真、Email、地址與完整 Logo metadata；Logo object key 不對前端公開，也不能在表單手填。`GET／PUT /api/v1/organizations/current/profile` 只使用 Session 公司、`settings.manage`、signed CSRF、樂觀衝突與同交易 audit。React `/settings/company` 沿用 ADR-010 表單版型，具即時文件頁首預覽、無權限／loading／錯誤狀態及 RWD；185 個非 DB、80 個 PostgreSQL integration 與 72 個 React 測試通過。
 - 完成 Phase 2 Slice 2.2：新增可逆 `0009_organization_settings`，每家公司只有一筆設定；對帳單計稅預設關閉，啟用後稅率、取整範圍與小數位才必須完整。ADR-018 的七類單號格式及公司 PDF 已確認的報價 A4 橫向、工單 A4 直向九製程以唯讀政策版本呈現，不允許 UI 改寫。`GET／PUT /api/v1/organizations/current/settings` 受公司 scope、`settings.manage`、signed CSRF、更新衝突與同交易 audit 保護；React `/settings/defaults` 已通過 RWD、axe 與實際桌面存檔驗證。正式稅額計算、單號配發、文件與列印仍留在對應 Phase；186 個非 DB、84 個 PostgreSQL integration 與 76 個 React 測試通過。
 - 完成 Phase 2 Slice 2.3～2.5 客戶管理垂直功能：可逆 `0010_customers` 建立公司範圍客戶主檔，保存代號、名稱、簡稱、統編、主要聯絡與地址；同公司代號 trim＋不分大小寫唯一，停用不刪除。`GET／POST／PUT /api/v1/customers` 與狀態 API 使用 Cookie Session、`customers.read／manage`、公司 scope、signed CSRF、樂觀衝突及同交易 audit。React `/customers`、`/customers/new`、`/customers/:id` 完成查詢、新增、編輯、停用、唯讀權限、loading／empty／error、RWD 與 axe；186 個非 DB、86 個 PostgreSQL integration 與 78 個 React 測試通過。舊稅務／取整、付款條件及 221 筆舊客戶 Import 仍留在 Slice 2.6／I-1.1。
+- 完成 Phase 2 Slice 2.6～2.10：客戶加入付款條件與舊稅額／取整唯讀證據；建立廠商、紙質、紙廠、固定 13 道製程及客戶常用工作項目 schema、公司隔離 API、權限、稽核與正式 React 頁面。Import I-1.1～I-1.3 已執行 aggregate-only dry-run，沒有 apply 正式資料；`cust` 221 筆有 109 個替代字元，`wpa` 9,831 筆中 189 筆客戶代號未對上且 6 筆缺客戶代號，必須先修復／簽認 mapping。
 
 ### 進行中
 
-- Phase 0 工程與公司 Gate、Phase 1 Slice 1.1～1.9、Phase 2 Slice 2.1～2.5 已完成；公司資料、設定與客戶主檔已成為後續報價單、工單、對帳及列印政策的公司範圍來源。P1-02 正式角色 mapping 與其餘業務流程仍未完成。
+- Phase 0、Phase 1 與 Phase 2 Slice 2.1～2.10 已完成；公司資料、客戶、採購／生產主檔及常用工作項目已成為後續報價、工單與列印的公司範圍來源。舊資料目前只有 dry-run，尚未正式 apply。
 - 工單查詢與單頁建檔的介面邊界已依原稿修正；正式儲存、編輯、列印、API 與資料表仍屬 Phase 4，不把原型誤報為業務功能。
 - 介面正式方向已定案；`/style-preview` 只保留為歷史比較與 ADR-010 決策證據，不是正式業務頁。
 - 公司 P0 已確認 10／10。正式 migration、API 與舊客戶資料 apply 仍只會在對應 Phase／Import Slice 通過測試後逐批建立，不因 Gate 通過而提前寫入。
@@ -127,7 +128,8 @@
 
 ### 接下來要做
 
-1. 下一個垂直批次完成 Phase 2 Slice 2.6＋Import I-1.1：建立舊稅額／取整與付款條件的只讀對照，對 221 筆 `cust` 做遮罩 dry-run 與 mapping 報告；不直接 apply 正式表。
+1. 下一個垂直批次進入 Phase 3 報價：先完成 quotation schema、單號與明細，再接公司 PDF 的同頁建檔與 A4 橫向列印。
+2. 舊資料 apply 前先處理 `cust` 轉碼替代字元及 `wpa` 的 189 筆孤兒／6 筆缺客戶代號；修復後重跑相同 dry-run，不能跳過公司抽查。
 2. 公司簽認客戶 mapping 與例外分類後，才規劃正式 apply；舊值不得自動啟用新 statement 計稅。
 3. 後續以 2.7 供應商／協力廠作下一個完整 schema＋API＋UI 批次；Phase 3／4 仍嚴格依 Gmail 附件契約，但程式拆成可維護元件。
 

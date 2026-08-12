@@ -14,6 +14,7 @@ import { CasePrototypePage } from '../pages/cases/CasePrototypePage'
 import { CustomerCreatePage } from '../pages/customers/CustomerCreatePage'
 import { CustomerEditPage } from '../pages/customers/CustomerEditPage'
 import { CustomerListPage } from '../pages/customers/CustomerListPage'
+import { MasterDataPage } from '../pages/master-data/MasterDataPage'
 import { CompanyProfilePage } from '../pages/settings/CompanyProfilePage'
 import { CompanyDefaultsPage } from '../pages/settings/CompanyDefaultsPage'
 import { ModulePrototypePage } from '../pages/ModulePrototypePage'
@@ -79,6 +80,12 @@ const companyDefaultsRoute = createRoute({
   component: CompanyDefaultsPage,
 })
 
+const masterDataRoute = createRoute({
+  getParentRoute: () => authenticatedRoute,
+  path: '/master-data',
+  component: MasterDataPage,
+})
+
 const workflowRoutes = workflowModules.map((module) => createRoute({
   getParentRoute: () => authenticatedRoute,
   path: module.path,
@@ -120,6 +127,7 @@ const routeTree = rootRoute.addChildren([
     auditLogsRoute,
     companyProfileRoute,
     companyDefaultsRoute,
+    masterDataRoute,
     uiPatternsRoute,
     stylePreviewRoute,
   ]),

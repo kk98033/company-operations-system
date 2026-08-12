@@ -11,6 +11,7 @@ from alembic import command
 from alembic.config import Config
 
 from app.core.database import create_database_resources
+from app.modules.master_data.models import ProcessDefinition
 from app.modules.organizations.models import Organization, OrganizationSettings
 from tests.integration.database_settings import load_database_test_settings
 
@@ -61,6 +62,11 @@ def test_organization_settings_migration_backfills_existing_company(
             connection.execute(
                 OrganizationSettings.__table__.delete().where(
                     OrganizationSettings.organization_id == organization_id
+                )
+            )
+            connection.execute(
+                ProcessDefinition.__table__.delete().where(
+                    ProcessDefinition.organization_id == organization_id
                 )
             )
             connection.execute(

@@ -27,6 +27,10 @@ API_TAGS = [
         "description": "進程存活與必要相依服務就緒狀態。",
     },
     {
+        "name": "master-data",
+        "description": "目前公司的供應商、紙材與固定製程主檔。",
+    },
+    {
         "name": "organizations",
         "description": "目前公司的基本資料、帳務預設與固定文件政策。",
     },

@@ -16,6 +16,7 @@ from app.core.database import create_database_resources
 from app.core.database.model_registry import REGISTERED_MODELS
 from app.modules.auth.models import User
 from app.modules.imports.models import ImportRun
+from app.modules.master_data.models import ProcessDefinition
 from app.modules.organizations.models import Organization, OrganizationMember, OrganizationSettings
 from tests.integration.database_settings import load_database_test_settings
 
@@ -68,6 +69,8 @@ IDENTITY_TABLES = [
 
 ORGANIZATION_SETTINGS_TABLES = ["organization_settings"]
 CUSTOMER_TABLES = ["customers"]
+CUSTOMER_WORK_ITEM_TABLES = ["customer_work_items"]
+MASTER_DATA_TABLES = ["paper_mills", "paper_types", "process_definitions", "vendors"]
 
 AUTHORIZATION_TABLES = [
     "organization_member_roles",
@@ -92,7 +95,7 @@ def test_schema_upgrade_downgrade_upgrade_round_trip(
     assert REGISTERED_MODELS
 
     command.upgrade(config, "head")
-    assert _current_revision() == "0010_customers"
+    assert _current_revision() == "0013_customer_work_items"
     assert _table_names() == [
         "alembic_version",
         *sorted(
@@ -104,6 +107,8 @@ def test_schema_upgrade_downgrade_upgrade_round_trip(
                 *IDENTITY_TABLES,
                 *ORGANIZATION_SETTINGS_TABLES,
                 *CUSTOMER_TABLES,
+                *CUSTOMER_WORK_ITEM_TABLES,
+                *MASTER_DATA_TABLES,
             ]
         ),
     ]
@@ -115,7 +120,7 @@ def test_schema_upgrade_downgrade_upgrade_round_trip(
     assert _table_names() == ["alembic_version"]
 
     command.upgrade(config, "head")
-    assert _current_revision() == "0010_customers"
+    assert _current_revision() == "0013_customer_work_items"
     assert _table_names() == [
         "alembic_version",
         *sorted(
@@ -127,6 +132,8 @@ def test_schema_upgrade_downgrade_upgrade_round_trip(
                 *IDENTITY_TABLES,
                 *ORGANIZATION_SETTINGS_TABLES,
                 *CUSTOMER_TABLES,
+                *CUSTOMER_WORK_ITEM_TABLES,
+                *MASTER_DATA_TABLES,
             ]
         ),
     ]
@@ -175,7 +182,7 @@ def test_identity_downgrade_preserves_existing_import_foundation(
         resources.dispose()
 
     command.upgrade(config, "head")
-    assert _current_revision() == "0010_customers"
+    assert _current_revision() == "0013_customer_work_items"
     command.check(config)
 
     resources = create_database_resources(settings)
@@ -261,6 +268,11 @@ def test_authorization_downgrade_preserves_existing_identity_rows(
             connection.execute(
                 OrganizationSettings.__table__.delete().where(
                     OrganizationSettings.organization_id == organization_id
+                )
+            )
+            connection.execute(
+                ProcessDefinition.__table__.delete().where(
+                    ProcessDefinition.organization_id == organization_id
                 )
             )
             connection.execute(

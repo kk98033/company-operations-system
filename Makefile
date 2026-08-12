@@ -11,7 +11,7 @@ COMPOSE_PARSE_ENV = POSTGRES_PASSWORD=company-system-compose-parse-only
 	db-test-config db-test-up db-test-down backend-database-integration-check \
 	import-profile import-profile-test backend-test backend-check frontend-test \
 	frontend-lint frontend-build frontend-audit frontend-check backend-build \
-	seed-test-identity
+	seed-test-identity import-customers-dry-run import-master-data-dry-run import-work-items-dry-run
 
 bootstrap:
 	PYTHON_BIN=$(PYTHON) ./scripts/bootstrap.sh
@@ -89,6 +89,22 @@ import-profile:
 
 import-profile-test:
 	$(PYTHON) -m unittest discover -s scripts/tests -p 'test_*.py' -v
+
+import-customers-dry-run:
+	$(PYTHON) scripts/legacy_customer_dry_run.py \
+		--source-file "$(LEGACY_SOURCE_DIR)/cust.csv" \
+		--output-file "artifacts/import/customers/cust_dry_run.json"
+
+import-master-data-dry-run:
+	$(PYTHON) scripts/legacy_master_data_dry_run.py \
+		--source-dir "$(LEGACY_SOURCE_DIR)" \
+		--output-file "artifacts/import/master-data/master_data_dry_run.json"
+
+import-work-items-dry-run:
+	$(PYTHON) scripts/legacy_work_items_dry_run.py \
+		--source-file "$(LEGACY_SOURCE_DIR)/wpa.csv" \
+		--customer-file "$(LEGACY_SOURCE_DIR)/cust.csv" \
+		--output-file "artifacts/import/work-items/wpa_dry_run.json"
 
 backend-test:
 	cd backend && .venv/bin/python -m pytest -m "not database_integration"

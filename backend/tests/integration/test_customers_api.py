@@ -80,6 +80,7 @@ def _payload(code: str, name: str) -> dict[str, str | None]:
         "postal_code": "000",
         "city": "測試市",
         "address": "測試地址",
+        "payment_terms": "月結 30 天（虛構）",
     }
 
 

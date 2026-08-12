@@ -172,4 +172,20 @@ describe('自動無障礙基線', () => {
       .toBeInTheDocument()
     await expectNoAccessibilityViolations()
   })
+
+  it('生產與採購主檔路由沒有 axe WCAG A／AA 與 best-practice 違規', async () => {
+    vi.stubGlobal('fetch', vi.fn<typeof fetch>().mockResolvedValue(Response.json({
+      items: [],
+      meta: {
+        filters: { keyword: null, status: null },
+        pagination: { has_next: false, has_previous: false, page: 1, page_size: 100, total_items: 0, total_pages: 0 },
+        sort: { direction: 'asc', field: 'code' },
+      },
+    })))
+    await renderApp(['/master-data'], {
+      session: { ...syntheticCurrentSession, capabilities: ['master_data.read'] },
+    })
+    expect(await screen.findByRole('heading', { level: 1, name: '生產與採購主檔' })).toBeInTheDocument()
+    await expectNoAccessibilityViolations()
+  })
 })

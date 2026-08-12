@@ -14,11 +14,13 @@ export type CustomerDraft = {
   postal_code: string
   city: string
   address: string
+  payment_terms: string
 }
 
 export const emptyCustomerDraft: CustomerDraft = {
   code: '', name: '', short_name: '', tax_identifier: '', contact_name: '', phone: '',
   phone_secondary: '', mobile: '', fax: '', email: '', postal_code: '', city: '', address: '',
+  payment_terms: '',
 }
 
 export function customerPayload(draft: CustomerDraft): CustomerCreate {
@@ -30,6 +32,6 @@ export function customerPayload(draft: CustomerDraft): CustomerCreate {
     phone_secondary: optional(draft.phone_secondary), mobile: optional(draft.mobile),
     fax: optional(draft.fax), email: optional(draft.email),
     postal_code: optional(draft.postal_code), city: optional(draft.city),
-    address: optional(draft.address),
+    address: optional(draft.address), payment_terms: optional(draft.payment_terms),
   }
 }

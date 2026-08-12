@@ -50,68 +50,57 @@ export interface AuthenticatedUserResponse {
   login_name: string;
 }
 
-export interface CurrentSessionResponse {
-  capabilities: string[];
-  expires_at: string;
-  organization: AuthenticatedOrganizationResponse;
-  user: AuthenticatedUserResponse;
-}
-
-export interface CustomerCreate {
-  address?: string | null;
-  city?: string | null;
+export interface CatalogCreate {
   /**
      * @minLength 1
      * @maxLength 32
      */
   code: string;
-  contact_name?: string | null;
-  email?: string | null;
-  fax?: string | null;
-  mobile?: string | null;
   /**
      * @minLength 1
-     * @maxLength 200
+     * @maxLength 100
      */
   name: string;
-  phone?: string | null;
-  phone_secondary?: string | null;
-  postal_code?: string | null;
-  short_name?: string | null;
-  tax_identifier?: string | null;
+  /**
+     * @minimum 0
+     * @maximum 9999
+     */
+  sort_order?: number;
 }
 
-export type CustomerStatus = typeof CustomerStatus[keyof typeof CustomerStatus];
+export type MasterStatus = typeof MasterStatus[keyof typeof MasterStatus];
 
 
-export const CustomerStatus = {
+export const MasterStatus = {
   active: 'active',
   inactive: 'inactive',
 } as const;
 
-export interface CustomerFilterSummary {
-  keyword: string | null;
-  status: CustomerStatus | null;
+export interface CatalogResponse {
+  /**
+     * @minLength 1
+     * @maxLength 32
+     */
+  code: string;
+  created_at: string;
+  id: string;
+  /**
+     * @minLength 1
+     * @maxLength 100
+     */
+  name: string;
+  /**
+     * @minimum 0
+     * @maximum 9999
+     */
+  sort_order?: number;
+  status: MasterStatus;
+  updated_at: string;
 }
 
-export interface CustomerResponse {
-  address: string | null;
-  city: string | null;
-  code: string;
-  contact_name: string | null;
-  created_at: string;
-  email: string | null;
-  fax: string | null;
-  id: string;
-  mobile: string | null;
-  name: string;
-  phone: string | null;
-  phone_secondary: string | null;
-  postal_code: string | null;
-  short_name: string | null;
-  status: CustomerStatus;
-  tax_identifier: string | null;
-  updated_at: string;
+export interface MasterFilters {
+  keyword: string | null;
+  status: MasterStatus | null;
 }
 
 /**
@@ -153,6 +142,106 @@ export const SortDirection = {
 export interface SortMeta {
   direction: SortDirection;
   field: string;
+}
+
+export interface ListResponseMetaMasterFilters {
+  filters: MasterFilters;
+  pagination: PaginationMeta;
+  sort: SortMeta;
+}
+
+export interface CatalogListResponse {
+  items: CatalogResponse[];
+  meta: ListResponseMetaMasterFilters;
+}
+
+export interface CatalogUpdate {
+  /**
+     * @minLength 1
+     * @maxLength 32
+     */
+  code: string;
+  expected_updated_at: string;
+  /**
+     * @minLength 1
+     * @maxLength 100
+     */
+  name: string;
+  /**
+     * @minimum 0
+     * @maximum 9999
+     */
+  sort_order?: number;
+}
+
+export interface CurrentSessionResponse {
+  capabilities: string[];
+  expires_at: string;
+  organization: AuthenticatedOrganizationResponse;
+  user: AuthenticatedUserResponse;
+}
+
+export interface CustomerCreate {
+  address?: string | null;
+  city?: string | null;
+  /**
+     * @minLength 1
+     * @maxLength 32
+     */
+  code: string;
+  contact_name?: string | null;
+  email?: string | null;
+  fax?: string | null;
+  mobile?: string | null;
+  /**
+     * @minLength 1
+     * @maxLength 200
+     */
+  name: string;
+  payment_terms?: string | null;
+  phone?: string | null;
+  phone_secondary?: string | null;
+  postal_code?: string | null;
+  short_name?: string | null;
+  tax_identifier?: string | null;
+}
+
+export type CustomerStatus = typeof CustomerStatus[keyof typeof CustomerStatus];
+
+
+export const CustomerStatus = {
+  active: 'active',
+  inactive: 'inactive',
+} as const;
+
+export interface CustomerFilterSummary {
+  keyword: string | null;
+  status: CustomerStatus | null;
+}
+
+export interface CustomerResponse {
+  address: string | null;
+  city: string | null;
+  code: string;
+  contact_name: string | null;
+  created_at: string;
+  email: string | null;
+  fax: string | null;
+  id: string;
+  legacy_rounding_setting_raw: string | null;
+  legacy_source_key: string | null;
+  legacy_source_table: string | null;
+  legacy_tax_setting_raw: string | null;
+  mobile: string | null;
+  name: string;
+  payment_terms: string | null;
+  phone: string | null;
+  phone_secondary: string | null;
+  postal_code: string | null;
+  short_name: string | null;
+  status: CustomerStatus;
+  tax_identifier: string | null;
+  updated_at: string;
 }
 
 export interface ListResponseMetaCustomerFilterSummary {
@@ -198,6 +287,7 @@ export interface CustomerUpdate {
      * @maxLength 200
      */
   name: string;
+  payment_terms?: string | null;
   phone?: string | null;
   phone_secondary?: string | null;
   postal_code?: string | null;
@@ -242,6 +332,17 @@ export interface ListResponseMetaAuditFilterSummary {
   sort: SortMeta;
 }
 
+export interface WorkItemFilters {
+  keyword: string | null;
+  status: CustomerStatus | null;
+}
+
+export interface ListResponseMetaWorkItemFilters {
+  filters: WorkItemFilters;
+  pagination: PaginationMeta;
+  sort: SortMeta;
+}
+
 export interface ListResponseAuditLogResponseAuditFilterSummary {
   items: AuditLogResponse[];
   meta: ListResponseMetaAuditFilterSummary;
@@ -272,6 +373,11 @@ export interface LoginResponse {
   expires_at: string;
   organization: AuthenticatedOrganizationResponse;
   user: AuthenticatedUserResponse;
+}
+
+export interface MasterStatusUpdate {
+  expected_updated_at: string;
+  status: MasterStatus;
 }
 
 export interface OrganizationLogoMetadata {
@@ -376,6 +482,17 @@ export interface OrganizationSettingsUpdate {
   statement_tax_rate_percent?: number | string | null;
 }
 
+export interface ProcessDefinitionResponse {
+  code: string;
+  created_at: string;
+  id: string;
+  is_system: boolean;
+  name: string;
+  sort_order: number;
+  status: MasterStatus;
+  updated_at: string;
+}
+
 export type ReadinessCheckResultStatus = typeof ReadinessCheckResultStatus[keyof typeof ReadinessCheckResultStatus];
 
 
@@ -397,6 +514,173 @@ export interface ReadinessCheckResult {
 export interface ReadyResponse {
   checks: ReadinessCheckResult[];
   status: 'ready';
+}
+
+export type VendorCategory = typeof VendorCategory[keyof typeof VendorCategory];
+
+
+export const VendorCategory = {
+  supplier: 'supplier',
+  collaborator: 'collaborator',
+} as const;
+
+export interface VendorCreate {
+  address?: string | null;
+  category: VendorCategory;
+  city?: string | null;
+  /**
+     * @minLength 1
+     * @maxLength 32
+     */
+  code: string;
+  contact_name?: string | null;
+  email?: string | null;
+  fax?: string | null;
+  mobile?: string | null;
+  /**
+     * @minLength 1
+     * @maxLength 200
+     */
+  name: string;
+  phone?: string | null;
+  phone_secondary?: string | null;
+  postal_code?: string | null;
+  settlement_day?: number | null;
+  short_name?: string | null;
+}
+
+export interface VendorResponse {
+  address?: string | null;
+  category: VendorCategory;
+  city?: string | null;
+  /**
+     * @minLength 1
+     * @maxLength 32
+     */
+  code: string;
+  contact_name?: string | null;
+  created_at: string;
+  email?: string | null;
+  fax?: string | null;
+  id: string;
+  mobile?: string | null;
+  /**
+     * @minLength 1
+     * @maxLength 200
+     */
+  name: string;
+  phone?: string | null;
+  phone_secondary?: string | null;
+  postal_code?: string | null;
+  settlement_day?: number | null;
+  short_name?: string | null;
+  status: MasterStatus;
+  updated_at: string;
+}
+
+export interface VendorListResponse {
+  items: VendorResponse[];
+  meta: ListResponseMetaMasterFilters;
+}
+
+export interface VendorUpdate {
+  address?: string | null;
+  category: VendorCategory;
+  city?: string | null;
+  /**
+     * @minLength 1
+     * @maxLength 32
+     */
+  code: string;
+  contact_name?: string | null;
+  email?: string | null;
+  expected_updated_at: string;
+  fax?: string | null;
+  mobile?: string | null;
+  /**
+     * @minLength 1
+     * @maxLength 200
+     */
+  name: string;
+  phone?: string | null;
+  phone_secondary?: string | null;
+  postal_code?: string | null;
+  settlement_day?: number | null;
+  short_name?: string | null;
+}
+
+export interface WorkItemCreate {
+  /**
+     * @minLength 1
+     * @maxLength 64
+     */
+  code: string;
+  /**
+     * @minLength 1
+     * @maxLength 200
+     */
+  name: string;
+  specification?: string | null;
+  unit_price?: number | string | null;
+}
+
+export type WorkItemSource = typeof WorkItemSource[keyof typeof WorkItemSource];
+
+
+export const WorkItemSource = {
+  manual: 'manual',
+  legacy: 'legacy',
+  work_order: 'work_order',
+} as const;
+
+export interface WorkItemResponse {
+  /**
+     * @minLength 1
+     * @maxLength 64
+     */
+  code: string;
+  created_at: string;
+  customer_id: string;
+  id: string;
+  legacy_source_key: string | null;
+  legacy_source_table: string | null;
+  /**
+     * @minLength 1
+     * @maxLength 200
+     */
+  name: string;
+  source: WorkItemSource;
+  source_reference: string | null;
+  specification?: string | null;
+  status: CustomerStatus;
+  unit_price?: string | null;
+  updated_at: string;
+}
+
+export interface WorkItemListResponse {
+  items: WorkItemResponse[];
+  meta: ListResponseMetaWorkItemFilters;
+}
+
+export interface WorkItemStatusUpdate {
+  expected_updated_at: string;
+  status: CustomerStatus;
+}
+
+export interface WorkItemUpdate {
+  /**
+     * @minLength 1
+     * @maxLength 64
+     */
+  code: string;
+  expected_updated_at: string;
+  /**
+     * @minLength 1
+     * @maxLength 200
+     */
+  name: string;
+  specification?: string | null;
+  unit_price?: number | string | null;
 }
 
 export type AuditListParams = {
@@ -422,6 +706,70 @@ export type CustomerListParams = {
 status?: CustomerStatus | null;
 sort_by?: CustomerSortField;
 sort_direction?: SortDirection;
+/**
+ * @minimum 1
+ * @maximum 1000000
+ */
+page?: number;
+/**
+ * @minimum 1
+ * @maximum 100
+ */
+page_size?: number;
+keyword?: string | null;
+};
+
+export type CustomerWorkItemListParams = {
+status?: CustomerStatus | null;
+/**
+ * @minimum 1
+ * @maximum 1000000
+ */
+page?: number;
+/**
+ * @minimum 1
+ * @maximum 100
+ */
+page_size?: number;
+keyword?: string | null;
+};
+
+export type PaperMillListParams = {
+status?: MasterStatus | null;
+/**
+ * @minimum 1
+ * @maximum 1000000
+ */
+page?: number;
+/**
+ * @minimum 1
+ * @maximum 100
+ */
+page_size?: number;
+keyword?: string | null;
+};
+
+export type PaperTypeListParams = {
+status?: MasterStatus | null;
+/**
+ * @minimum 1
+ * @maximum 1000000
+ */
+page?: number;
+/**
+ * @minimum 1
+ * @maximum 100
+ */
+page_size?: number;
+keyword?: string | null;
+};
+
+export type ProcessDefinitionListParams = {
+status?: MasterStatus | null;
+};
+
+export type VendorListParams = {
+status?: MasterStatus | null;
 /**
  * @minimum 1
  * @maximum 1000000
@@ -1261,6 +1609,382 @@ export const customerStatusUpdate = async (customerId: string,
 
 
 
+export type customerWorkItemListResponse200 = {
+  data: WorkItemListResponse
+  status: 200
+}
+
+export type customerWorkItemListResponse400 = {
+  data: ErrorResponse
+  status: 400
+}
+
+export type customerWorkItemListResponse401 = {
+  data: ErrorResponse
+  status: 401
+}
+
+export type customerWorkItemListResponse403 = {
+  data: ErrorResponse
+  status: 403
+}
+
+export type customerWorkItemListResponse404 = {
+  data: ErrorResponse
+  status: 404
+}
+
+export type customerWorkItemListResponse405 = {
+  data: ErrorResponse
+  status: 405
+}
+
+export type customerWorkItemListResponse409 = {
+  data: ErrorResponse
+  status: 409
+}
+
+export type customerWorkItemListResponse422 = {
+  data: ErrorResponse
+  status: 422
+}
+
+export type customerWorkItemListResponse429 = {
+  data: ErrorResponse
+  status: 429
+}
+
+export type customerWorkItemListResponse500 = {
+  data: ErrorResponse
+  status: 500
+}
+
+export type customerWorkItemListResponseSuccess = (customerWorkItemListResponse200) & {
+  headers: Headers;
+};
+export type customerWorkItemListResponseError = (customerWorkItemListResponse400 | customerWorkItemListResponse401 | customerWorkItemListResponse403 | customerWorkItemListResponse404 | customerWorkItemListResponse405 | customerWorkItemListResponse409 | customerWorkItemListResponse422 | customerWorkItemListResponse429 | customerWorkItemListResponse500) & {
+  headers: Headers;
+};
+
+export type customerWorkItemListResponse = (customerWorkItemListResponseSuccess | customerWorkItemListResponseError)
+
+export const getCustomerWorkItemListUrl = (customerId: string,
+    params?: CustomerWorkItemListParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `${import.meta.env.VITE_API_ORIGIN || ''}/api/v1/customers/${customerId}/work-items?${stringifiedParams}` : `${import.meta.env.VITE_API_ORIGIN || ''}/api/v1/customers/${customerId}/work-items`
+}
+
+/**
+ * @summary Work Item List
+ */
+export const customerWorkItemList = async (customerId: string,
+    params?: CustomerWorkItemListParams, options?: RequestInit): Promise<customerWorkItemListResponse> => {
+
+  const res = await fetch(getCustomerWorkItemListUrl(customerId,params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+)
+
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+
+  const data: customerWorkItemListResponse['data'] = body ? JSON.parse(body) : {}
+  return { data, status: res.status, headers: res.headers } as customerWorkItemListResponse
+}
+
+
+
+export type customerWorkItemCreateResponse201 = {
+  data: WorkItemResponse
+  status: 201
+}
+
+export type customerWorkItemCreateResponse400 = {
+  data: ErrorResponse
+  status: 400
+}
+
+export type customerWorkItemCreateResponse401 = {
+  data: ErrorResponse
+  status: 401
+}
+
+export type customerWorkItemCreateResponse403 = {
+  data: ErrorResponse
+  status: 403
+}
+
+export type customerWorkItemCreateResponse404 = {
+  data: ErrorResponse
+  status: 404
+}
+
+export type customerWorkItemCreateResponse405 = {
+  data: ErrorResponse
+  status: 405
+}
+
+export type customerWorkItemCreateResponse409 = {
+  data: ErrorResponse
+  status: 409
+}
+
+export type customerWorkItemCreateResponse422 = {
+  data: ErrorResponse
+  status: 422
+}
+
+export type customerWorkItemCreateResponse429 = {
+  data: ErrorResponse
+  status: 429
+}
+
+export type customerWorkItemCreateResponse500 = {
+  data: ErrorResponse
+  status: 500
+}
+
+export type customerWorkItemCreateResponseSuccess = (customerWorkItemCreateResponse201) & {
+  headers: Headers;
+};
+export type customerWorkItemCreateResponseError = (customerWorkItemCreateResponse400 | customerWorkItemCreateResponse401 | customerWorkItemCreateResponse403 | customerWorkItemCreateResponse404 | customerWorkItemCreateResponse405 | customerWorkItemCreateResponse409 | customerWorkItemCreateResponse422 | customerWorkItemCreateResponse429 | customerWorkItemCreateResponse500) & {
+  headers: Headers;
+};
+
+export type customerWorkItemCreateResponse = (customerWorkItemCreateResponseSuccess | customerWorkItemCreateResponseError)
+
+export const getCustomerWorkItemCreateUrl = (customerId: string,) => {
+
+
+
+
+  return `${import.meta.env.VITE_API_ORIGIN || ''}/api/v1/customers/${customerId}/work-items`
+}
+
+/**
+ * @summary Work Item Create
+ */
+export const customerWorkItemCreate = async (customerId: string,
+    workItemCreate: WorkItemCreate, options?: RequestInit): Promise<customerWorkItemCreateResponse> => {
+
+  const res = await fetch(getCustomerWorkItemCreateUrl(customerId),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(workItemCreate)
+  }
+)
+
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+
+  const data: customerWorkItemCreateResponse['data'] = body ? JSON.parse(body) : {}
+  return { data, status: res.status, headers: res.headers } as customerWorkItemCreateResponse
+}
+
+
+
+export type customerWorkItemUpdateResponse200 = {
+  data: WorkItemResponse
+  status: 200
+}
+
+export type customerWorkItemUpdateResponse400 = {
+  data: ErrorResponse
+  status: 400
+}
+
+export type customerWorkItemUpdateResponse401 = {
+  data: ErrorResponse
+  status: 401
+}
+
+export type customerWorkItemUpdateResponse403 = {
+  data: ErrorResponse
+  status: 403
+}
+
+export type customerWorkItemUpdateResponse404 = {
+  data: ErrorResponse
+  status: 404
+}
+
+export type customerWorkItemUpdateResponse405 = {
+  data: ErrorResponse
+  status: 405
+}
+
+export type customerWorkItemUpdateResponse409 = {
+  data: ErrorResponse
+  status: 409
+}
+
+export type customerWorkItemUpdateResponse422 = {
+  data: ErrorResponse
+  status: 422
+}
+
+export type customerWorkItemUpdateResponse429 = {
+  data: ErrorResponse
+  status: 429
+}
+
+export type customerWorkItemUpdateResponse500 = {
+  data: ErrorResponse
+  status: 500
+}
+
+export type customerWorkItemUpdateResponseSuccess = (customerWorkItemUpdateResponse200) & {
+  headers: Headers;
+};
+export type customerWorkItemUpdateResponseError = (customerWorkItemUpdateResponse400 | customerWorkItemUpdateResponse401 | customerWorkItemUpdateResponse403 | customerWorkItemUpdateResponse404 | customerWorkItemUpdateResponse405 | customerWorkItemUpdateResponse409 | customerWorkItemUpdateResponse422 | customerWorkItemUpdateResponse429 | customerWorkItemUpdateResponse500) & {
+  headers: Headers;
+};
+
+export type customerWorkItemUpdateResponse = (customerWorkItemUpdateResponseSuccess | customerWorkItemUpdateResponseError)
+
+export const getCustomerWorkItemUpdateUrl = (customerId: string,
+    itemId: string,) => {
+
+
+
+
+  return `${import.meta.env.VITE_API_ORIGIN || ''}/api/v1/customers/${customerId}/work-items/${itemId}`
+}
+
+/**
+ * @summary Work Item Update
+ */
+export const customerWorkItemUpdate = async (customerId: string,
+    itemId: string,
+    workItemUpdate: WorkItemUpdate, options?: RequestInit): Promise<customerWorkItemUpdateResponse> => {
+
+  const res = await fetch(getCustomerWorkItemUpdateUrl(customerId,itemId),
+  {
+    ...options,
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(workItemUpdate)
+  }
+)
+
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+
+  const data: customerWorkItemUpdateResponse['data'] = body ? JSON.parse(body) : {}
+  return { data, status: res.status, headers: res.headers } as customerWorkItemUpdateResponse
+}
+
+
+
+export type customerWorkItemStatusUpdateResponse200 = {
+  data: WorkItemResponse
+  status: 200
+}
+
+export type customerWorkItemStatusUpdateResponse400 = {
+  data: ErrorResponse
+  status: 400
+}
+
+export type customerWorkItemStatusUpdateResponse401 = {
+  data: ErrorResponse
+  status: 401
+}
+
+export type customerWorkItemStatusUpdateResponse403 = {
+  data: ErrorResponse
+  status: 403
+}
+
+export type customerWorkItemStatusUpdateResponse404 = {
+  data: ErrorResponse
+  status: 404
+}
+
+export type customerWorkItemStatusUpdateResponse405 = {
+  data: ErrorResponse
+  status: 405
+}
+
+export type customerWorkItemStatusUpdateResponse409 = {
+  data: ErrorResponse
+  status: 409
+}
+
+export type customerWorkItemStatusUpdateResponse422 = {
+  data: ErrorResponse
+  status: 422
+}
+
+export type customerWorkItemStatusUpdateResponse429 = {
+  data: ErrorResponse
+  status: 429
+}
+
+export type customerWorkItemStatusUpdateResponse500 = {
+  data: ErrorResponse
+  status: 500
+}
+
+export type customerWorkItemStatusUpdateResponseSuccess = (customerWorkItemStatusUpdateResponse200) & {
+  headers: Headers;
+};
+export type customerWorkItemStatusUpdateResponseError = (customerWorkItemStatusUpdateResponse400 | customerWorkItemStatusUpdateResponse401 | customerWorkItemStatusUpdateResponse403 | customerWorkItemStatusUpdateResponse404 | customerWorkItemStatusUpdateResponse405 | customerWorkItemStatusUpdateResponse409 | customerWorkItemStatusUpdateResponse422 | customerWorkItemStatusUpdateResponse429 | customerWorkItemStatusUpdateResponse500) & {
+  headers: Headers;
+};
+
+export type customerWorkItemStatusUpdateResponse = (customerWorkItemStatusUpdateResponseSuccess | customerWorkItemStatusUpdateResponseError)
+
+export const getCustomerWorkItemStatusUpdateUrl = (customerId: string,
+    itemId: string,) => {
+
+
+
+
+  return `${import.meta.env.VITE_API_ORIGIN || ''}/api/v1/customers/${customerId}/work-items/${itemId}/status`
+}
+
+/**
+ * @summary Work Item Status
+ */
+export const customerWorkItemStatusUpdate = async (customerId: string,
+    itemId: string,
+    workItemStatusUpdate: WorkItemStatusUpdate, options?: RequestInit): Promise<customerWorkItemStatusUpdateResponse> => {
+
+  const res = await fetch(getCustomerWorkItemStatusUpdateUrl(customerId,itemId),
+  {
+    ...options,
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(workItemStatusUpdate)
+  }
+)
+
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+
+  const data: customerWorkItemStatusUpdateResponse['data'] = body ? JSON.parse(body) : {}
+  return { data, status: res.status, headers: res.headers } as customerWorkItemStatusUpdateResponse
+}
+
+
+
 export type healthLiveResponse200 = {
   data: LiveResponse
   status: 200
@@ -1444,6 +2168,932 @@ export const healthReady = async ( options?: RequestInit): Promise<healthReadyRe
 
   const data: healthReadyResponse['data'] = body ? JSON.parse(body) : {}
   return { data, status: res.status, headers: res.headers } as healthReadyResponse
+}
+
+
+
+export type paperMillListResponse200 = {
+  data: CatalogListResponse
+  status: 200
+}
+
+export type paperMillListResponse400 = {
+  data: ErrorResponse
+  status: 400
+}
+
+export type paperMillListResponse401 = {
+  data: ErrorResponse
+  status: 401
+}
+
+export type paperMillListResponse403 = {
+  data: ErrorResponse
+  status: 403
+}
+
+export type paperMillListResponse404 = {
+  data: ErrorResponse
+  status: 404
+}
+
+export type paperMillListResponse405 = {
+  data: ErrorResponse
+  status: 405
+}
+
+export type paperMillListResponse409 = {
+  data: ErrorResponse
+  status: 409
+}
+
+export type paperMillListResponse422 = {
+  data: ErrorResponse
+  status: 422
+}
+
+export type paperMillListResponse429 = {
+  data: ErrorResponse
+  status: 429
+}
+
+export type paperMillListResponse500 = {
+  data: ErrorResponse
+  status: 500
+}
+
+export type paperMillListResponseSuccess = (paperMillListResponse200) & {
+  headers: Headers;
+};
+export type paperMillListResponseError = (paperMillListResponse400 | paperMillListResponse401 | paperMillListResponse403 | paperMillListResponse404 | paperMillListResponse405 | paperMillListResponse409 | paperMillListResponse422 | paperMillListResponse429 | paperMillListResponse500) & {
+  headers: Headers;
+};
+
+export type paperMillListResponse = (paperMillListResponseSuccess | paperMillListResponseError)
+
+export const getPaperMillListUrl = (params?: PaperMillListParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `${import.meta.env.VITE_API_ORIGIN || ''}/api/v1/master-data/paper-mills?${stringifiedParams}` : `${import.meta.env.VITE_API_ORIGIN || ''}/api/v1/master-data/paper-mills`
+}
+
+/**
+ * @summary Catalog List
+ */
+export const paperMillList = async (params?: PaperMillListParams, options?: RequestInit): Promise<paperMillListResponse> => {
+
+  const res = await fetch(getPaperMillListUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+)
+
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+
+  const data: paperMillListResponse['data'] = body ? JSON.parse(body) : {}
+  return { data, status: res.status, headers: res.headers } as paperMillListResponse
+}
+
+
+
+export type paperMillCreateResponse201 = {
+  data: CatalogResponse
+  status: 201
+}
+
+export type paperMillCreateResponse400 = {
+  data: ErrorResponse
+  status: 400
+}
+
+export type paperMillCreateResponse401 = {
+  data: ErrorResponse
+  status: 401
+}
+
+export type paperMillCreateResponse403 = {
+  data: ErrorResponse
+  status: 403
+}
+
+export type paperMillCreateResponse404 = {
+  data: ErrorResponse
+  status: 404
+}
+
+export type paperMillCreateResponse405 = {
+  data: ErrorResponse
+  status: 405
+}
+
+export type paperMillCreateResponse409 = {
+  data: ErrorResponse
+  status: 409
+}
+
+export type paperMillCreateResponse422 = {
+  data: ErrorResponse
+  status: 422
+}
+
+export type paperMillCreateResponse429 = {
+  data: ErrorResponse
+  status: 429
+}
+
+export type paperMillCreateResponse500 = {
+  data: ErrorResponse
+  status: 500
+}
+
+export type paperMillCreateResponseSuccess = (paperMillCreateResponse201) & {
+  headers: Headers;
+};
+export type paperMillCreateResponseError = (paperMillCreateResponse400 | paperMillCreateResponse401 | paperMillCreateResponse403 | paperMillCreateResponse404 | paperMillCreateResponse405 | paperMillCreateResponse409 | paperMillCreateResponse422 | paperMillCreateResponse429 | paperMillCreateResponse500) & {
+  headers: Headers;
+};
+
+export type paperMillCreateResponse = (paperMillCreateResponseSuccess | paperMillCreateResponseError)
+
+export const getPaperMillCreateUrl = () => {
+
+
+
+
+  return `${import.meta.env.VITE_API_ORIGIN || ''}/api/v1/master-data/paper-mills`
+}
+
+/**
+ * @summary Catalog Create
+ */
+export const paperMillCreate = async (catalogCreate: CatalogCreate, options?: RequestInit): Promise<paperMillCreateResponse> => {
+
+  const res = await fetch(getPaperMillCreateUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(catalogCreate)
+  }
+)
+
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+
+  const data: paperMillCreateResponse['data'] = body ? JSON.parse(body) : {}
+  return { data, status: res.status, headers: res.headers } as paperMillCreateResponse
+}
+
+
+
+export type paperMillUpdateResponse200 = {
+  data: CatalogResponse
+  status: 200
+}
+
+export type paperMillUpdateResponse400 = {
+  data: ErrorResponse
+  status: 400
+}
+
+export type paperMillUpdateResponse401 = {
+  data: ErrorResponse
+  status: 401
+}
+
+export type paperMillUpdateResponse403 = {
+  data: ErrorResponse
+  status: 403
+}
+
+export type paperMillUpdateResponse404 = {
+  data: ErrorResponse
+  status: 404
+}
+
+export type paperMillUpdateResponse405 = {
+  data: ErrorResponse
+  status: 405
+}
+
+export type paperMillUpdateResponse409 = {
+  data: ErrorResponse
+  status: 409
+}
+
+export type paperMillUpdateResponse422 = {
+  data: ErrorResponse
+  status: 422
+}
+
+export type paperMillUpdateResponse429 = {
+  data: ErrorResponse
+  status: 429
+}
+
+export type paperMillUpdateResponse500 = {
+  data: ErrorResponse
+  status: 500
+}
+
+export type paperMillUpdateResponseSuccess = (paperMillUpdateResponse200) & {
+  headers: Headers;
+};
+export type paperMillUpdateResponseError = (paperMillUpdateResponse400 | paperMillUpdateResponse401 | paperMillUpdateResponse403 | paperMillUpdateResponse404 | paperMillUpdateResponse405 | paperMillUpdateResponse409 | paperMillUpdateResponse422 | paperMillUpdateResponse429 | paperMillUpdateResponse500) & {
+  headers: Headers;
+};
+
+export type paperMillUpdateResponse = (paperMillUpdateResponseSuccess | paperMillUpdateResponseError)
+
+export const getPaperMillUpdateUrl = (itemId: string,) => {
+
+
+
+
+  return `${import.meta.env.VITE_API_ORIGIN || ''}/api/v1/master-data/paper-mills/${itemId}`
+}
+
+/**
+ * @summary Catalog Update
+ */
+export const paperMillUpdate = async (itemId: string,
+    catalogUpdate: CatalogUpdate, options?: RequestInit): Promise<paperMillUpdateResponse> => {
+
+  const res = await fetch(getPaperMillUpdateUrl(itemId),
+  {
+    ...options,
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(catalogUpdate)
+  }
+)
+
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+
+  const data: paperMillUpdateResponse['data'] = body ? JSON.parse(body) : {}
+  return { data, status: res.status, headers: res.headers } as paperMillUpdateResponse
+}
+
+
+
+export type paperMillStatusUpdateResponse200 = {
+  data: CatalogResponse
+  status: 200
+}
+
+export type paperMillStatusUpdateResponse400 = {
+  data: ErrorResponse
+  status: 400
+}
+
+export type paperMillStatusUpdateResponse401 = {
+  data: ErrorResponse
+  status: 401
+}
+
+export type paperMillStatusUpdateResponse403 = {
+  data: ErrorResponse
+  status: 403
+}
+
+export type paperMillStatusUpdateResponse404 = {
+  data: ErrorResponse
+  status: 404
+}
+
+export type paperMillStatusUpdateResponse405 = {
+  data: ErrorResponse
+  status: 405
+}
+
+export type paperMillStatusUpdateResponse409 = {
+  data: ErrorResponse
+  status: 409
+}
+
+export type paperMillStatusUpdateResponse422 = {
+  data: ErrorResponse
+  status: 422
+}
+
+export type paperMillStatusUpdateResponse429 = {
+  data: ErrorResponse
+  status: 429
+}
+
+export type paperMillStatusUpdateResponse500 = {
+  data: ErrorResponse
+  status: 500
+}
+
+export type paperMillStatusUpdateResponseSuccess = (paperMillStatusUpdateResponse200) & {
+  headers: Headers;
+};
+export type paperMillStatusUpdateResponseError = (paperMillStatusUpdateResponse400 | paperMillStatusUpdateResponse401 | paperMillStatusUpdateResponse403 | paperMillStatusUpdateResponse404 | paperMillStatusUpdateResponse405 | paperMillStatusUpdateResponse409 | paperMillStatusUpdateResponse422 | paperMillStatusUpdateResponse429 | paperMillStatusUpdateResponse500) & {
+  headers: Headers;
+};
+
+export type paperMillStatusUpdateResponse = (paperMillStatusUpdateResponseSuccess | paperMillStatusUpdateResponseError)
+
+export const getPaperMillStatusUpdateUrl = (itemId: string,) => {
+
+
+
+
+  return `${import.meta.env.VITE_API_ORIGIN || ''}/api/v1/master-data/paper-mills/${itemId}/status`
+}
+
+/**
+ * @summary Catalog Status Update
+ */
+export const paperMillStatusUpdate = async (itemId: string,
+    masterStatusUpdate: MasterStatusUpdate, options?: RequestInit): Promise<paperMillStatusUpdateResponse> => {
+
+  const res = await fetch(getPaperMillStatusUpdateUrl(itemId),
+  {
+    ...options,
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(masterStatusUpdate)
+  }
+)
+
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+
+  const data: paperMillStatusUpdateResponse['data'] = body ? JSON.parse(body) : {}
+  return { data, status: res.status, headers: res.headers } as paperMillStatusUpdateResponse
+}
+
+
+
+export type paperTypeListResponse200 = {
+  data: CatalogListResponse
+  status: 200
+}
+
+export type paperTypeListResponse400 = {
+  data: ErrorResponse
+  status: 400
+}
+
+export type paperTypeListResponse401 = {
+  data: ErrorResponse
+  status: 401
+}
+
+export type paperTypeListResponse403 = {
+  data: ErrorResponse
+  status: 403
+}
+
+export type paperTypeListResponse404 = {
+  data: ErrorResponse
+  status: 404
+}
+
+export type paperTypeListResponse405 = {
+  data: ErrorResponse
+  status: 405
+}
+
+export type paperTypeListResponse409 = {
+  data: ErrorResponse
+  status: 409
+}
+
+export type paperTypeListResponse422 = {
+  data: ErrorResponse
+  status: 422
+}
+
+export type paperTypeListResponse429 = {
+  data: ErrorResponse
+  status: 429
+}
+
+export type paperTypeListResponse500 = {
+  data: ErrorResponse
+  status: 500
+}
+
+export type paperTypeListResponseSuccess = (paperTypeListResponse200) & {
+  headers: Headers;
+};
+export type paperTypeListResponseError = (paperTypeListResponse400 | paperTypeListResponse401 | paperTypeListResponse403 | paperTypeListResponse404 | paperTypeListResponse405 | paperTypeListResponse409 | paperTypeListResponse422 | paperTypeListResponse429 | paperTypeListResponse500) & {
+  headers: Headers;
+};
+
+export type paperTypeListResponse = (paperTypeListResponseSuccess | paperTypeListResponseError)
+
+export const getPaperTypeListUrl = (params?: PaperTypeListParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `${import.meta.env.VITE_API_ORIGIN || ''}/api/v1/master-data/paper-types?${stringifiedParams}` : `${import.meta.env.VITE_API_ORIGIN || ''}/api/v1/master-data/paper-types`
+}
+
+/**
+ * @summary Catalog List
+ */
+export const paperTypeList = async (params?: PaperTypeListParams, options?: RequestInit): Promise<paperTypeListResponse> => {
+
+  const res = await fetch(getPaperTypeListUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+)
+
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+
+  const data: paperTypeListResponse['data'] = body ? JSON.parse(body) : {}
+  return { data, status: res.status, headers: res.headers } as paperTypeListResponse
+}
+
+
+
+export type paperTypeCreateResponse201 = {
+  data: CatalogResponse
+  status: 201
+}
+
+export type paperTypeCreateResponse400 = {
+  data: ErrorResponse
+  status: 400
+}
+
+export type paperTypeCreateResponse401 = {
+  data: ErrorResponse
+  status: 401
+}
+
+export type paperTypeCreateResponse403 = {
+  data: ErrorResponse
+  status: 403
+}
+
+export type paperTypeCreateResponse404 = {
+  data: ErrorResponse
+  status: 404
+}
+
+export type paperTypeCreateResponse405 = {
+  data: ErrorResponse
+  status: 405
+}
+
+export type paperTypeCreateResponse409 = {
+  data: ErrorResponse
+  status: 409
+}
+
+export type paperTypeCreateResponse422 = {
+  data: ErrorResponse
+  status: 422
+}
+
+export type paperTypeCreateResponse429 = {
+  data: ErrorResponse
+  status: 429
+}
+
+export type paperTypeCreateResponse500 = {
+  data: ErrorResponse
+  status: 500
+}
+
+export type paperTypeCreateResponseSuccess = (paperTypeCreateResponse201) & {
+  headers: Headers;
+};
+export type paperTypeCreateResponseError = (paperTypeCreateResponse400 | paperTypeCreateResponse401 | paperTypeCreateResponse403 | paperTypeCreateResponse404 | paperTypeCreateResponse405 | paperTypeCreateResponse409 | paperTypeCreateResponse422 | paperTypeCreateResponse429 | paperTypeCreateResponse500) & {
+  headers: Headers;
+};
+
+export type paperTypeCreateResponse = (paperTypeCreateResponseSuccess | paperTypeCreateResponseError)
+
+export const getPaperTypeCreateUrl = () => {
+
+
+
+
+  return `${import.meta.env.VITE_API_ORIGIN || ''}/api/v1/master-data/paper-types`
+}
+
+/**
+ * @summary Catalog Create
+ */
+export const paperTypeCreate = async (catalogCreate: CatalogCreate, options?: RequestInit): Promise<paperTypeCreateResponse> => {
+
+  const res = await fetch(getPaperTypeCreateUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(catalogCreate)
+  }
+)
+
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+
+  const data: paperTypeCreateResponse['data'] = body ? JSON.parse(body) : {}
+  return { data, status: res.status, headers: res.headers } as paperTypeCreateResponse
+}
+
+
+
+export type paperTypeUpdateResponse200 = {
+  data: CatalogResponse
+  status: 200
+}
+
+export type paperTypeUpdateResponse400 = {
+  data: ErrorResponse
+  status: 400
+}
+
+export type paperTypeUpdateResponse401 = {
+  data: ErrorResponse
+  status: 401
+}
+
+export type paperTypeUpdateResponse403 = {
+  data: ErrorResponse
+  status: 403
+}
+
+export type paperTypeUpdateResponse404 = {
+  data: ErrorResponse
+  status: 404
+}
+
+export type paperTypeUpdateResponse405 = {
+  data: ErrorResponse
+  status: 405
+}
+
+export type paperTypeUpdateResponse409 = {
+  data: ErrorResponse
+  status: 409
+}
+
+export type paperTypeUpdateResponse422 = {
+  data: ErrorResponse
+  status: 422
+}
+
+export type paperTypeUpdateResponse429 = {
+  data: ErrorResponse
+  status: 429
+}
+
+export type paperTypeUpdateResponse500 = {
+  data: ErrorResponse
+  status: 500
+}
+
+export type paperTypeUpdateResponseSuccess = (paperTypeUpdateResponse200) & {
+  headers: Headers;
+};
+export type paperTypeUpdateResponseError = (paperTypeUpdateResponse400 | paperTypeUpdateResponse401 | paperTypeUpdateResponse403 | paperTypeUpdateResponse404 | paperTypeUpdateResponse405 | paperTypeUpdateResponse409 | paperTypeUpdateResponse422 | paperTypeUpdateResponse429 | paperTypeUpdateResponse500) & {
+  headers: Headers;
+};
+
+export type paperTypeUpdateResponse = (paperTypeUpdateResponseSuccess | paperTypeUpdateResponseError)
+
+export const getPaperTypeUpdateUrl = (itemId: string,) => {
+
+
+
+
+  return `${import.meta.env.VITE_API_ORIGIN || ''}/api/v1/master-data/paper-types/${itemId}`
+}
+
+/**
+ * @summary Catalog Update
+ */
+export const paperTypeUpdate = async (itemId: string,
+    catalogUpdate: CatalogUpdate, options?: RequestInit): Promise<paperTypeUpdateResponse> => {
+
+  const res = await fetch(getPaperTypeUpdateUrl(itemId),
+  {
+    ...options,
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(catalogUpdate)
+  }
+)
+
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+
+  const data: paperTypeUpdateResponse['data'] = body ? JSON.parse(body) : {}
+  return { data, status: res.status, headers: res.headers } as paperTypeUpdateResponse
+}
+
+
+
+export type paperTypeStatusUpdateResponse200 = {
+  data: CatalogResponse
+  status: 200
+}
+
+export type paperTypeStatusUpdateResponse400 = {
+  data: ErrorResponse
+  status: 400
+}
+
+export type paperTypeStatusUpdateResponse401 = {
+  data: ErrorResponse
+  status: 401
+}
+
+export type paperTypeStatusUpdateResponse403 = {
+  data: ErrorResponse
+  status: 403
+}
+
+export type paperTypeStatusUpdateResponse404 = {
+  data: ErrorResponse
+  status: 404
+}
+
+export type paperTypeStatusUpdateResponse405 = {
+  data: ErrorResponse
+  status: 405
+}
+
+export type paperTypeStatusUpdateResponse409 = {
+  data: ErrorResponse
+  status: 409
+}
+
+export type paperTypeStatusUpdateResponse422 = {
+  data: ErrorResponse
+  status: 422
+}
+
+export type paperTypeStatusUpdateResponse429 = {
+  data: ErrorResponse
+  status: 429
+}
+
+export type paperTypeStatusUpdateResponse500 = {
+  data: ErrorResponse
+  status: 500
+}
+
+export type paperTypeStatusUpdateResponseSuccess = (paperTypeStatusUpdateResponse200) & {
+  headers: Headers;
+};
+export type paperTypeStatusUpdateResponseError = (paperTypeStatusUpdateResponse400 | paperTypeStatusUpdateResponse401 | paperTypeStatusUpdateResponse403 | paperTypeStatusUpdateResponse404 | paperTypeStatusUpdateResponse405 | paperTypeStatusUpdateResponse409 | paperTypeStatusUpdateResponse422 | paperTypeStatusUpdateResponse429 | paperTypeStatusUpdateResponse500) & {
+  headers: Headers;
+};
+
+export type paperTypeStatusUpdateResponse = (paperTypeStatusUpdateResponseSuccess | paperTypeStatusUpdateResponseError)
+
+export const getPaperTypeStatusUpdateUrl = (itemId: string,) => {
+
+
+
+
+  return `${import.meta.env.VITE_API_ORIGIN || ''}/api/v1/master-data/paper-types/${itemId}/status`
+}
+
+/**
+ * @summary Catalog Status Update
+ */
+export const paperTypeStatusUpdate = async (itemId: string,
+    masterStatusUpdate: MasterStatusUpdate, options?: RequestInit): Promise<paperTypeStatusUpdateResponse> => {
+
+  const res = await fetch(getPaperTypeStatusUpdateUrl(itemId),
+  {
+    ...options,
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(masterStatusUpdate)
+  }
+)
+
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+
+  const data: paperTypeStatusUpdateResponse['data'] = body ? JSON.parse(body) : {}
+  return { data, status: res.status, headers: res.headers } as paperTypeStatusUpdateResponse
+}
+
+
+
+export type processDefinitionListResponse200 = {
+  data: ProcessDefinitionResponse[]
+  status: 200
+}
+
+export type processDefinitionListResponse400 = {
+  data: ErrorResponse
+  status: 400
+}
+
+export type processDefinitionListResponse401 = {
+  data: ErrorResponse
+  status: 401
+}
+
+export type processDefinitionListResponse403 = {
+  data: ErrorResponse
+  status: 403
+}
+
+export type processDefinitionListResponse404 = {
+  data: ErrorResponse
+  status: 404
+}
+
+export type processDefinitionListResponse405 = {
+  data: ErrorResponse
+  status: 405
+}
+
+export type processDefinitionListResponse409 = {
+  data: ErrorResponse
+  status: 409
+}
+
+export type processDefinitionListResponse422 = {
+  data: ErrorResponse
+  status: 422
+}
+
+export type processDefinitionListResponse429 = {
+  data: ErrorResponse
+  status: 429
+}
+
+export type processDefinitionListResponse500 = {
+  data: ErrorResponse
+  status: 500
+}
+
+export type processDefinitionListResponseSuccess = (processDefinitionListResponse200) & {
+  headers: Headers;
+};
+export type processDefinitionListResponseError = (processDefinitionListResponse400 | processDefinitionListResponse401 | processDefinitionListResponse403 | processDefinitionListResponse404 | processDefinitionListResponse405 | processDefinitionListResponse409 | processDefinitionListResponse422 | processDefinitionListResponse429 | processDefinitionListResponse500) & {
+  headers: Headers;
+};
+
+export type processDefinitionListResponse = (processDefinitionListResponseSuccess | processDefinitionListResponseError)
+
+export const getProcessDefinitionListUrl = (params?: ProcessDefinitionListParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `${import.meta.env.VITE_API_ORIGIN || ''}/api/v1/master-data/process-definitions?${stringifiedParams}` : `${import.meta.env.VITE_API_ORIGIN || ''}/api/v1/master-data/process-definitions`
+}
+
+/**
+ * @summary Process Definition List
+ */
+export const processDefinitionList = async (params?: ProcessDefinitionListParams, options?: RequestInit): Promise<processDefinitionListResponse> => {
+
+  const res = await fetch(getProcessDefinitionListUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+)
+
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+
+  const data: processDefinitionListResponse['data'] = body ? JSON.parse(body) : {}
+  return { data, status: res.status, headers: res.headers } as processDefinitionListResponse
+}
+
+
+
+export type processDefinitionStatusUpdateResponse200 = {
+  data: ProcessDefinitionResponse
+  status: 200
+}
+
+export type processDefinitionStatusUpdateResponse400 = {
+  data: ErrorResponse
+  status: 400
+}
+
+export type processDefinitionStatusUpdateResponse401 = {
+  data: ErrorResponse
+  status: 401
+}
+
+export type processDefinitionStatusUpdateResponse403 = {
+  data: ErrorResponse
+  status: 403
+}
+
+export type processDefinitionStatusUpdateResponse404 = {
+  data: ErrorResponse
+  status: 404
+}
+
+export type processDefinitionStatusUpdateResponse405 = {
+  data: ErrorResponse
+  status: 405
+}
+
+export type processDefinitionStatusUpdateResponse409 = {
+  data: ErrorResponse
+  status: 409
+}
+
+export type processDefinitionStatusUpdateResponse422 = {
+  data: ErrorResponse
+  status: 422
+}
+
+export type processDefinitionStatusUpdateResponse429 = {
+  data: ErrorResponse
+  status: 429
+}
+
+export type processDefinitionStatusUpdateResponse500 = {
+  data: ErrorResponse
+  status: 500
+}
+
+export type processDefinitionStatusUpdateResponseSuccess = (processDefinitionStatusUpdateResponse200) & {
+  headers: Headers;
+};
+export type processDefinitionStatusUpdateResponseError = (processDefinitionStatusUpdateResponse400 | processDefinitionStatusUpdateResponse401 | processDefinitionStatusUpdateResponse403 | processDefinitionStatusUpdateResponse404 | processDefinitionStatusUpdateResponse405 | processDefinitionStatusUpdateResponse409 | processDefinitionStatusUpdateResponse422 | processDefinitionStatusUpdateResponse429 | processDefinitionStatusUpdateResponse500) & {
+  headers: Headers;
+};
+
+export type processDefinitionStatusUpdateResponse = (processDefinitionStatusUpdateResponseSuccess | processDefinitionStatusUpdateResponseError)
+
+export const getProcessDefinitionStatusUpdateUrl = (itemId: string,) => {
+
+
+
+
+  return `${import.meta.env.VITE_API_ORIGIN || ''}/api/v1/master-data/process-definitions/${itemId}/status`
+}
+
+/**
+ * @summary Process Definition Status Update
+ */
+export const processDefinitionStatusUpdate = async (itemId: string,
+    masterStatusUpdate: MasterStatusUpdate, options?: RequestInit): Promise<processDefinitionStatusUpdateResponse> => {
+
+  const res = await fetch(getProcessDefinitionStatusUpdateUrl(itemId),
+  {
+    ...options,
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(masterStatusUpdate)
+  }
+)
+
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+
+  const data: processDefinitionStatusUpdateResponse['data'] = body ? JSON.parse(body) : {}
+  return { data, status: res.status, headers: res.headers } as processDefinitionStatusUpdateResponse
 }
 
 
@@ -1804,4 +3454,373 @@ export const organizationSettingsUpdate = async (organizationSettingsUpdateBody:
 
   const data: organizationSettingsUpdateResponse['data'] = body ? JSON.parse(body) : {}
   return { data, status: res.status, headers: res.headers } as organizationSettingsUpdateResponse
+}
+
+
+
+export type vendorListResponse200 = {
+  data: VendorListResponse
+  status: 200
+}
+
+export type vendorListResponse400 = {
+  data: ErrorResponse
+  status: 400
+}
+
+export type vendorListResponse401 = {
+  data: ErrorResponse
+  status: 401
+}
+
+export type vendorListResponse403 = {
+  data: ErrorResponse
+  status: 403
+}
+
+export type vendorListResponse404 = {
+  data: ErrorResponse
+  status: 404
+}
+
+export type vendorListResponse405 = {
+  data: ErrorResponse
+  status: 405
+}
+
+export type vendorListResponse409 = {
+  data: ErrorResponse
+  status: 409
+}
+
+export type vendorListResponse422 = {
+  data: ErrorResponse
+  status: 422
+}
+
+export type vendorListResponse429 = {
+  data: ErrorResponse
+  status: 429
+}
+
+export type vendorListResponse500 = {
+  data: ErrorResponse
+  status: 500
+}
+
+export type vendorListResponseSuccess = (vendorListResponse200) & {
+  headers: Headers;
+};
+export type vendorListResponseError = (vendorListResponse400 | vendorListResponse401 | vendorListResponse403 | vendorListResponse404 | vendorListResponse405 | vendorListResponse409 | vendorListResponse422 | vendorListResponse429 | vendorListResponse500) & {
+  headers: Headers;
+};
+
+export type vendorListResponse = (vendorListResponseSuccess | vendorListResponseError)
+
+export const getVendorListUrl = (params?: VendorListParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `${import.meta.env.VITE_API_ORIGIN || ''}/api/v1/vendors?${stringifiedParams}` : `${import.meta.env.VITE_API_ORIGIN || ''}/api/v1/vendors`
+}
+
+/**
+ * @summary Vendor List
+ */
+export const vendorList = async (params?: VendorListParams, options?: RequestInit): Promise<vendorListResponse> => {
+
+  const res = await fetch(getVendorListUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+)
+
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+
+  const data: vendorListResponse['data'] = body ? JSON.parse(body) : {}
+  return { data, status: res.status, headers: res.headers } as vendorListResponse
+}
+
+
+
+export type vendorCreateResponse201 = {
+  data: VendorResponse
+  status: 201
+}
+
+export type vendorCreateResponse400 = {
+  data: ErrorResponse
+  status: 400
+}
+
+export type vendorCreateResponse401 = {
+  data: ErrorResponse
+  status: 401
+}
+
+export type vendorCreateResponse403 = {
+  data: ErrorResponse
+  status: 403
+}
+
+export type vendorCreateResponse404 = {
+  data: ErrorResponse
+  status: 404
+}
+
+export type vendorCreateResponse405 = {
+  data: ErrorResponse
+  status: 405
+}
+
+export type vendorCreateResponse409 = {
+  data: ErrorResponse
+  status: 409
+}
+
+export type vendorCreateResponse422 = {
+  data: ErrorResponse
+  status: 422
+}
+
+export type vendorCreateResponse429 = {
+  data: ErrorResponse
+  status: 429
+}
+
+export type vendorCreateResponse500 = {
+  data: ErrorResponse
+  status: 500
+}
+
+export type vendorCreateResponseSuccess = (vendorCreateResponse201) & {
+  headers: Headers;
+};
+export type vendorCreateResponseError = (vendorCreateResponse400 | vendorCreateResponse401 | vendorCreateResponse403 | vendorCreateResponse404 | vendorCreateResponse405 | vendorCreateResponse409 | vendorCreateResponse422 | vendorCreateResponse429 | vendorCreateResponse500) & {
+  headers: Headers;
+};
+
+export type vendorCreateResponse = (vendorCreateResponseSuccess | vendorCreateResponseError)
+
+export const getVendorCreateUrl = () => {
+
+
+
+
+  return `${import.meta.env.VITE_API_ORIGIN || ''}/api/v1/vendors`
+}
+
+/**
+ * @summary Vendor Create
+ */
+export const vendorCreate = async (vendorCreateBody: VendorCreate, options?: RequestInit): Promise<vendorCreateResponse> => {
+
+  const res = await fetch(getVendorCreateUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(vendorCreateBody)
+  }
+)
+
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+
+  const data: vendorCreateResponse['data'] = body ? JSON.parse(body) : {}
+  return { data, status: res.status, headers: res.headers } as vendorCreateResponse
+}
+
+
+
+export type vendorUpdateResponse200 = {
+  data: VendorResponse
+  status: 200
+}
+
+export type vendorUpdateResponse400 = {
+  data: ErrorResponse
+  status: 400
+}
+
+export type vendorUpdateResponse401 = {
+  data: ErrorResponse
+  status: 401
+}
+
+export type vendorUpdateResponse403 = {
+  data: ErrorResponse
+  status: 403
+}
+
+export type vendorUpdateResponse404 = {
+  data: ErrorResponse
+  status: 404
+}
+
+export type vendorUpdateResponse405 = {
+  data: ErrorResponse
+  status: 405
+}
+
+export type vendorUpdateResponse409 = {
+  data: ErrorResponse
+  status: 409
+}
+
+export type vendorUpdateResponse422 = {
+  data: ErrorResponse
+  status: 422
+}
+
+export type vendorUpdateResponse429 = {
+  data: ErrorResponse
+  status: 429
+}
+
+export type vendorUpdateResponse500 = {
+  data: ErrorResponse
+  status: 500
+}
+
+export type vendorUpdateResponseSuccess = (vendorUpdateResponse200) & {
+  headers: Headers;
+};
+export type vendorUpdateResponseError = (vendorUpdateResponse400 | vendorUpdateResponse401 | vendorUpdateResponse403 | vendorUpdateResponse404 | vendorUpdateResponse405 | vendorUpdateResponse409 | vendorUpdateResponse422 | vendorUpdateResponse429 | vendorUpdateResponse500) & {
+  headers: Headers;
+};
+
+export type vendorUpdateResponse = (vendorUpdateResponseSuccess | vendorUpdateResponseError)
+
+export const getVendorUpdateUrl = (vendorId: string,) => {
+
+
+
+
+  return `${import.meta.env.VITE_API_ORIGIN || ''}/api/v1/vendors/${vendorId}`
+}
+
+/**
+ * @summary Vendor Update
+ */
+export const vendorUpdate = async (vendorId: string,
+    vendorUpdateBody: VendorUpdate, options?: RequestInit): Promise<vendorUpdateResponse> => {
+
+  const res = await fetch(getVendorUpdateUrl(vendorId),
+  {
+    ...options,
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(vendorUpdateBody)
+  }
+)
+
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+
+  const data: vendorUpdateResponse['data'] = body ? JSON.parse(body) : {}
+  return { data, status: res.status, headers: res.headers } as vendorUpdateResponse
+}
+
+
+
+export type vendorStatusUpdateResponse200 = {
+  data: VendorResponse
+  status: 200
+}
+
+export type vendorStatusUpdateResponse400 = {
+  data: ErrorResponse
+  status: 400
+}
+
+export type vendorStatusUpdateResponse401 = {
+  data: ErrorResponse
+  status: 401
+}
+
+export type vendorStatusUpdateResponse403 = {
+  data: ErrorResponse
+  status: 403
+}
+
+export type vendorStatusUpdateResponse404 = {
+  data: ErrorResponse
+  status: 404
+}
+
+export type vendorStatusUpdateResponse405 = {
+  data: ErrorResponse
+  status: 405
+}
+
+export type vendorStatusUpdateResponse409 = {
+  data: ErrorResponse
+  status: 409
+}
+
+export type vendorStatusUpdateResponse422 = {
+  data: ErrorResponse
+  status: 422
+}
+
+export type vendorStatusUpdateResponse429 = {
+  data: ErrorResponse
+  status: 429
+}
+
+export type vendorStatusUpdateResponse500 = {
+  data: ErrorResponse
+  status: 500
+}
+
+export type vendorStatusUpdateResponseSuccess = (vendorStatusUpdateResponse200) & {
+  headers: Headers;
+};
+export type vendorStatusUpdateResponseError = (vendorStatusUpdateResponse400 | vendorStatusUpdateResponse401 | vendorStatusUpdateResponse403 | vendorStatusUpdateResponse404 | vendorStatusUpdateResponse405 | vendorStatusUpdateResponse409 | vendorStatusUpdateResponse422 | vendorStatusUpdateResponse429 | vendorStatusUpdateResponse500) & {
+  headers: Headers;
+};
+
+export type vendorStatusUpdateResponse = (vendorStatusUpdateResponseSuccess | vendorStatusUpdateResponseError)
+
+export const getVendorStatusUpdateUrl = (vendorId: string,) => {
+
+
+
+
+  return `${import.meta.env.VITE_API_ORIGIN || ''}/api/v1/vendors/${vendorId}/status`
+}
+
+/**
+ * @summary Vendor Status Update
+ */
+export const vendorStatusUpdate = async (vendorId: string,
+    masterStatusUpdate: MasterStatusUpdate, options?: RequestInit): Promise<vendorStatusUpdateResponse> => {
+
+  const res = await fetch(getVendorStatusUpdateUrl(vendorId),
+  {
+    ...options,
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(masterStatusUpdate)
+  }
+)
+
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+
+  const data: vendorStatusUpdateResponse['data'] = body ? JSON.parse(body) : {}
+  return { data, status: res.status, headers: res.headers } as vendorStatusUpdateResponse
 }
