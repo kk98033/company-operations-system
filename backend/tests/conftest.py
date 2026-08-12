@@ -13,3 +13,6 @@ os.environ["DATABASE_URL"] = (
 )
 os.environ["APP_PUBLIC_ORIGIN"] = "http://testserver"
 os.environ["CSRF_HMAC_KEY"] = "dGVzdC1vbmx5LWNzcmYta2V5LTMyLWJ5dGVzISEhISE"
+os.environ["AUTH_SECURITY_HMAC_KEY"] = (
+    "dGVzdC1vbmx5LWF1dGgta2V5LTMyLWJ5dGVzISEhISE"
+)

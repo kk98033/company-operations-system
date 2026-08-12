@@ -30,6 +30,7 @@ def test_development_openapi_has_stable_health_and_error_contracts() -> None:
             "404",
             "405",
             "409",
+            "429",
             "422",
             "500",
         ):
@@ -83,6 +84,9 @@ def test_auth_openapi_declares_secret_input_and_cookie_transport() -> None:
     }
     assert "session_token" not in login_response["properties"]
     assert "token_type" not in login_response["properties"]
+    assert login["responses"]["429"]["content"]["application/json"][
+        "schema"
+    ] == {"$ref": "#/components/schemas/ErrorResponse"}
     csrf_parameter = next(
         parameter
         for parameter in logout["parameters"]

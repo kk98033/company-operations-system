@@ -54,15 +54,15 @@
 
 | 項目 | 目前狀態 |
 |---|---|
-| 最後更新日期 | 2026-08-09 |
-| 計畫版本 | v1.12（Phase 1 Slice 1.8 完成，下一步 1.9） |
-| 架構版本 | v1.13（交易式稽核、Request ID 與第二家公司部署邊界同步） |
-| 目前階段 | Phase 1 進行中；身分與公司隔離基礎依小切片實作 |
-| 目前切片 | Slice 1.8：不可變交易式稽核、Request ID、遮罩與唯讀稽核頁已完成 |
-| 實作完成度 | Phase 0：完成；Import I-0：3／3；Phase 1：8／9；正式業務流程功能 0% |
+| 最後更新日期 | 2026-08-12 |
+| 計畫版本 | v1.13（Phase 1 Slice 1.9 完成，下一步 Phase 2 Slice 2.1） |
+| 架構版本 | v1.14（登入限制、安全事件與多公司隔離同步） |
+| 目前階段 | Phase 1 工程完成；準備進入 Phase 2 公司與主檔基礎 |
+| 目前切片 | Slice 1.9：登入失敗限制與 append-only 安全事件已完成 |
+| 實作完成度 | Phase 0：完成；Import I-0：3／3；Phase 1：9／9；正式業務流程功能 0% |
 | 規劃文件完成度 | 100% |
-| 最新中型進度備份 | Git tag `checkpoint-phase1-audit-foundation-v1`；經驗證 bundle 位於專案外層 `git-backups/` |
-| 正式遠端 Git 備份 | 尚未設定，必須在 Phase 1 完成前建立私人 repository |
+| 最新中型進度備份 | Git tag `checkpoint-phase-1`；經驗證 bundle 位於專案外層 `git-backups/` |
+| 正式遠端 Git 備份 | 尚未設定；R-11 維持 Open，Phase 2 開始前優先建立私人 repository |
 
 ### 已完成
 
@@ -112,10 +112,11 @@
 - 完成 Phase 1 Slice 1.6：新增可逆 `0005_authorization_foundation`，建立 permissions、公司 roles、role grants 與 membership role assignment；兩組複合外鍵直接拒絕跨公司角色。後端 exact capability dependency 預設拒絕並回穩定 403，current Session 回傳啟用中的 capability；React 提供通用 `CapabilityGate`。P1-02 正式角色 mapping 尚待公司簽認，migration 沒有寫入候選業務權限。
 - 完成 Phase 1 Slice 1.7：新增 Session-only `OrganizationScope` dependency；SELECT／UPDATE／DELETE 由 model scope 加入公司條件，CREATE 由後端注入 ownership，caller 偽造 organization 會在 SQL 前失敗。A／B 公司真 PostgreSQL 測試證明 A 查不到也改不到 B，且 cross-company error 不暴露公司 ID。沒有新增 migration、RLS 或業務表。
 - 完成 Phase 1 Slice 1.8：新增可逆 `0006_audit_foundation`、交易式 audit service、遞迴敏感欄位遮罩及伺服器產生的 Request ID。稽核資料與業務異動由同一 transaction 提交或回滾，資料庫拒絕一般 UPDATE／DELETE；`GET /api/v1/audit-logs` 以 `audit.read`、Cookie Session 與公司 scope 保護。React `/audit-logs` 使用既有清單版型，具 loading、空資料、錯誤、無權限、RWD 與 axe 基線；A／B 公司真 PostgreSQL 測試確認紀錄不混用。
+- 完成 Phase 1 Slice 1.9：新增可逆 `0007_login_security`、公司範圍 HMAC 登入 bucket、15 分鐘內第五次失敗起限制 15 分鐘，以及 append-only 安全事件。已知／未知帳號使用相同門檻；成功登入會清除失敗狀態。資料庫不保存 raw 帳號、密碼或 IP，A／B 公司不共用計數。184 個非 DB、77 個 PostgreSQL integration 與 69 個 React 測試通過。
 
 ### 進行中
 
-- Phase 0 工程與公司 Gate 已完成；Phase 1 Slice 1.1～1.8 已建立 identity、登入／Cookie／CSRF／React、角色 capability、organization scope 及稽核；P1-02 正式角色 mapping、登入限流與正式業務流程仍未完成。
+- Phase 0 工程與公司 Gate、Phase 1 Slice 1.1～1.9 已完成；identity、登入／Cookie／CSRF／React、角色 capability、organization scope、稽核及登入安全事件基礎已建立。P1-02 正式角色 mapping 與正式業務流程仍未完成。
 - 工單查詢與單頁建檔的介面邊界已依原稿修正；正式儲存、編輯、列印、API 與資料表仍屬 Phase 4，不把原型誤報為業務功能。
 - 介面正式方向已定案；`/style-preview` 只保留為歷史比較與 ADR-010 決策證據，不是正式業務頁。
 - 公司 P0 已確認 10／10。正式 migration、API 與舊客戶資料 apply 仍只會在對應 Phase／Import Slice 通過測試後逐批建立，不因 Gate 通過而提前寫入。
@@ -123,7 +124,7 @@
 
 ### 接下來要做
 
-1. 執行 Phase 1 Slice 1.9：建立登入失敗限制與安全事件紀錄；錯誤回應仍不可洩漏帳號是否存在，也不提前建立客戶或工單資料表。
+1. 執行 Phase 2 Slice 2.1：建立公司基本資料與 Logo metadata；沿用 organization scope、權限與 audit，不提前混入客戶或工單 schema。
 2. Phase 3／4 開工時依 `docs/Gmail附件需求逐項對照.md` 逐 Slice 建立測試，不可把整份報價或工單一次塞入單一元件。
 3. 客戶 Slice 2.6 完成並簽認 mapping 後，才執行 I-1.1 `cust` dry-run。
 
@@ -183,7 +184,7 @@
 ```bash
 make toolchain-check
 make bootstrap
-# 編輯 .env：更換 POSTGRES_PASSWORD，以 secrets.token_urlsafe(32) 產生 CSRF_HMAC_KEY，並設定 VITE_ORGANIZATION_ID
+# 編輯 .env：更換 POSTGRES_PASSWORD，以 secrets.token_urlsafe(32) 分別產生兩把不同的 CSRF_HMAC_KEY／AUTH_SECURITY_HMAC_KEY，並設定 VITE_ORGANIZATION_ID
 make env-check
 ```
 
@@ -194,9 +195,9 @@ python3 -c 'import secrets; print(secrets.token_urlsafe(32))'
 chmod 600 .env
 ```
 
-若 `.env` 是 Slice 1.4 前建立的舊檔，需同步目前 `.env.example` 的 `APP_PUBLIC_ORIGIN`、`CSRF_HMAC_KEY` 與 `VITE_ORGANIZATION_ID`，並將 `DATABASE_URL` 保持為變數引用寫法。`CSRF_HMAC_KEY` 應以 Python `secrets.token_urlsafe(32)` 產生，不得沿用範例或提交 Git；本機 `.env` 建議權限設為只有本人可讀。`VITE_ORGANIZATION_ID` 是公開的部署識別碼，不是 Secret，但仍不可當成後端公司 scope 驗證的代替品。
+若 `.env` 是 Slice 1.9 前建立的舊檔，需同步目前 `.env.example` 的 `APP_PUBLIC_ORIGIN`、`CSRF_HMAC_KEY`、`AUTH_SECURITY_HMAC_KEY` 與 `VITE_ORGANIZATION_ID`，並將 `DATABASE_URL` 保持為變數引用寫法。兩把 HMAC key 都應各自以 Python `secrets.token_urlsafe(32)` 產生且不得相同，不得沿用範例或提交 Git；本機 `.env` 建議權限設為只有本人可讀。`VITE_ORGANIZATION_ID` 是公開的部署識別碼，不是 Secret，但仍不可當成後端公司 scope 驗證的代替品。
 
-正式伺服器不要把真實密鑰放在 React bundle、Git、Dockerfile 或可公開的 `.env`。單機 VM 可使用僅部署帳號可讀的系統環境檔（例如 `/etc/company-system/company-system.env`，owner-only）由 systemd 注入；雲端／容器環境優先使用 Secret Manager、Docker Secret 或等價機制在啟動時注入。輪替 `CSRF_HMAC_KEY` 不需要資料庫 migration，但現有 CSRF token 會失效，應搭配撤銷現有 Session 或安排使用者重新登入。
+正式伺服器不要把真實密鑰放在 React bundle、Git、Dockerfile 或可公開的 `.env`。單機 VM 可使用僅部署帳號可讀的系統環境檔（例如 `/etc/company-system/company-system.env`，owner-only）由 systemd 注入；雲端／容器環境優先使用 Secret Manager、Docker Secret 或等價機制在啟動時注入。輪替 `CSRF_HMAC_KEY` 會使現有 CSRF token 失效；輪替 `AUTH_SECURITY_HMAC_KEY` 會改變登入 bucket 指紋，應先清除短期 throttle state。兩者都不需要資料庫 migration，但應安排撤銷 Session或重新登入及保留安全事件的核對方式。
 
 日常操作：
 

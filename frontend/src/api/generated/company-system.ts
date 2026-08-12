@@ -234,6 +234,11 @@ export type auditListResponse422 = {
   status: 422
 }
 
+export type auditListResponse429 = {
+  data: ErrorResponse
+  status: 429
+}
+
 export type auditListResponse500 = {
   data: ErrorResponse
   status: 500
@@ -242,7 +247,7 @@ export type auditListResponse500 = {
 export type auditListResponseSuccess = (auditListResponse200) & {
   headers: Headers;
 };
-export type auditListResponseError = (auditListResponse400 | auditListResponse401 | auditListResponse403 | auditListResponse404 | auditListResponse405 | auditListResponse409 | auditListResponse422 | auditListResponse500) & {
+export type auditListResponseError = (auditListResponse400 | auditListResponse401 | auditListResponse403 | auditListResponse404 | auditListResponse405 | auditListResponse409 | auditListResponse422 | auditListResponse429 | auditListResponse500) & {
   headers: Headers;
 };
 
@@ -326,6 +331,11 @@ export type authLoginResponse422 = {
   status: 422
 }
 
+export type authLoginResponse429 = {
+  data: ErrorResponse
+  status: 429
+}
+
 export type authLoginResponse500 = {
   data: ErrorResponse
   status: 500
@@ -334,7 +344,7 @@ export type authLoginResponse500 = {
 export type authLoginResponseSuccess = (authLoginResponse200) & {
   headers: Headers;
 };
-export type authLoginResponseError = (authLoginResponse400 | authLoginResponse401 | authLoginResponse403 | authLoginResponse404 | authLoginResponse405 | authLoginResponse409 | authLoginResponse422 | authLoginResponse500) & {
+export type authLoginResponseError = (authLoginResponse400 | authLoginResponse401 | authLoginResponse403 | authLoginResponse404 | authLoginResponse405 | authLoginResponse409 | authLoginResponse422 | authLoginResponse429 | authLoginResponse500) & {
   headers: Headers;
 };
 
@@ -411,6 +421,11 @@ export type authLogoutResponse422 = {
   status: 422
 }
 
+export type authLogoutResponse429 = {
+  data: ErrorResponse
+  status: 429
+}
+
 export type authLogoutResponse500 = {
   data: ErrorResponse
   status: 500
@@ -419,7 +434,7 @@ export type authLogoutResponse500 = {
 export type authLogoutResponseSuccess = (authLogoutResponse204) & {
   headers: Headers;
 };
-export type authLogoutResponseError = (authLogoutResponse400 | authLogoutResponse401 | authLogoutResponse403 | authLogoutResponse404 | authLogoutResponse405 | authLogoutResponse409 | authLogoutResponse422 | authLogoutResponse500) & {
+export type authLogoutResponseError = (authLogoutResponse400 | authLogoutResponse401 | authLogoutResponse403 | authLogoutResponse404 | authLogoutResponse405 | authLogoutResponse409 | authLogoutResponse422 | authLogoutResponse429 | authLogoutResponse500) & {
   headers: Headers;
 };
 
@@ -496,6 +511,11 @@ export type authCurrentSessionResponse422 = {
   status: 422
 }
 
+export type authCurrentSessionResponse429 = {
+  data: ErrorResponse
+  status: 429
+}
+
 export type authCurrentSessionResponse500 = {
   data: ErrorResponse
   status: 500
@@ -504,7 +524,7 @@ export type authCurrentSessionResponse500 = {
 export type authCurrentSessionResponseSuccess = (authCurrentSessionResponse200) & {
   headers: Headers;
 };
-export type authCurrentSessionResponseError = (authCurrentSessionResponse400 | authCurrentSessionResponse401 | authCurrentSessionResponse403 | authCurrentSessionResponse404 | authCurrentSessionResponse405 | authCurrentSessionResponse409 | authCurrentSessionResponse422 | authCurrentSessionResponse500) & {
+export type authCurrentSessionResponseError = (authCurrentSessionResponse400 | authCurrentSessionResponse401 | authCurrentSessionResponse403 | authCurrentSessionResponse404 | authCurrentSessionResponse405 | authCurrentSessionResponse409 | authCurrentSessionResponse422 | authCurrentSessionResponse429 | authCurrentSessionResponse500) & {
   headers: Headers;
 };
 
@@ -581,6 +601,11 @@ export type healthLiveResponse422 = {
   status: 422
 }
 
+export type healthLiveResponse429 = {
+  data: ErrorResponse
+  status: 429
+}
+
 export type healthLiveResponse500 = {
   data: ErrorResponse
   status: 500
@@ -589,7 +614,7 @@ export type healthLiveResponse500 = {
 export type healthLiveResponseSuccess = (healthLiveResponse200) & {
   headers: Headers;
 };
-export type healthLiveResponseError = (healthLiveResponse400 | healthLiveResponse401 | healthLiveResponse403 | healthLiveResponse404 | healthLiveResponse405 | healthLiveResponse409 | healthLiveResponse422 | healthLiveResponse500) & {
+export type healthLiveResponseError = (healthLiveResponse400 | healthLiveResponse401 | healthLiveResponse403 | healthLiveResponse404 | healthLiveResponse405 | healthLiveResponse409 | healthLiveResponse422 | healthLiveResponse429 | healthLiveResponse500) & {
   headers: Headers;
 };
 
@@ -667,6 +692,11 @@ export type healthReadyResponse422 = {
   status: 422
 }
 
+export type healthReadyResponse429 = {
+  data: ErrorResponse
+  status: 429
+}
+
 export type healthReadyResponse500 = {
   data: ErrorResponse
   status: 500
@@ -680,7 +710,7 @@ export type healthReadyResponse503 = {
 export type healthReadyResponseSuccess = (healthReadyResponse200) & {
   headers: Headers;
 };
-export type healthReadyResponseError = (healthReadyResponse400 | healthReadyResponse401 | healthReadyResponse403 | healthReadyResponse404 | healthReadyResponse405 | healthReadyResponse409 | healthReadyResponse422 | healthReadyResponse500 | healthReadyResponse503) & {
+export type healthReadyResponseError = (healthReadyResponse400 | healthReadyResponse401 | healthReadyResponse403 | healthReadyResponse404 | healthReadyResponse405 | healthReadyResponse409 | healthReadyResponse422 | healthReadyResponse429 | healthReadyResponse500 | healthReadyResponse503) & {
   headers: Headers;
 };
 

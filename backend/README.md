@@ -41,7 +41,7 @@ python -m pip install -e ".[dev]"
 ```bash
 cd company-system
 cp .env.example .env
-# 更換 POSTGRES_PASSWORD，以 secrets.token_urlsafe(32) 產生 CSRF_HMAC_KEY，並設定 VITE_ORGANIZATION_ID
+# 更換 POSTGRES_PASSWORD，以 secrets.token_urlsafe(32) 分別產生不同的 CSRF_HMAC_KEY 與 AUTH_SECURITY_HMAC_KEY，並設定 VITE_ORGANIZATION_ID
 cd backend
 source .venv/bin/activate
 uvicorn app.main:app --reload --host 127.0.0.1 --port 8000
@@ -61,13 +61,14 @@ uvicorn app.main:app --reload --host 127.0.0.1 --port 8000
 | `DATABASE_URL` | PostgreSQL DSN | 必須含帳號與密碼，資料庫名稱與帳號都要隔離；視為 Secret，錯誤訊息不回顯連線值 |
 | `APP_PUBLIC_ORIGIN` | 瀏覽器正式來源 | 單一完整 origin；production 必須是 HTTPS，不接受 wildcard、path 或 query |
 | `CSRF_HMAC_KEY` | CSRF 簽章密鑰 | `secrets.token_urlsafe(32)` 產生的 43 字元值；不得提交 Git 或沿用範例值 |
+| `AUTH_SECURITY_HMAC_KEY` | 登入限制指紋密鑰 | 使用另一個 `secrets.token_urlsafe(32)` 值；不得與 CSRF key 相同或進入前端 |
 
 ### Secret 儲存與上線
 
-- 本機開發：真實 `CSRF_HMAC_KEY` 只放專案根目錄 `.env`；該檔已由 Git 排除，建議權限收緊為 owner-only。本機值可隨時重產，但不可使用 `.env.example` marker、人類可猜文字或他人的正式值。
+- 本機開發：兩把真實 HMAC key 只放專案根目錄 `.env`；該檔已由 Git 排除，建議權限收緊為 owner-only。本機值可重產，但不可相同、使用 `.env.example` marker、人類可猜文字或他人的正式值。
 - 單機正式 VM：放在專案目錄外、僅服務帳號／部署帳號可讀的系統環境檔，例如 `/etc/company-system/company-system.env`，再由 systemd `EnvironmentFile` 注入。檔案不得打包進 image、備份到公開位置或被 Web server 提供下載。
 - 雲端／容器：優先使用平台 Secret Manager、Docker Secret 或等價的 runtime injection；秘密值不進 React `VITE_*`、Git、Dockerfile、CI log 或 image layer。
-- 輪替：更換 `CSRF_HMAC_KEY` 不需 Alembic migration，但舊 CSRF token 會立即無效。上線操作應同時撤銷現有 Session 或通知使用者清除 Cookie 後重新登入。
+- 輪替：更換 `CSRF_HMAC_KEY` 不需 Alembic migration，但舊 CSRF token 會立即無效；更換 `AUTH_SECURITY_HMAC_KEY` 前先清除短期 throttle state，舊安全事件保留。正式操作需安排 Session／Cookie 與事件核對。
 
 `VITE_ORGANIZATION_ID` 只是前端部署公開設定，用來免除員工手動輸入 UUID，不是 Secret。後端仍必須以使用者 membership 驗證公司範圍，不信任前端值。
 

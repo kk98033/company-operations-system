@@ -10,6 +10,7 @@ from sqlalchemy.orm import Session as OrmSession
 
 from app.core.database.session import get_database_session
 from app.core.errors import ApplicationError
+from app.core.request_context import require_request_id
 from app.modules.auth.cookies import clear_auth_cookies, set_auth_cookies
 from app.modules.auth.dependencies import (
     optional_logout_session,
@@ -18,6 +19,7 @@ from app.modules.auth.dependencies import (
 )
 from app.modules.auth.errors import (
     AuthenticationFailedError,
+    LoginRateLimitedError,
     SessionCreationError,
 )
 from app.modules.auth.schemas import (
@@ -90,9 +92,18 @@ def build_auth_router() -> APIRouter:
                 login_name=payload.login_name,
                 password=payload.password,
                 organization_id=payload.organization_id,
+                request_id=require_request_id(request),
+                security_hmac_key=request.app.state.settings.auth_security_hmac_key_value(),
             )
         except AuthenticationFailedError:
             raise _authentication_error() from None
+        except LoginRateLimitedError as exc:
+            raise ApplicationError(
+                status_code=429,
+                code="LOGIN_RATE_LIMITED",
+                message="登入嘗試過於頻繁，請稍後再試",
+                headers={"Retry-After": str(exc.retry_after_seconds)},
+            ) from None
         except SessionCreationError:
             raise ApplicationError(
                 status_code=500,

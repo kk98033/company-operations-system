@@ -74,6 +74,7 @@ AUTHORIZATION_TABLES = [
 ]
 
 AUDIT_TABLES = ["audit_logs"]
+LOGIN_SECURITY_TABLES = ["login_security_events", "login_throttle_states"]
 
 
 def test_schema_upgrade_downgrade_upgrade_round_trip(
@@ -88,11 +89,17 @@ def test_schema_upgrade_downgrade_upgrade_round_trip(
     assert REGISTERED_MODELS
 
     command.upgrade(config, "head")
-    assert _current_revision() == "0006_audit_foundation"
+    assert _current_revision() == "0007_login_security"
     assert _table_names() == [
         "alembic_version",
         *sorted(
-            [*IMPORT_TABLES, *AUTHORIZATION_TABLES, *AUDIT_TABLES, *IDENTITY_TABLES]
+            [
+                *IMPORT_TABLES,
+                *AUTHORIZATION_TABLES,
+                *AUDIT_TABLES,
+                *LOGIN_SECURITY_TABLES,
+                *IDENTITY_TABLES,
+            ]
         ),
     ]
 
@@ -103,11 +110,17 @@ def test_schema_upgrade_downgrade_upgrade_round_trip(
     assert _table_names() == ["alembic_version"]
 
     command.upgrade(config, "head")
-    assert _current_revision() == "0006_audit_foundation"
+    assert _current_revision() == "0007_login_security"
     assert _table_names() == [
         "alembic_version",
         *sorted(
-            [*IMPORT_TABLES, *AUTHORIZATION_TABLES, *AUDIT_TABLES, *IDENTITY_TABLES]
+            [
+                *IMPORT_TABLES,
+                *AUTHORIZATION_TABLES,
+                *AUDIT_TABLES,
+                *LOGIN_SECURITY_TABLES,
+                *IDENTITY_TABLES,
+            ]
         ),
     ]
 
@@ -155,7 +168,7 @@ def test_identity_downgrade_preserves_existing_import_foundation(
         resources.dispose()
 
     command.upgrade(config, "head")
-    assert _current_revision() == "0006_audit_foundation"
+    assert _current_revision() == "0007_login_security"
     command.check(config)
 
     resources = create_database_resources(settings)

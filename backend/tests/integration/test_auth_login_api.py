@@ -256,7 +256,7 @@ def test_all_credential_and_status_failures_have_the_same_safe_401(
     def count_selects(*args) -> None:
         nonlocal select_count
         statement = args[2]
-        if statement.lstrip().upper().startswith("SELECT"):
+        if statement.lstrip().upper().startswith("SELECT") and "FROM users" in statement:
             select_count += 1
 
     event.listen(identity_engine, "before_cursor_execute", count_selects)

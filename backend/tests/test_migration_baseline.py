@@ -28,6 +28,8 @@ def test_base_metadata_contains_import_and_identity_foundation_tables() -> None:
         "import_source_files",
         "import_staging_records",
         "legacy_mappings",
+        "login_security_events",
+        "login_throttle_states",
         "organization_member_roles",
         "organization_members",
         "organizations",

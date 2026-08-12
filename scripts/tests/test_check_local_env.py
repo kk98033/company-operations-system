@@ -10,6 +10,7 @@ CHECK_SCRIPT = REPO_ROOT / "scripts" / "check-local-env.sh"
 
 class CheckLocalEnvTests(unittest.TestCase):
     VALID_CSRF_KEY = "dGVzdC1vbmx5LWNzcmYta2V5LTMyLWJ5dGVzISEhISE"
+    VALID_AUTH_KEY = "dGVzdC1vbmx5LWF1dGgta2V5LTMyLWJ5dGVzISEhISE"
 
     def run_check(self, content: str | None) -> subprocess.CompletedProcess[str]:
         with tempfile.TemporaryDirectory() as temporary_directory:
@@ -27,6 +28,7 @@ class CheckLocalEnvTests(unittest.TestCase):
         result = self.run_check(
             "POSTGRES_PASSWORD=local-secret-canary\n"
             f"CSRF_HMAC_KEY={self.VALID_CSRF_KEY}\n"
+            f"AUTH_SECURITY_HMAC_KEY={self.VALID_AUTH_KEY}\n"
         )
 
         self.assertEqual(result.returncode, 0)
@@ -58,11 +60,33 @@ class CheckLocalEnvTests(unittest.TestCase):
         ):
             csrf_line = "" if csrf_value is None else f"CSRF_HMAC_KEY={csrf_value}\n"
             result = self.run_check(
-                "POSTGRES_PASSWORD=local-secret-canary\n" + csrf_line
+                "POSTGRES_PASSWORD=local-secret-canary\n"
+                + csrf_line
+                + f"AUTH_SECURITY_HMAC_KEY={self.VALID_AUTH_KEY}\n"
             )
             self.assertNotEqual(result.returncode, 0)
             if csrf_value:
                 self.assertNotIn(csrf_value, result.stdout + result.stderr)
+
+    def test_rejects_missing_malformed_or_reused_auth_security_key(self) -> None:
+        for auth_value in (
+            None,
+            "",
+            "replace-with-a-different-token-urlsafe-32-byte-value",
+            "too-short",
+            self.VALID_CSRF_KEY,
+        ):
+            auth_line = (
+                "" if auth_value is None else f"AUTH_SECURITY_HMAC_KEY={auth_value}\n"
+            )
+            result = self.run_check(
+                "POSTGRES_PASSWORD=local-secret-canary\n"
+                f"CSRF_HMAC_KEY={self.VALID_CSRF_KEY}\n"
+                + auth_line
+            )
+            self.assertNotEqual(result.returncode, 0)
+            if auth_value:
+                self.assertNotIn(auth_value, result.stdout + result.stderr)
 
 
 if __name__ == "__main__":

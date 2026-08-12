@@ -16,6 +16,7 @@ def valid_settings_values(**overrides: object) -> dict[str, object]:
         ),
         "APP_PUBLIC_ORIGIN": "http://testserver",
         "CSRF_HMAC_KEY": "dGVzdC1vbmx5LWNzcmYta2V5LTMyLWJ5dGVzISEhISE",
+        "AUTH_SECURITY_HMAC_KEY": "dGVzdC1vbmx5LWF1dGgta2V5LTMyLWJ5dGVzISEhISE",
     }
     values.update(overrides)
     if values["APP_ENV"] == "production" and "APP_PUBLIC_ORIGIN" not in overrides:
@@ -49,8 +50,7 @@ def make_test_settings() -> AppSettings:
         valid_settings_values(
             APP_ENV="test",
             DATABASE_URL=(
-                "postgresql+psycopg://company_system_test:test-only@127.0.0.1/"
-                "company_system_test"
+                "postgresql+psycopg://company_system_test:test-only@127.0.0.1/company_system_test"
             ),
         )
     )

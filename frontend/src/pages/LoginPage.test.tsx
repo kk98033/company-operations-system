@@ -128,6 +128,31 @@ describe('登入與 Cookie Session 流程', () => {
       .not.toBeInTheDocument()
   })
 
+  it('登入被暫時限制時顯示安全訊息且不進入工作區', async () => {
+    vi.stubGlobal('fetch', vi.fn<typeof fetch>().mockImplementation(async (input) => {
+      const url = String(input)
+      if (url.endsWith('/api/v1/auth/session')) {
+        return apiError(401, 'SESSION_INVALID', '請重新登入')
+      }
+      if (url.endsWith('/api/v1/auth/login')) {
+        return apiError(429, 'LOGIN_RATE_LIMITED', '登入嘗試過於頻繁，請稍後再試')
+      }
+      throw new Error(`Unexpected request: ${url}`)
+    }))
+    const user = userEvent.setup()
+
+    await renderApp(['/login'], { session: null })
+    await user.type(await screen.findByRole('textbox', { name: /^使用者代號/ }), 'test.operator')
+    await user.type(screen.getByLabelText(/^密碼/), 'wrong-password')
+    await user.click(screen.getByRole('button', { name: '登入' }))
+
+    expect(await screen.findByRole('alert')).toHaveTextContent(
+      '登入嘗試過於頻繁，請稍後再試',
+    )
+    expect(screen.queryByRole('heading', { level: 1, name: '首頁' }))
+      .not.toBeInTheDocument()
+  })
+
   it('登出後清除前端 Session cache 並回到登入頁', async () => {
     document.cookie = 'company_system_csrf=signed-csrf-token; Path=/'
     const fetchMock = vi.fn<typeof fetch>().mockImplementation(async (input, init) => {

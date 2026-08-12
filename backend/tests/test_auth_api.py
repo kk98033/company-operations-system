@@ -13,7 +13,11 @@ from app.main import create_app
 from app.modules.auth import api as auth_api
 from app.modules.auth.cookies import CSRF_COOKIE_NAME, SESSION_COOKIE_NAME
 from app.modules.auth.csrf import derive_csrf_token
-from app.modules.auth.errors import AuthenticationFailedError, SessionCreationError
+from app.modules.auth.errors import (
+    AuthenticationFailedError,
+    LoginRateLimitedError,
+    SessionCreationError,
+)
 from app.modules.auth.services.login import LoginResult
 from tests.database_factory import make_database_resources
 from tests.settings_factory import make_test_settings
@@ -122,6 +126,7 @@ def test_login_sets_browser_session_cookies_without_returning_raw_token(
     ("error", "expected_status", "expected_code"),
     [
         (AuthenticationFailedError(), 401, "AUTHENTICATION_FAILED"),
+        (LoginRateLimitedError(321), 429, "LOGIN_RATE_LIMITED"),
         (SessionCreationError(), 500, "SESSION_CREATION_FAILED"),
     ],
 )
@@ -150,6 +155,8 @@ def test_login_domain_errors_use_safe_fixed_responses(
     assert response.json()["error"]["details"] is None
     assert password not in response.text
     assert "set-cookie" not in response.headers
+    if expected_status == 429:
+        assert response.headers["retry-after"] == "321"
 
 
 @pytest.mark.parametrize(

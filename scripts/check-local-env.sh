@@ -45,6 +45,22 @@ if [[ ! "$csrf_key" =~ ^[A-Za-z0-9_-]{43}$ ]]; then
   exit 1
 fi
 
+auth_key_line="$(grep -E '^AUTH_SECURITY_HMAC_KEY=' "$env_file" | tail -n 1 || true)"
+auth_key="${auth_key_line#AUTH_SECURITY_HMAC_KEY=}"
+auth_key="$(printf '%s' "$auth_key" | sed -E 's/^[[:space:]]+//; s/[[:space:]]+$//')"
+if [[ "$auth_key" == \"*\" && "$auth_key" == *\" ]]; then
+  auth_key="${auth_key:1:${#auth_key}-2}"
+elif [[ "$auth_key" == \'*\' && "$auth_key" == *\' ]]; then
+  auth_key="${auth_key:1:${#auth_key}-2}"
+else
+  auth_key="$(printf '%s' "$auth_key" | sed -E 's/[[:space:]]+#.*$//; s/[[:space:]]+$//')"
+fi
+
+if [[ ! "$auth_key" =~ ^[A-Za-z0-9_-]{43}$ || "$auth_key" == "$csrf_key" ]]; then
+  echo "AUTH_SECURITY_HMAC_KEY must be a different token_urlsafe(32) local key." >&2
+  exit 1
+fi
+
 if [[ "$env_file" == "$repo_root/.env" ]]; then
   python_bin="$repo_root/backend/.venv/bin/python"
   if [[ ! -x "$python_bin" ]]; then

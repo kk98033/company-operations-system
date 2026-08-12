@@ -12,7 +12,12 @@ from sqlalchemy import Engine, text
 
 from app.core.database import create_database_resources
 from app.modules.audit.models import AuditLog
-from app.modules.auth.models import Session, User
+from app.modules.auth.models import (
+    LoginSecurityEvent,
+    LoginThrottleState,
+    Session,
+    User,
+)
 from app.modules.authorization.models import (
     OrganizationMemberRole,
     Permission,
@@ -52,6 +57,10 @@ def identity_engine(migrated_engine: Engine) -> Generator[Engine, None, None]:
     finally:
         with migrated_engine.begin() as connection:
             connection.execute(text(f"TRUNCATE TABLE {AuditLog.__tablename__}"))
+            connection.execute(
+                text(f"TRUNCATE TABLE {LoginSecurityEvent.__tablename__}")
+            )
+            connection.execute(LoginThrottleState.__table__.delete())
             connection.execute(Session.__table__.delete())
             connection.execute(OrganizationMemberRole.__table__.delete())
             connection.execute(RolePermission.__table__.delete())

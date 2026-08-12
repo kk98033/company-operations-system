@@ -35,6 +35,7 @@ def build_default_error_responses() -> dict[int | str, dict[str, Any]]:
         404: "資源不存在",
         405: "HTTP method 不允許用於此資源",
         409: "資料狀態或版本衝突",
+        429: "請求次數暫時超過安全限制",
         422: "輸入資料驗證失敗",
         500: "伺服器發生未預期錯誤",
     }

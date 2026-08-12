@@ -42,6 +42,9 @@ class AppSettings(BaseModel):
     database_url: SecretStr = Field(alias="DATABASE_URL", min_length=1)
     public_origin: str = Field(alias="APP_PUBLIC_ORIGIN", min_length=1)
     csrf_hmac_key: SecretStr = Field(alias="CSRF_HMAC_KEY", min_length=1)
+    auth_security_hmac_key: SecretStr = Field(
+        alias="AUTH_SECURITY_HMAC_KEY", min_length=1
+    )
 
     @field_validator("public_origin")
     @classmethod
@@ -67,18 +70,18 @@ class AppSettings(BaseModel):
             raise ValueError("APP_PUBLIC_ORIGIN 必須是單一完整 origin")
         return value.rstrip("/")
 
-    @field_validator("csrf_hmac_key")
+    @field_validator("csrf_hmac_key", "auth_security_hmac_key")
     @classmethod
     def validate_csrf_hmac_key(cls, value: SecretStr) -> SecretStr:
         raw_value = value.get_secret_value()
         if re.fullmatch(r"[A-Za-z0-9_-]{43}", raw_value) is None:
-            raise ValueError("CSRF_HMAC_KEY 必須是 32-byte base64url 密鑰")
+            raise ValueError("HMAC key 必須是 32-byte base64url 密鑰")
         try:
             decoded = base64.urlsafe_b64decode(raw_value + "=")
         except (ValueError, TypeError):
-            raise ValueError("CSRF_HMAC_KEY 格式無效") from None
+            raise ValueError("HMAC key 格式無效") from None
         if len(decoded) != 32:
-            raise ValueError("CSRF_HMAC_KEY 必須提供至少 256-bit 熵")
+            raise ValueError("HMAC key 必須提供至少 256-bit 熵")
         return value
 
     @model_validator(mode="after")
@@ -96,6 +99,11 @@ class AppSettings(BaseModel):
             and urlsplit(self.public_origin).scheme != "https"
         ):
             raise ValueError("production APP_PUBLIC_ORIGIN 必須使用 https")
+        if (
+            self.csrf_hmac_key.get_secret_value()
+            == self.auth_security_hmac_key.get_secret_value()
+        ):
+            raise ValueError("AUTH_SECURITY_HMAC_KEY 必須與 CSRF_HMAC_KEY 不同")
         return self
 
     def database_url_value(self) -> str:
@@ -107,3 +115,10 @@ class AppSettings(BaseModel):
         """Return the CSRF signing key only at the HMAC boundary."""
 
         return base64.urlsafe_b64decode(self.csrf_hmac_key.get_secret_value() + "=")
+
+    def auth_security_hmac_key_value(self) -> bytes:
+        """Return the login fingerprint key only at the HMAC boundary."""
+
+        return base64.urlsafe_b64decode(
+            self.auth_security_hmac_key.get_secret_value() + "="
+        )

@@ -20,7 +20,7 @@ def test_missing_required_variables_are_reported_together() -> None:
 
     assert str(error.value) == (
         "缺少必要環境變數: APP_ENV, APP_HOST, APP_PORT, DATABASE_URL, "
-        "APP_PUBLIC_ORIGIN, CSRF_HMAC_KEY"
+        "APP_PUBLIC_ORIGIN, CSRF_HMAC_KEY, AUTH_SECURITY_HMAC_KEY"
     )
 
 
@@ -38,6 +38,7 @@ def test_process_environment_overrides_dotenv_file(tmp_path: Path) -> None:
                 ),
                 "APP_PUBLIC_ORIGIN=http://127.0.0.1:5173",
                 "CSRF_HMAC_KEY=dGVzdC1vbmx5LWNzcmYta2V5LTMyLWJ5dGVzISEhISE",
+                "AUTH_SECURITY_HMAC_KEY=dGVzdC1vbmx5LWF1dGgta2V5LTMyLWJ5dGVzISEhISE",
             ]
         ),
         encoding="utf-8",
@@ -81,6 +82,7 @@ def test_dotenv_expands_postgres_components_into_database_url(
                 ),
                 "APP_PUBLIC_ORIGIN=http://127.0.0.1:5173",
                 "CSRF_HMAC_KEY=dGVzdC1vbmx5LWNzcmYta2V5LTMyLWJ5dGVzISEhISE",
+                "AUTH_SECURITY_HMAC_KEY=dGVzdC1vbmx5LWF1dGgta2V5LTMyLWJ5dGVzISEhISE",
             ]
         ),
         encoding="utf-8",
@@ -189,3 +191,25 @@ def test_csrf_key_rejects_weak_or_placeholder_values_without_echo(
 
     assert "CSRF_HMAC_KEY" in str(error.value)
     assert csrf_key not in str(error.value)
+
+
+@pytest.mark.parametrize(
+    "security_key",
+    [
+        "short",
+        "replace-with-a-different-token-urlsafe-32-byte-value",
+        "!" * 43,
+        "dGVzdC1vbmx5LWNzcmYta2V5LTMyLWJ5dGVzISEhISE",
+    ],
+)
+def test_auth_security_key_rejects_weak_values_without_echo(
+    security_key: str,
+) -> None:
+    with pytest.raises(SettingsLoadError) as error:
+        load_settings(
+            environ=valid_settings_values(AUTH_SECURITY_HMAC_KEY=security_key),
+            env_file=None,
+        )
+
+    assert "AUTH_SECURITY_HMAC_KEY" in str(error.value)
+    assert security_key not in str(error.value)

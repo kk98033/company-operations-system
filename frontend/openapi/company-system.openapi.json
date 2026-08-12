@@ -755,6 +755,16 @@
             },
             "description": "輸入資料驗證失敗"
           },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "請求次數暫時超過安全限制"
+          },
           "500": {
             "content": {
               "application/json": {
@@ -870,6 +880,16 @@
               }
             },
             "description": "輸入資料驗證失敗"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "請求次數暫時超過安全限制"
           },
           "500": {
             "content": {
@@ -999,6 +1019,16 @@
             },
             "description": "輸入資料驗證失敗"
           },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "請求次數暫時超過安全限制"
+          },
           "500": {
             "content": {
               "application/json": {
@@ -1104,6 +1134,16 @@
               }
             },
             "description": "輸入資料驗證失敗"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "請求次數暫時超過安全限制"
           },
           "500": {
             "content": {
@@ -1212,6 +1252,16 @@
             },
             "description": "輸入資料驗證失敗"
           },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "請求次數暫時超過安全限制"
+          },
           "500": {
             "content": {
               "application/json": {
@@ -1313,6 +1363,16 @@
               }
             },
             "description": "輸入資料驗證失敗"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "請求次數暫時超過安全限制"
           },
           "500": {
             "content": {

@@ -5,6 +5,7 @@ from __future__ import annotations
 import os
 from datetime import UTC, datetime, timedelta
 from secrets import token_urlsafe
+from uuid import uuid4
 
 import pytest
 from pydantic import SecretStr
@@ -41,6 +42,8 @@ def _login(identity_engine: Engine, identity, *, now: datetime | None = None):
             login_name=identity.login_name,
             password=identity.password,
             organization_id=identity.organization_id,
+            request_id=uuid4(),
+            security_hmac_key=make_test_settings().auth_security_hmac_key_value(),
             now=lambda: timestamp,
         )
 
@@ -207,6 +210,8 @@ def test_digest_collision_rolls_back_last_login_and_new_session(
                 login_name=identity.login_name,
                 password=identity.password,
                 organization_id=identity.organization_id,
+                request_id=uuid4(),
+                security_hmac_key=make_test_settings().auth_security_hmac_key_value(),
                 token_issuer=lambda: issued,
             )
 
