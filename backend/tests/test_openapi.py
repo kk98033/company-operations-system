@@ -119,6 +119,22 @@ def test_audit_openapi_is_read_only_bounded_and_cookie_protected() -> None:
     assert "post" not in schema["paths"]["/api/v1/audit-logs"]
 
 
+def test_organization_profile_openapi_is_scoped_and_csrf_protected() -> None:
+    schema = TestClient(create_app(settings=make_test_settings())).get(
+        "/openapi.json"
+    ).json()
+    path = schema["paths"]["/api/v1/organizations/current/profile"]
+
+    assert path["get"]["operationId"] == "organization_profile_get"
+    assert path["put"]["operationId"] == "organization_profile_update"
+    assert path["get"]["security"] == [{"SessionCookie": []}]
+    assert path["put"]["security"] == [{"SessionCookie": []}]
+    update = schema["components"]["schemas"]["OrganizationProfileUpdate"]
+    assert "organization_id" not in update["properties"]
+    assert "logo" not in update["properties"]
+    assert "expected_updated_at" in update["required"]
+
+
 def test_development_swagger_ui_remains_available() -> None:
     client = TestClient(create_app(settings=make_test_settings()))
 

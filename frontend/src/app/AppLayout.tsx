@@ -3,7 +3,6 @@ import { Link, Outlet, useNavigate } from '@tanstack/react-router'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 
 import { getApiErrorMessage } from '../api/errorMessage'
-import { CapabilityGate } from '../auth/CapabilityGate'
 import { useAuthenticatedSession } from '../auth/authContext'
 import { CURRENT_SESSION_QUERY_KEY, logoutSession } from '../auth/session'
 import { workflowModules } from './workflowModules'
@@ -18,6 +17,9 @@ export function AppLayout() {
   const navigate = useNavigate()
   const queryClient = useQueryClient()
   const session = useAuthenticatedSession()
+  const canReadAudit = session.capabilities.includes('audit.read')
+  const canManageSettings = session.capabilities.includes('settings.manage')
+  const canSeeSystemManagement = canReadAudit || canManageSettings
   const logoutMutation = useMutation({
     mutationFn: logoutSession,
     onSuccess: async () => {
@@ -70,18 +72,33 @@ export function AppLayout() {
             </Link>
           ))}
 
-          <CapabilityGate capability="audit.read">
-            <p className="sidebar__section-label sidebar__section-label--modules">系統管理</p>
-            <Link
-              activeOptions={{ exact: false }}
-              activeProps={{ className: 'sidebar__link--active' }}
-              className="sidebar__link"
-              to="/audit-logs"
-            >
-              <span className="sidebar__link-icon" aria-hidden="true">稽</span>
-              <span className="sidebar__link-label">操作稽核</span>
-            </Link>
-          </CapabilityGate>
+          {canSeeSystemManagement ? (
+            <>
+              <p className="sidebar__section-label sidebar__section-label--modules">系統管理</p>
+              {canManageSettings ? (
+                <Link
+                  activeOptions={{ exact: false }}
+                  activeProps={{ className: 'sidebar__link--active' }}
+                  className="sidebar__link"
+                  to="/settings/company"
+                >
+                  <span className="sidebar__link-icon" aria-hidden="true">司</span>
+                  <span className="sidebar__link-label">公司基本資料</span>
+                </Link>
+              ) : null}
+              {canReadAudit ? (
+                <Link
+                  activeOptions={{ exact: false }}
+                  activeProps={{ className: 'sidebar__link--active' }}
+                  className="sidebar__link"
+                  to="/audit-logs"
+                >
+                  <span className="sidebar__link-icon" aria-hidden="true">稽</span>
+                  <span className="sidebar__link-label">操作稽核</span>
+                </Link>
+              ) : null}
+            </>
+          ) : null}
 
           <p className="sidebar__section-label sidebar__section-label--modules">開發基準</p>
           {developmentNavigation.map((item) => (

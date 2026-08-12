@@ -55,11 +55,11 @@
 | 項目 | 目前狀態 |
 |---|---|
 | 最後更新日期 | 2026-08-12 |
-| 計畫版本 | v1.13（Phase 1 Slice 1.9 完成，下一步 Phase 2 Slice 2.1） |
-| 架構版本 | v1.14（登入限制、安全事件與多公司隔離同步） |
-| 目前階段 | Phase 1 工程完成；準備進入 Phase 2 公司與主檔基礎 |
-| 目前切片 | Slice 1.9：登入失敗限制與 append-only 安全事件已完成 |
-| 實作完成度 | Phase 0：完成；Import I-0：3／3；Phase 1：9／9；正式業務流程功能 0% |
+| 計畫版本 | v1.14（Phase 2 Slice 2.1 完成，下一步 Slice 2.2） |
+| 架構版本 | v1.15（公司資料、Logo metadata 與列印抬頭來源同步） |
+| 目前階段 | Phase 2 公司與主檔基礎進行中（1／10） |
+| 目前切片 | Slice 2.1：公司基本資料與 Logo metadata 已完成 |
+| 實作完成度 | Phase 0：完成；Import I-0：3／3；Phase 1：9／9；Phase 2：1／10；正式業務流程功能 0% |
 | 規劃文件完成度 | 100% |
 | 最新中型進度備份 | Git tag `checkpoint-phase-1`；經驗證 bundle 位於專案外層 `git-backups/` |
 | 正式遠端 Git 備份 | 尚未設定；R-11 維持 Open，Phase 2 開始前優先建立私人 repository |
@@ -113,10 +113,11 @@
 - 完成 Phase 1 Slice 1.7：新增 Session-only `OrganizationScope` dependency；SELECT／UPDATE／DELETE 由 model scope 加入公司條件，CREATE 由後端注入 ownership，caller 偽造 organization 會在 SQL 前失敗。A／B 公司真 PostgreSQL 測試證明 A 查不到也改不到 B，且 cross-company error 不暴露公司 ID。沒有新增 migration、RLS 或業務表。
 - 完成 Phase 1 Slice 1.8：新增可逆 `0006_audit_foundation`、交易式 audit service、遞迴敏感欄位遮罩及伺服器產生的 Request ID。稽核資料與業務異動由同一 transaction 提交或回滾，資料庫拒絕一般 UPDATE／DELETE；`GET /api/v1/audit-logs` 以 `audit.read`、Cookie Session 與公司 scope 保護。React `/audit-logs` 使用既有清單版型，具 loading、空資料、錯誤、無權限、RWD 與 axe 基線；A／B 公司真 PostgreSQL 測試確認紀錄不混用。
 - 完成 Phase 1 Slice 1.9：新增可逆 `0007_login_security`、公司範圍 HMAC 登入 bucket、15 分鐘內第五次失敗起限制 15 分鐘，以及 append-only 安全事件。已知／未知帳號使用相同門檻；成功登入會清除失敗狀態。資料庫不保存 raw 帳號、密碼或 IP，A／B 公司不共用計數。184 個非 DB、77 個 PostgreSQL integration 與 69 個 React 測試通過。
+- 完成 Phase 2 Slice 2.1：以可逆 `0008_organization_profile` 擴充公司名稱、統編、負責人、電話、傳真、Email、地址與完整 Logo metadata；Logo object key 不對前端公開，也不能在表單手填。`GET／PUT /api/v1/organizations/current/profile` 只使用 Session 公司、`settings.manage`、signed CSRF、樂觀衝突與同交易 audit。React `/settings/company` 沿用 ADR-010 表單版型，具即時文件頁首預覽、無權限／loading／錯誤狀態及 RWD；185 個非 DB、80 個 PostgreSQL integration 與 72 個 React 測試通過。
 
 ### 進行中
 
-- Phase 0 工程與公司 Gate、Phase 1 Slice 1.1～1.9 已完成；identity、登入／Cookie／CSRF／React、角色 capability、organization scope、稽核及登入安全事件基礎已建立。P1-02 正式角色 mapping 與正式業務流程仍未完成。
+- Phase 0 工程與公司 Gate、Phase 1 Slice 1.1～1.9、Phase 2 Slice 2.1 已完成；公司資料已成為後續報價單、工單與列印抬頭的唯一來源。P1-02 正式角色 mapping 與正式業務流程仍未完成。
 - 工單查詢與單頁建檔的介面邊界已依原稿修正；正式儲存、編輯、列印、API 與資料表仍屬 Phase 4，不把原型誤報為業務功能。
 - 介面正式方向已定案；`/style-preview` 只保留為歷史比較與 ADR-010 決策證據，不是正式業務頁。
 - 公司 P0 已確認 10／10。正式 migration、API 與舊客戶資料 apply 仍只會在對應 Phase／Import Slice 通過測試後逐批建立，不因 Gate 通過而提前寫入。
@@ -124,7 +125,7 @@
 
 ### 接下來要做
 
-1. 執行 Phase 2 Slice 2.1：建立公司基本資料與 Logo metadata；沿用 organization scope、權限與 audit，不提前混入客戶或工單 schema。
+1. 執行 Phase 2 Slice 2.2：建立帳務、單號、列印預設設定骨架；不提前建立客戶、報價或工單 schema。
 2. Phase 3／4 開工時依 `docs/Gmail附件需求逐項對照.md` 逐 Slice 建立測試，不可把整份報價或工單一次塞入單一元件。
 3. 客戶 Slice 2.6 完成並簽認 mapping 後，才執行 I-1.1 `cust` dry-run。
 
@@ -208,6 +209,8 @@ make test   # Import、backend unit、隔離 PostgreSQL integration、frontend t
 make build  # backend import smoke、frontend typecheck 與 production build
 make down   # 停掉 Compose 服務；不刪除 development volume
 ```
+
+若 PostgreSQL volume 已用舊密碼初始化，之後只改 `.env` 會出現密碼驗證失敗。先確認 volume 是否含需保留資料，再讓 `.env` 改回該 volume 的原密碼或依備份／還原流程建立新 volume；不得為了排錯直接使用 `docker compose down -v` 刪除資料。
 
 其他入口：
 

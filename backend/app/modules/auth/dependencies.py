@@ -65,6 +65,16 @@ def require_current_session(
     return context
 
 
+def require_authenticated_csrf(
+    request: Request,
+    raw_session_token: Annotated[SecretStr, Depends(require_session_cookie)],
+) -> None:
+    """Protect an authenticated state-changing browser request."""
+
+    require_trusted_origin(request)
+    require_bound_csrf(request, raw_session_token=raw_session_token)
+
+
 def optional_logout_session(
     request: Request,
     raw_value: Annotated[str | None, Security(_session_cookie)],

@@ -123,4 +123,26 @@ describe('自動無障礙基線', () => {
       .toBeInTheDocument()
     await expectNoAccessibilityViolations()
   })
+
+  it('公司基本資料路由沒有 axe WCAG A／AA 與 best-practice 違規', async () => {
+    vi.stubGlobal('fetch', vi.fn<typeof fetch>().mockResolvedValue(Response.json({
+      address: null,
+      email: null,
+      fax: null,
+      id: syntheticCurrentSession.organization.id,
+      logo: null,
+      name: syntheticCurrentSession.organization.name,
+      phone: null,
+      representative_name: null,
+      tax_identifier: null,
+      updated_at: '2026-08-12T08:00:00Z',
+    })))
+    await renderApp(['/settings/company'], {
+      session: { ...syntheticCurrentSession, capabilities: ['settings.manage'] },
+    })
+
+    expect(await screen.findByRole('heading', { level: 1, name: '公司基本資料' }))
+      .toBeInTheDocument()
+    await expectNoAccessibilityViolations()
+  })
 })

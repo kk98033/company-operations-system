@@ -152,6 +152,40 @@ export interface LoginResponse {
   user: AuthenticatedUserResponse;
 }
 
+export interface OrganizationLogoMetadata {
+  content_type: string;
+  original_filename: string;
+  sha256: string;
+}
+
+export interface OrganizationProfileResponse {
+  address: string | null;
+  email: string | null;
+  fax: string | null;
+  id: string;
+  logo: OrganizationLogoMetadata | null;
+  name: string;
+  phone: string | null;
+  representative_name: string | null;
+  tax_identifier: string | null;
+  updated_at: string;
+}
+
+export interface OrganizationProfileUpdate {
+  address?: string | null;
+  email?: string | null;
+  expected_updated_at: string;
+  fax?: string | null;
+  /**
+     * @minLength 1
+     * @maxLength 200
+     */
+  name: string;
+  phone?: string | null;
+  representative_name?: string | null;
+  tax_identifier?: string | null;
+}
+
 export type ReadinessCheckResultStatus = typeof ReadinessCheckResultStatus[keyof typeof ReadinessCheckResultStatus];
 
 
@@ -744,4 +778,184 @@ export const healthReady = async ( options?: RequestInit): Promise<healthReadyRe
 
   const data: healthReadyResponse['data'] = body ? JSON.parse(body) : {}
   return { data, status: res.status, headers: res.headers } as healthReadyResponse
+}
+
+
+
+export type organizationProfileGetResponse200 = {
+  data: OrganizationProfileResponse
+  status: 200
+}
+
+export type organizationProfileGetResponse400 = {
+  data: ErrorResponse
+  status: 400
+}
+
+export type organizationProfileGetResponse401 = {
+  data: ErrorResponse
+  status: 401
+}
+
+export type organizationProfileGetResponse403 = {
+  data: ErrorResponse
+  status: 403
+}
+
+export type organizationProfileGetResponse404 = {
+  data: ErrorResponse
+  status: 404
+}
+
+export type organizationProfileGetResponse405 = {
+  data: ErrorResponse
+  status: 405
+}
+
+export type organizationProfileGetResponse409 = {
+  data: ErrorResponse
+  status: 409
+}
+
+export type organizationProfileGetResponse422 = {
+  data: ErrorResponse
+  status: 422
+}
+
+export type organizationProfileGetResponse429 = {
+  data: ErrorResponse
+  status: 429
+}
+
+export type organizationProfileGetResponse500 = {
+  data: ErrorResponse
+  status: 500
+}
+
+export type organizationProfileGetResponseSuccess = (organizationProfileGetResponse200) & {
+  headers: Headers;
+};
+export type organizationProfileGetResponseError = (organizationProfileGetResponse400 | organizationProfileGetResponse401 | organizationProfileGetResponse403 | organizationProfileGetResponse404 | organizationProfileGetResponse405 | organizationProfileGetResponse409 | organizationProfileGetResponse422 | organizationProfileGetResponse429 | organizationProfileGetResponse500) & {
+  headers: Headers;
+};
+
+export type organizationProfileGetResponse = (organizationProfileGetResponseSuccess | organizationProfileGetResponseError)
+
+export const getOrganizationProfileGetUrl = () => {
+
+
+
+
+  return `${import.meta.env.VITE_API_ORIGIN || ''}/api/v1/organizations/current/profile`
+}
+
+/**
+ * @summary 讀取目前公司的基本資料
+ */
+export const organizationProfileGet = async ( options?: RequestInit): Promise<organizationProfileGetResponse> => {
+
+  const res = await fetch(getOrganizationProfileGetUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+)
+
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+
+  const data: organizationProfileGetResponse['data'] = body ? JSON.parse(body) : {}
+  return { data, status: res.status, headers: res.headers } as organizationProfileGetResponse
+}
+
+
+
+export type organizationProfileUpdateResponse200 = {
+  data: OrganizationProfileResponse
+  status: 200
+}
+
+export type organizationProfileUpdateResponse400 = {
+  data: ErrorResponse
+  status: 400
+}
+
+export type organizationProfileUpdateResponse401 = {
+  data: ErrorResponse
+  status: 401
+}
+
+export type organizationProfileUpdateResponse403 = {
+  data: ErrorResponse
+  status: 403
+}
+
+export type organizationProfileUpdateResponse404 = {
+  data: ErrorResponse
+  status: 404
+}
+
+export type organizationProfileUpdateResponse405 = {
+  data: ErrorResponse
+  status: 405
+}
+
+export type organizationProfileUpdateResponse409 = {
+  data: ErrorResponse
+  status: 409
+}
+
+export type organizationProfileUpdateResponse422 = {
+  data: ErrorResponse
+  status: 422
+}
+
+export type organizationProfileUpdateResponse429 = {
+  data: ErrorResponse
+  status: 429
+}
+
+export type organizationProfileUpdateResponse500 = {
+  data: ErrorResponse
+  status: 500
+}
+
+export type organizationProfileUpdateResponseSuccess = (organizationProfileUpdateResponse200) & {
+  headers: Headers;
+};
+export type organizationProfileUpdateResponseError = (organizationProfileUpdateResponse400 | organizationProfileUpdateResponse401 | organizationProfileUpdateResponse403 | organizationProfileUpdateResponse404 | organizationProfileUpdateResponse405 | organizationProfileUpdateResponse409 | organizationProfileUpdateResponse422 | organizationProfileUpdateResponse429 | organizationProfileUpdateResponse500) & {
+  headers: Headers;
+};
+
+export type organizationProfileUpdateResponse = (organizationProfileUpdateResponseSuccess | organizationProfileUpdateResponseError)
+
+export const getOrganizationProfileUpdateUrl = () => {
+
+
+
+
+  return `${import.meta.env.VITE_API_ORIGIN || ''}/api/v1/organizations/current/profile`
+}
+
+/**
+ * @summary 更新目前公司的基本資料
+ */
+export const organizationProfileUpdate = async (organizationProfileUpdateBody: OrganizationProfileUpdate, options?: RequestInit): Promise<organizationProfileUpdateResponse> => {
+
+  const res = await fetch(getOrganizationProfileUpdateUrl(),
+  {
+    ...options,
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(organizationProfileUpdateBody)
+  }
+)
+
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+
+  const data: organizationProfileUpdateResponse['data'] = body ? JSON.parse(body) : {}
+  return { data, status: res.status, headers: res.headers } as organizationProfileUpdateResponse
 }

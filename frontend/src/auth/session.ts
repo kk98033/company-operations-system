@@ -10,7 +10,7 @@ import { createApiResponseError, createApiTransportError } from '../api/errorMes
 export const CURRENT_SESSION_QUERY_KEY = ['auth', 'current-session'] as const
 export const CSRF_COOKIE_NAME = 'company_system_csrf'
 
-function readCookie(name: string): string | null {
+export function readCookie(name: string): string | null {
   const prefix = `${name}=`
   for (const segment of document.cookie.split(';')) {
     const value = segment.trim()

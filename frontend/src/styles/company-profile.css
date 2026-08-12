@@ -1,0 +1,51 @@
+.company-profile-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.45fr) minmax(20rem, 0.85fr);
+  gap: var(--space-5);
+  align-items: start;
+}
+
+.company-profile-form .ui-field:last-child { grid-column: 1 / -1; }
+.company-profile-side { display: grid; gap: var(--space-5); }
+
+.company-letterhead {
+  display: grid;
+  grid-template-columns: 4rem minmax(0, 1fr);
+  gap: var(--space-4);
+  padding: var(--space-5);
+  border: 1px solid var(--color-border-strong);
+  background: #fff;
+}
+
+.company-letterhead__logo {
+  display: grid;
+  width: 4rem;
+  height: 4rem;
+  place-items: center;
+  border: 1px dashed var(--color-border-strong);
+  color: var(--color-ink-500);
+  font-size: 0.7rem;
+  font-weight: 800;
+}
+
+.company-letterhead__identity { display: grid; align-content: center; gap: var(--space-1); }
+.company-letterhead__identity strong { color: var(--color-brand-900); font-size: 1.05rem; }
+.company-letterhead__identity span { color: var(--color-ink-500); font-size: 0.7rem; }
+.company-letterhead dl { grid-column: 1 / -1; margin: 0; border-top: 2px solid var(--color-brand-800); }
+.company-letterhead dl div { display: grid; grid-template-columns: 3.5rem minmax(0, 1fr); padding-top: var(--space-2); font-size: 0.72rem; }
+.company-letterhead dt { color: var(--color-ink-500); font-weight: 700; }
+.company-letterhead dd { min-width: 0; margin: 0; overflow-wrap: anywhere; }
+.company-logo-status { display: grid; gap: var(--space-3); }
+.company-logo-status p { margin: 0; color: var(--color-ink-700); font-size: 0.75rem; }
+.company-profile-message { margin: var(--space-4) 0 0; color: var(--color-success-700); font-size: 0.75rem; }
+.company-profile-message--error { color: var(--color-danger-700); }
+
+@media (max-width: 64rem) {
+  .company-profile-layout { grid-template-columns: 1fr; }
+  .company-profile-side { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+@media (max-width: 40rem) {
+  .company-profile-side { grid-template-columns: 1fr; }
+  .company-letterhead { padding: var(--space-4); }
+}
