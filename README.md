@@ -61,7 +61,7 @@
 | 目前切片 | Slice 2.1：公司基本資料與 Logo metadata 已完成 |
 | 實作完成度 | Phase 0：完成；Import I-0：3／3；Phase 1：9／9；Phase 2：1／10；正式業務流程功能 0% |
 | 規劃文件完成度 | 100% |
-| 最新中型進度備份 | Git tag `checkpoint-phase-1`；經驗證 bundle 位於專案外層 `git-backups/` |
+| 最新中型進度備份 | Git tag `checkpoint-phase2-company-profile-v1`；經驗證 bundle 位於專案外層 `git-backups/` |
 | 正式遠端 Git 備份 | 尚未設定；R-11 維持 Open，Phase 2 開始前優先建立私人 repository |
 
 ### 已完成
