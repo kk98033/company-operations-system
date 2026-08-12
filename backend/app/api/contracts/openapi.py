@@ -34,6 +34,10 @@ API_TAGS = [
         "name": "organizations",
         "description": "目前公司的基本資料、帳務預設與固定文件政策。",
     },
+    {
+        "name": "quotations",
+        "description": "目前公司的報價建檔、確認與查詢。",
+    },
 ]
 
 

@@ -15,6 +15,9 @@ import { CustomerCreatePage } from '../pages/customers/CustomerCreatePage'
 import { CustomerEditPage } from '../pages/customers/CustomerEditPage'
 import { CustomerListPage } from '../pages/customers/CustomerListPage'
 import { MasterDataPage } from '../pages/master-data/MasterDataPage'
+import { QuotationEditPage, QuotationNewPage } from '../pages/quotations/QuotationEditorPage'
+import { QuotationListPage } from '../pages/quotations/QuotationListPage'
+import { QuotationPrintPage } from '../pages/quotations/QuotationPrintPage'
 import { CompanyProfilePage } from '../pages/settings/CompanyProfilePage'
 import { CompanyDefaultsPage } from '../pages/settings/CompanyDefaultsPage'
 import { ModulePrototypePage } from '../pages/ModulePrototypePage'
@@ -93,6 +96,8 @@ const workflowRoutes = workflowModules.map((module) => createRoute({
     ? WorkOrderListPrototypePage
     : module.id === 'customers'
       ? CustomerListPage
+    : module.id === 'quotations'
+      ? QuotationListPage
     : module.id === 'cases'
       ? () => <CasePrototypePage module={module} />
     : () => <ModulePrototypePage module={module} />,
@@ -116,6 +121,24 @@ const customerEditRoute = createRoute({
   component: CustomerEditPage,
 })
 
+const quotationNewRoute = createRoute({
+  getParentRoute: () => authenticatedRoute,
+  path: '/quotations/new',
+  component: QuotationNewPage,
+})
+
+const quotationEditRoute = createRoute({
+  getParentRoute: () => authenticatedRoute,
+  path: '/quotations/$quotationId',
+  component: QuotationEditPage,
+})
+
+const quotationPrintRoute = createRoute({
+  getParentRoute: () => authenticatedRoute,
+  path: '/quotations/$quotationId/print',
+  component: QuotationPrintPage,
+})
+
 const routeTree = rootRoute.addChildren([
   loginRoute,
   authenticatedRoute.addChildren([
@@ -123,6 +146,9 @@ const routeTree = rootRoute.addChildren([
     ...workflowRoutes,
     customerNewRoute,
     customerEditRoute,
+    quotationNewRoute,
+    quotationEditRoute,
+    quotationPrintRoute,
     workOrderNewRoute,
     auditLogsRoute,
     companyProfileRoute,

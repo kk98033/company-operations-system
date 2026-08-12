@@ -31,6 +31,7 @@ from app.modules.organizations.models import (
     OrganizationMember,
     OrganizationSettings,
 )
+from app.modules.quotations.models import DocumentSequence, Quotation, QuotationItem
 from tests.integration.database_settings import load_database_test_settings
 
 BACKEND_ROOT = Path(__file__).resolve().parents[2]
@@ -63,15 +64,16 @@ def identity_engine(migrated_engine: Engine) -> Generator[Engine, None, None]:
     finally:
         with migrated_engine.begin() as connection:
             connection.execute(text(f"TRUNCATE TABLE {AuditLog.__tablename__}"))
-            connection.execute(
-                text(f"TRUNCATE TABLE {LoginSecurityEvent.__tablename__}")
-            )
+            connection.execute(text(f"TRUNCATE TABLE {LoginSecurityEvent.__tablename__}"))
             connection.execute(LoginThrottleState.__table__.delete())
             connection.execute(Session.__table__.delete())
             connection.execute(OrganizationMemberRole.__table__.delete())
             connection.execute(RolePermission.__table__.delete())
             connection.execute(Role.__table__.delete())
             connection.execute(Permission.__table__.delete())
+            connection.execute(QuotationItem.__table__.delete())
+            connection.execute(Quotation.__table__.delete())
+            connection.execute(DocumentSequence.__table__.delete())
             connection.execute(CustomerWorkItem.__table__.delete())
             connection.execute(Customer.__table__.delete())
             connection.execute(Vendor.__table__.delete())

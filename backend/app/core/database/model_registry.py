@@ -27,6 +27,7 @@ from app.modules.organizations.models import (
     OrganizationMember,
     OrganizationSettings,
 )
+from app.modules.quotations.models import DocumentSequence, Quotation, QuotationItem
 
 REGISTERED_MODELS = (
     ImportError,
@@ -38,6 +39,9 @@ REGISTERED_MODELS = (
     OrganizationSettings,
     Customer,
     CustomerWorkItem,
+    DocumentSequence,
+    Quotation,
+    QuotationItem,
     Vendor,
     PaperType,
     PaperMill,

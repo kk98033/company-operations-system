@@ -70,6 +70,7 @@ IDENTITY_TABLES = [
 ORGANIZATION_SETTINGS_TABLES = ["organization_settings"]
 CUSTOMER_TABLES = ["customers"]
 CUSTOMER_WORK_ITEM_TABLES = ["customer_work_items"]
+QUOTATION_TABLES = ["document_sequences", "quotation_items", "quotations"]
 MASTER_DATA_TABLES = ["paper_mills", "paper_types", "process_definitions", "vendors"]
 
 AUTHORIZATION_TABLES = [
@@ -95,7 +96,7 @@ def test_schema_upgrade_downgrade_upgrade_round_trip(
     assert REGISTERED_MODELS
 
     command.upgrade(config, "head")
-    assert _current_revision() == "0013_customer_work_items"
+    assert _current_revision() == "0015_quotations"
     assert _table_names() == [
         "alembic_version",
         *sorted(
@@ -108,6 +109,7 @@ def test_schema_upgrade_downgrade_upgrade_round_trip(
                 *ORGANIZATION_SETTINGS_TABLES,
                 *CUSTOMER_TABLES,
                 *CUSTOMER_WORK_ITEM_TABLES,
+                *QUOTATION_TABLES,
                 *MASTER_DATA_TABLES,
             ]
         ),
@@ -120,7 +122,7 @@ def test_schema_upgrade_downgrade_upgrade_round_trip(
     assert _table_names() == ["alembic_version"]
 
     command.upgrade(config, "head")
-    assert _current_revision() == "0013_customer_work_items"
+    assert _current_revision() == "0015_quotations"
     assert _table_names() == [
         "alembic_version",
         *sorted(
@@ -133,6 +135,7 @@ def test_schema_upgrade_downgrade_upgrade_round_trip(
                 *ORGANIZATION_SETTINGS_TABLES,
                 *CUSTOMER_TABLES,
                 *CUSTOMER_WORK_ITEM_TABLES,
+                *QUOTATION_TABLES,
                 *MASTER_DATA_TABLES,
             ]
         ),
@@ -173,29 +176,33 @@ def test_identity_downgrade_preserves_existing_import_foundation(
     resources = create_database_resources(settings)
     try:
         with resources.engine.connect() as connection:
-            assert connection.scalar(
-                ImportRun.__table__.select()
-                .with_only_columns(ImportRun.id)
-                .where(ImportRun.id == run_id)
-            ) == run_id
+            assert (
+                connection.scalar(
+                    ImportRun.__table__.select()
+                    .with_only_columns(ImportRun.id)
+                    .where(ImportRun.id == run_id)
+                )
+                == run_id
+            )
     finally:
         resources.dispose()
 
     command.upgrade(config, "head")
-    assert _current_revision() == "0013_customer_work_items"
+    assert _current_revision() == "0015_quotations"
     command.check(config)
 
     resources = create_database_resources(settings)
     try:
         with resources.engine.begin() as connection:
-            assert connection.scalar(
-                ImportRun.__table__.select()
-                .with_only_columns(ImportRun.id)
-                .where(ImportRun.id == run_id)
-            ) == run_id
-            connection.execute(
-                ImportRun.__table__.delete().where(ImportRun.id == run_id)
+            assert (
+                connection.scalar(
+                    ImportRun.__table__.select()
+                    .with_only_columns(ImportRun.id)
+                    .where(ImportRun.id == run_id)
+                )
+                == run_id
             )
+            connection.execute(ImportRun.__table__.delete().where(ImportRun.id == run_id))
     finally:
         resources.dispose()
 
@@ -246,11 +253,14 @@ def test_authorization_downgrade_preserves_existing_identity_rows(
     resources = create_database_resources(settings)
     try:
         with resources.engine.connect() as connection:
-            assert connection.scalar(
-                OrganizationMember.__table__.select()
-                .with_only_columns(OrganizationMember.id)
-                .where(OrganizationMember.id == member_id)
-            ) == member_id
+            assert (
+                connection.scalar(
+                    OrganizationMember.__table__.select()
+                    .with_only_columns(OrganizationMember.id)
+                    .where(OrganizationMember.id == member_id)
+                )
+                == member_id
+            )
     finally:
         resources.dispose()
 
@@ -260,9 +270,7 @@ def test_authorization_downgrade_preserves_existing_identity_rows(
     try:
         with resources.engine.begin() as connection:
             connection.execute(
-                OrganizationMember.__table__.delete().where(
-                    OrganizationMember.id == member_id
-                )
+                OrganizationMember.__table__.delete().where(OrganizationMember.id == member_id)
             )
             connection.execute(User.__table__.delete().where(User.id == user_id))
             connection.execute(
@@ -276,9 +284,7 @@ def test_authorization_downgrade_preserves_existing_identity_rows(
                 )
             )
             connection.execute(
-                Organization.__table__.delete().where(
-                    Organization.id == organization_id
-                )
+                Organization.__table__.delete().where(Organization.id == organization_id)
             )
     finally:
         resources.dispose()

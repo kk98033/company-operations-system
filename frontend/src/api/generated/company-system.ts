@@ -174,6 +174,10 @@ export interface CatalogUpdate {
   sort_order?: number;
 }
 
+export interface ConfirmRequest {
+  expected_updated_at: string;
+}
+
 export interface CurrentSessionResponse {
   capabilities: string[];
   expires_at: string;
@@ -328,6 +332,28 @@ export interface ErrorResponse {
 
 export interface ListResponseMetaAuditFilterSummary {
   filters: AuditFilterSummary;
+  pagination: PaginationMeta;
+  sort: SortMeta;
+}
+
+export type QuotationStatus = typeof QuotationStatus[keyof typeof QuotationStatus];
+
+
+export const QuotationStatus = {
+  draft: 'draft',
+  confirmed: 'confirmed',
+  void: 'void',
+} as const;
+
+export interface QuotationFilters {
+  date_from: string | null;
+  date_to: string | null;
+  keyword: string | null;
+  status: QuotationStatus | null;
+}
+
+export interface ListResponseMetaQuotationFilters {
+  filters: QuotationFilters;
   pagination: PaginationMeta;
   sort: SortMeta;
 }
@@ -491,6 +517,131 @@ export interface ProcessDefinitionResponse {
   sort_order: number;
   status: MasterStatus;
   updated_at: string;
+}
+
+export interface QuotationClone {
+  quotation_date: string;
+}
+
+export interface QuotationItemWrite {
+  coating?: string | null;
+  color?: string | null;
+  die_fee?: number | string;
+  note?: string | null;
+  paper?: string | null;
+  plate_fee?: number | string;
+  /**
+     * @minLength 1
+     * @maxLength 200
+     */
+  product_name: string;
+  quantity: number | string;
+  size?: string | null;
+  unit_price: number | string;
+}
+
+export interface QuotationCreate {
+  customer_id: string;
+  /**
+     * @minItems 1
+     * @maxItems 50
+     */
+  items: QuotationItemWrite[];
+  notes?: string | null;
+  quotation_date: string;
+}
+
+export interface QuotationItemResponse {
+  coating?: string | null;
+  color?: string | null;
+  /** @pattern ^(?!^[-+.]*$)[+-]?0*(?:\d{0,10}|(?=[\d.]{1,15}0*$)\d{0,10}\.\d{0,4}0*$) */
+  die_fee?: string;
+  id: string;
+  line_number: number;
+  note?: string | null;
+  paper?: string | null;
+  /** @pattern ^(?!^[-+.]*$)[+-]?0*(?:\d{0,10}|(?=[\d.]{1,15}0*$)\d{0,10}\.\d{0,4}0*$) */
+  plate_fee?: string;
+  /**
+     * @minLength 1
+     * @maxLength 200
+     */
+  product_name: string;
+  /** @pattern ^(?!^[-+.]*$)[+-]?0*(?:\d{0,10}|(?=[\d.]{1,15}0*$)\d{0,10}\.\d{0,4}0*$) */
+  quantity: string;
+  size?: string | null;
+  /** @pattern ^(?!^[-+.]*$)[+-]?0*(?:\d{0,10}|(?=[\d.]{1,15}0*$)\d{0,10}\.\d{0,4}0*$) */
+  unit_price: string;
+}
+
+export interface QuotationSummary {
+  customer_name: string;
+  document_number: string;
+  first_product_name: string;
+  id: string;
+  item_count: number;
+  legacy_document_number: string | null;
+  quotation_date: string;
+  status: QuotationStatus;
+  updated_at: string;
+}
+
+export interface QuotationListResponse {
+  items: QuotationSummary[];
+  meta: ListResponseMetaQuotationFilters;
+}
+
+export type QuotationResponseCustomerSnapshot = { [key: string]: unknown };
+
+export type QuotationResponseDocumentSnapshot = { [key: string]: unknown } | null;
+
+export type QuotationResponseOrganizationSnapshot = { [key: string]: unknown };
+
+export type QuotationResponsePrintMetadata = { [key: string]: unknown } | null;
+
+export interface QuotationResponse {
+  confirmed_at: string | null;
+  created_at: string;
+  customer_id: string;
+  customer_snapshot: QuotationResponseCustomerSnapshot;
+  document_number: string;
+  document_snapshot: QuotationResponseDocumentSnapshot;
+  id: string;
+  items: QuotationItemResponse[];
+  legacy_document_number: string | null;
+  legacy_source_key: string | null;
+  legacy_source_table: string | null;
+  legacy_tax_included_raw: string | null;
+  notes: string | null;
+  organization_snapshot: QuotationResponseOrganizationSnapshot;
+  print_metadata: QuotationResponsePrintMetadata;
+  quotation_date: string;
+  source_quotation_id: string | null;
+  status: QuotationStatus;
+  updated_at: string;
+  void_reason: string | null;
+  voided_at: string | null;
+}
+
+export interface QuotationUpdate {
+  customer_id: string;
+  expected_updated_at: string;
+  /**
+     * @minItems 1
+     * @maxItems 50
+     */
+  items: QuotationItemWrite[];
+  notes?: string | null;
+  quotation_date: string;
+}
+
+export interface QuotationVoid {
+  expected_updated_at: string;
+  /**
+     * @minLength 1
+     * @maxLength 1000
+     */
+  reason: string;
 }
 
 export type ReadinessCheckResultStatus = typeof ReadinessCheckResultStatus[keyof typeof ReadinessCheckResultStatus];
@@ -766,6 +917,23 @@ keyword?: string | null;
 
 export type ProcessDefinitionListParams = {
 status?: MasterStatus | null;
+};
+
+export type QuotationListParams = {
+status?: QuotationStatus | null;
+date_from?: string | null;
+date_to?: string | null;
+/**
+ * @minimum 1
+ * @maximum 1000000
+ */
+page?: number;
+/**
+ * @minimum 1
+ * @maximum 100
+ */
+page_size?: number;
+keyword?: string | null;
 };
 
 export type VendorListParams = {
@@ -3454,6 +3622,647 @@ export const organizationSettingsUpdate = async (organizationSettingsUpdateBody:
 
   const data: organizationSettingsUpdateResponse['data'] = body ? JSON.parse(body) : {}
   return { data, status: res.status, headers: res.headers } as organizationSettingsUpdateResponse
+}
+
+
+
+export type quotationListResponse200 = {
+  data: QuotationListResponse
+  status: 200
+}
+
+export type quotationListResponse400 = {
+  data: ErrorResponse
+  status: 400
+}
+
+export type quotationListResponse401 = {
+  data: ErrorResponse
+  status: 401
+}
+
+export type quotationListResponse403 = {
+  data: ErrorResponse
+  status: 403
+}
+
+export type quotationListResponse404 = {
+  data: ErrorResponse
+  status: 404
+}
+
+export type quotationListResponse405 = {
+  data: ErrorResponse
+  status: 405
+}
+
+export type quotationListResponse409 = {
+  data: ErrorResponse
+  status: 409
+}
+
+export type quotationListResponse422 = {
+  data: ErrorResponse
+  status: 422
+}
+
+export type quotationListResponse429 = {
+  data: ErrorResponse
+  status: 429
+}
+
+export type quotationListResponse500 = {
+  data: ErrorResponse
+  status: 500
+}
+
+export type quotationListResponseSuccess = (quotationListResponse200) & {
+  headers: Headers;
+};
+export type quotationListResponseError = (quotationListResponse400 | quotationListResponse401 | quotationListResponse403 | quotationListResponse404 | quotationListResponse405 | quotationListResponse409 | quotationListResponse422 | quotationListResponse429 | quotationListResponse500) & {
+  headers: Headers;
+};
+
+export type quotationListResponse = (quotationListResponseSuccess | quotationListResponseError)
+
+export const getQuotationListUrl = (params?: QuotationListParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `${import.meta.env.VITE_API_ORIGIN || ''}/api/v1/quotations?${stringifiedParams}` : `${import.meta.env.VITE_API_ORIGIN || ''}/api/v1/quotations`
+}
+
+/**
+ * @summary Quotation List
+ */
+export const quotationList = async (params?: QuotationListParams, options?: RequestInit): Promise<quotationListResponse> => {
+
+  const res = await fetch(getQuotationListUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+)
+
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+
+  const data: quotationListResponse['data'] = body ? JSON.parse(body) : {}
+  return { data, status: res.status, headers: res.headers } as quotationListResponse
+}
+
+
+
+export type quotationCreateResponse201 = {
+  data: QuotationResponse
+  status: 201
+}
+
+export type quotationCreateResponse400 = {
+  data: ErrorResponse
+  status: 400
+}
+
+export type quotationCreateResponse401 = {
+  data: ErrorResponse
+  status: 401
+}
+
+export type quotationCreateResponse403 = {
+  data: ErrorResponse
+  status: 403
+}
+
+export type quotationCreateResponse404 = {
+  data: ErrorResponse
+  status: 404
+}
+
+export type quotationCreateResponse405 = {
+  data: ErrorResponse
+  status: 405
+}
+
+export type quotationCreateResponse409 = {
+  data: ErrorResponse
+  status: 409
+}
+
+export type quotationCreateResponse422 = {
+  data: ErrorResponse
+  status: 422
+}
+
+export type quotationCreateResponse429 = {
+  data: ErrorResponse
+  status: 429
+}
+
+export type quotationCreateResponse500 = {
+  data: ErrorResponse
+  status: 500
+}
+
+export type quotationCreateResponseSuccess = (quotationCreateResponse201) & {
+  headers: Headers;
+};
+export type quotationCreateResponseError = (quotationCreateResponse400 | quotationCreateResponse401 | quotationCreateResponse403 | quotationCreateResponse404 | quotationCreateResponse405 | quotationCreateResponse409 | quotationCreateResponse422 | quotationCreateResponse429 | quotationCreateResponse500) & {
+  headers: Headers;
+};
+
+export type quotationCreateResponse = (quotationCreateResponseSuccess | quotationCreateResponseError)
+
+export const getQuotationCreateUrl = () => {
+
+
+
+
+  return `${import.meta.env.VITE_API_ORIGIN || ''}/api/v1/quotations`
+}
+
+/**
+ * @summary Quotation Create
+ */
+export const quotationCreate = async (quotationCreateBody: QuotationCreate, options?: RequestInit): Promise<quotationCreateResponse> => {
+
+  const res = await fetch(getQuotationCreateUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(quotationCreateBody)
+  }
+)
+
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+
+  const data: quotationCreateResponse['data'] = body ? JSON.parse(body) : {}
+  return { data, status: res.status, headers: res.headers } as quotationCreateResponse
+}
+
+
+
+export type quotationGetResponse200 = {
+  data: QuotationResponse
+  status: 200
+}
+
+export type quotationGetResponse400 = {
+  data: ErrorResponse
+  status: 400
+}
+
+export type quotationGetResponse401 = {
+  data: ErrorResponse
+  status: 401
+}
+
+export type quotationGetResponse403 = {
+  data: ErrorResponse
+  status: 403
+}
+
+export type quotationGetResponse404 = {
+  data: ErrorResponse
+  status: 404
+}
+
+export type quotationGetResponse405 = {
+  data: ErrorResponse
+  status: 405
+}
+
+export type quotationGetResponse409 = {
+  data: ErrorResponse
+  status: 409
+}
+
+export type quotationGetResponse422 = {
+  data: ErrorResponse
+  status: 422
+}
+
+export type quotationGetResponse429 = {
+  data: ErrorResponse
+  status: 429
+}
+
+export type quotationGetResponse500 = {
+  data: ErrorResponse
+  status: 500
+}
+
+export type quotationGetResponseSuccess = (quotationGetResponse200) & {
+  headers: Headers;
+};
+export type quotationGetResponseError = (quotationGetResponse400 | quotationGetResponse401 | quotationGetResponse403 | quotationGetResponse404 | quotationGetResponse405 | quotationGetResponse409 | quotationGetResponse422 | quotationGetResponse429 | quotationGetResponse500) & {
+  headers: Headers;
+};
+
+export type quotationGetResponse = (quotationGetResponseSuccess | quotationGetResponseError)
+
+export const getQuotationGetUrl = (quotationId: string,) => {
+
+
+
+
+  return `${import.meta.env.VITE_API_ORIGIN || ''}/api/v1/quotations/${quotationId}`
+}
+
+/**
+ * @summary Quotation Get
+ */
+export const quotationGet = async (quotationId: string, options?: RequestInit): Promise<quotationGetResponse> => {
+
+  const res = await fetch(getQuotationGetUrl(quotationId),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+)
+
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+
+  const data: quotationGetResponse['data'] = body ? JSON.parse(body) : {}
+  return { data, status: res.status, headers: res.headers } as quotationGetResponse
+}
+
+
+
+export type quotationUpdateResponse200 = {
+  data: QuotationResponse
+  status: 200
+}
+
+export type quotationUpdateResponse400 = {
+  data: ErrorResponse
+  status: 400
+}
+
+export type quotationUpdateResponse401 = {
+  data: ErrorResponse
+  status: 401
+}
+
+export type quotationUpdateResponse403 = {
+  data: ErrorResponse
+  status: 403
+}
+
+export type quotationUpdateResponse404 = {
+  data: ErrorResponse
+  status: 404
+}
+
+export type quotationUpdateResponse405 = {
+  data: ErrorResponse
+  status: 405
+}
+
+export type quotationUpdateResponse409 = {
+  data: ErrorResponse
+  status: 409
+}
+
+export type quotationUpdateResponse422 = {
+  data: ErrorResponse
+  status: 422
+}
+
+export type quotationUpdateResponse429 = {
+  data: ErrorResponse
+  status: 429
+}
+
+export type quotationUpdateResponse500 = {
+  data: ErrorResponse
+  status: 500
+}
+
+export type quotationUpdateResponseSuccess = (quotationUpdateResponse200) & {
+  headers: Headers;
+};
+export type quotationUpdateResponseError = (quotationUpdateResponse400 | quotationUpdateResponse401 | quotationUpdateResponse403 | quotationUpdateResponse404 | quotationUpdateResponse405 | quotationUpdateResponse409 | quotationUpdateResponse422 | quotationUpdateResponse429 | quotationUpdateResponse500) & {
+  headers: Headers;
+};
+
+export type quotationUpdateResponse = (quotationUpdateResponseSuccess | quotationUpdateResponseError)
+
+export const getQuotationUpdateUrl = (quotationId: string,) => {
+
+
+
+
+  return `${import.meta.env.VITE_API_ORIGIN || ''}/api/v1/quotations/${quotationId}`
+}
+
+/**
+ * @summary Quotation Update
+ */
+export const quotationUpdate = async (quotationId: string,
+    quotationUpdateBody: QuotationUpdate, options?: RequestInit): Promise<quotationUpdateResponse> => {
+
+  const res = await fetch(getQuotationUpdateUrl(quotationId),
+  {
+    ...options,
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(quotationUpdateBody)
+  }
+)
+
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+
+  const data: quotationUpdateResponse['data'] = body ? JSON.parse(body) : {}
+  return { data, status: res.status, headers: res.headers } as quotationUpdateResponse
+}
+
+
+
+export type quotationCloneResponse201 = {
+  data: QuotationResponse
+  status: 201
+}
+
+export type quotationCloneResponse400 = {
+  data: ErrorResponse
+  status: 400
+}
+
+export type quotationCloneResponse401 = {
+  data: ErrorResponse
+  status: 401
+}
+
+export type quotationCloneResponse403 = {
+  data: ErrorResponse
+  status: 403
+}
+
+export type quotationCloneResponse404 = {
+  data: ErrorResponse
+  status: 404
+}
+
+export type quotationCloneResponse405 = {
+  data: ErrorResponse
+  status: 405
+}
+
+export type quotationCloneResponse409 = {
+  data: ErrorResponse
+  status: 409
+}
+
+export type quotationCloneResponse422 = {
+  data: ErrorResponse
+  status: 422
+}
+
+export type quotationCloneResponse429 = {
+  data: ErrorResponse
+  status: 429
+}
+
+export type quotationCloneResponse500 = {
+  data: ErrorResponse
+  status: 500
+}
+
+export type quotationCloneResponseSuccess = (quotationCloneResponse201) & {
+  headers: Headers;
+};
+export type quotationCloneResponseError = (quotationCloneResponse400 | quotationCloneResponse401 | quotationCloneResponse403 | quotationCloneResponse404 | quotationCloneResponse405 | quotationCloneResponse409 | quotationCloneResponse422 | quotationCloneResponse429 | quotationCloneResponse500) & {
+  headers: Headers;
+};
+
+export type quotationCloneResponse = (quotationCloneResponseSuccess | quotationCloneResponseError)
+
+export const getQuotationCloneUrl = (quotationId: string,) => {
+
+
+
+
+  return `${import.meta.env.VITE_API_ORIGIN || ''}/api/v1/quotations/${quotationId}/clone`
+}
+
+/**
+ * @summary Quotation Clone
+ */
+export const quotationClone = async (quotationId: string,
+    quotationCloneBody: QuotationClone, options?: RequestInit): Promise<quotationCloneResponse> => {
+
+  const res = await fetch(getQuotationCloneUrl(quotationId),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(quotationCloneBody)
+  }
+)
+
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+
+  const data: quotationCloneResponse['data'] = body ? JSON.parse(body) : {}
+  return { data, status: res.status, headers: res.headers } as quotationCloneResponse
+}
+
+
+
+export type quotationConfirmResponse200 = {
+  data: QuotationResponse
+  status: 200
+}
+
+export type quotationConfirmResponse400 = {
+  data: ErrorResponse
+  status: 400
+}
+
+export type quotationConfirmResponse401 = {
+  data: ErrorResponse
+  status: 401
+}
+
+export type quotationConfirmResponse403 = {
+  data: ErrorResponse
+  status: 403
+}
+
+export type quotationConfirmResponse404 = {
+  data: ErrorResponse
+  status: 404
+}
+
+export type quotationConfirmResponse405 = {
+  data: ErrorResponse
+  status: 405
+}
+
+export type quotationConfirmResponse409 = {
+  data: ErrorResponse
+  status: 409
+}
+
+export type quotationConfirmResponse422 = {
+  data: ErrorResponse
+  status: 422
+}
+
+export type quotationConfirmResponse429 = {
+  data: ErrorResponse
+  status: 429
+}
+
+export type quotationConfirmResponse500 = {
+  data: ErrorResponse
+  status: 500
+}
+
+export type quotationConfirmResponseSuccess = (quotationConfirmResponse200) & {
+  headers: Headers;
+};
+export type quotationConfirmResponseError = (quotationConfirmResponse400 | quotationConfirmResponse401 | quotationConfirmResponse403 | quotationConfirmResponse404 | quotationConfirmResponse405 | quotationConfirmResponse409 | quotationConfirmResponse422 | quotationConfirmResponse429 | quotationConfirmResponse500) & {
+  headers: Headers;
+};
+
+export type quotationConfirmResponse = (quotationConfirmResponseSuccess | quotationConfirmResponseError)
+
+export const getQuotationConfirmUrl = (quotationId: string,) => {
+
+
+
+
+  return `${import.meta.env.VITE_API_ORIGIN || ''}/api/v1/quotations/${quotationId}/confirm`
+}
+
+/**
+ * @summary Quotation Confirm
+ */
+export const quotationConfirm = async (quotationId: string,
+    confirmRequest: ConfirmRequest, options?: RequestInit): Promise<quotationConfirmResponse> => {
+
+  const res = await fetch(getQuotationConfirmUrl(quotationId),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(confirmRequest)
+  }
+)
+
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+
+  const data: quotationConfirmResponse['data'] = body ? JSON.parse(body) : {}
+  return { data, status: res.status, headers: res.headers } as quotationConfirmResponse
+}
+
+
+
+export type quotationVoidResponse200 = {
+  data: QuotationResponse
+  status: 200
+}
+
+export type quotationVoidResponse400 = {
+  data: ErrorResponse
+  status: 400
+}
+
+export type quotationVoidResponse401 = {
+  data: ErrorResponse
+  status: 401
+}
+
+export type quotationVoidResponse403 = {
+  data: ErrorResponse
+  status: 403
+}
+
+export type quotationVoidResponse404 = {
+  data: ErrorResponse
+  status: 404
+}
+
+export type quotationVoidResponse405 = {
+  data: ErrorResponse
+  status: 405
+}
+
+export type quotationVoidResponse409 = {
+  data: ErrorResponse
+  status: 409
+}
+
+export type quotationVoidResponse422 = {
+  data: ErrorResponse
+  status: 422
+}
+
+export type quotationVoidResponse429 = {
+  data: ErrorResponse
+  status: 429
+}
+
+export type quotationVoidResponse500 = {
+  data: ErrorResponse
+  status: 500
+}
+
+export type quotationVoidResponseSuccess = (quotationVoidResponse200) & {
+  headers: Headers;
+};
+export type quotationVoidResponseError = (quotationVoidResponse400 | quotationVoidResponse401 | quotationVoidResponse403 | quotationVoidResponse404 | quotationVoidResponse405 | quotationVoidResponse409 | quotationVoidResponse422 | quotationVoidResponse429 | quotationVoidResponse500) & {
+  headers: Headers;
+};
+
+export type quotationVoidResponse = (quotationVoidResponseSuccess | quotationVoidResponseError)
+
+export const getQuotationVoidUrl = (quotationId: string,) => {
+
+
+
+
+  return `${import.meta.env.VITE_API_ORIGIN || ''}/api/v1/quotations/${quotationId}/void`
+}
+
+/**
+ * @summary Quotation Void
+ */
+export const quotationVoid = async (quotationId: string,
+    quotationVoidBody: QuotationVoid, options?: RequestInit): Promise<quotationVoidResponse> => {
+
+  const res = await fetch(getQuotationVoidUrl(quotationId),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(quotationVoidBody)
+  }
+)
+
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+
+  const data: quotationVoidResponse['data'] = body ? JSON.parse(body) : {}
+  return { data, status: res.status, headers: res.headers } as quotationVoidResponse
 }
 
 

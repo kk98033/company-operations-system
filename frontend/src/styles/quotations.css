@@ -1,0 +1,34 @@
+.quotation-page { max-width: 100%; }
+.quotation-filter-action { align-self: end; }
+.quotation-list-table th:first-child small { display: block; color: var(--color-text-muted); font-weight: 400; }
+.quotation-status-line { align-items: center; display: flex; gap: 1rem; }
+.quotation-snapshot { background: var(--color-surface-subtle); border-left: 4px solid var(--color-action); margin-top: 1rem; padding: .75rem 1rem; }
+.quotation-items { min-width: 88rem; }
+.quotation-items input { min-width: 6rem; width: 100%; }
+.quotation-items td:nth-child(2) input { min-width: 12rem; }
+.quotation-action-bar { align-items: center; background: var(--color-surface); border-top: 2px solid var(--color-border-strong); bottom: 0; display: flex; gap: .75rem; justify-content: flex-end; padding: 1rem; position: sticky; z-index: 5; }
+.quotation-lifecycle-actions { align-items: end; display: grid; gap: 1rem; grid-template-columns: auto minmax(18rem, 1fr) auto; }
+.quotation-void-reason { border-left: 4px solid var(--color-danger-700); color: var(--color-danger-700); margin: 0; padding: .75rem 1rem; }
+.quotation-print-page { background: #e7e9ec; min-height: 100%; padding: 1.5rem; }
+.quotation-print-actions { display: flex; gap: .75rem; justify-content: flex-end; margin: 0 auto 1rem; max-width: 297mm; }
+.quotation-print-sheet { background: #fff; color: #111; margin: 0 auto; min-height: 190mm; padding: 10mm; width: 277mm; }
+.quotation-print-header { align-items: end; border-bottom: 2px solid #111; display: flex; justify-content: space-between; padding-bottom: 5mm; }
+.quotation-print-header h1 { font-size: 24pt; margin: 0 0 2mm; }
+.quotation-print-header p { margin: 1mm 0; }
+.quotation-print-header strong { font-size: 28pt; letter-spacing: .35em; }
+.quotation-print-customer { border-bottom: 1px solid #111; display: grid; gap: 2mm 6mm; grid-template-columns: 2fr 1fr 1fr; padding: 5mm 0; }
+.quotation-print-table { border-collapse: collapse; margin-top: 4mm; table-layout: fixed; width: 100%; }
+.quotation-print-table th, .quotation-print-table td { border: 1px solid #111; font-size: 9pt; padding: 2mm 1mm; text-align: center; vertical-align: top; word-break: break-word; }
+.quotation-print-table th:nth-child(1) { width: 5%; }.quotation-print-table th:nth-child(2) { width: 17%; }.quotation-print-table th:nth-child(11) { width: 13%; }
+.quotation-print-notes { border: 1px solid #111; border-top: 0; min-height: 25mm; padding: 3mm; }
+.quotation-print-notes p { white-space: pre-wrap; }
+@media (max-width: 70rem) { .quotation-print-page { overflow-x: auto; } }
+@media (max-width: 46rem) { .quotation-action-bar { align-items: stretch; flex-direction: column; } .quotation-action-bar .ui-button { width: 100%; } .quotation-lifecycle-actions { align-items: stretch; grid-template-columns: 1fr; } }
+@page { size: A4 landscape; margin: 10mm; }
+@media print {
+  body, #root { background: #fff; }
+  .app-shell > .sidebar, .app-shell__workspace > .topbar, .quotation-print-actions { display: none !important; }
+  .app-shell, .app-shell__workspace, .main-content, .quotation-print-page { display: block; margin: 0; min-height: 0; padding: 0; }
+  .quotation-print-sheet { margin: 0; min-height: auto; padding: 0; width: auto; }
+  .quotation-print-table tr { break-inside: avoid; }
+}

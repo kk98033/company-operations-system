@@ -4,7 +4,9 @@ import userEvent from '@testing-library/user-event'
 import { workflowModules } from '../app/workflowModules'
 import { renderApp } from '../test/renderApp'
 
-const prototypeModules = workflowModules.filter((module) => module.id !== 'customers')
+const prototypeModules = workflowModules.filter(
+  (module) => !['customers', 'quotations'].includes(module.id),
+)
 
 describe('公司主流程路由', () => {
   it('報價、案件與工單模組追蹤到完整需求編號', () => {
@@ -155,7 +157,11 @@ describe('公司主流程路由', () => {
 
     for (const module of workflowModules) {
       await user.click(within(navigation).getByRole('link', { name: module.label }))
-      const heading = module.id === 'customers' ? '沒有客戶資料權限' : module.label
+      const heading = module.id === 'customers'
+        ? '沒有客戶資料權限'
+        : module.id === 'quotations'
+          ? '沒有報價資料權限'
+          : module.label
       expect(screen.getByRole('heading', { level: 1, name: heading }))
         .toBeInTheDocument()
     }

@@ -55,14 +55,14 @@
 | 項目 | 目前狀態 |
 |---|---|
 | 最後更新日期 | 2026-08-13 |
-| 計畫版本 | v1.17（Phase 2 Slice 2.1～2.10 全部完成） |
-| 架構版本 | v1.18（客戶、主檔、常用工作項目與 legacy dry-run 同步） |
-| 目前階段 | Phase 2 公司與主檔基礎完成（10／10） |
-| 目前切片 | Phase 2 收尾：主檔、常用工作項目與 Import I-1.1～I-1.3 dry-run 已完成 |
-| 實作完成度 | Phase 0：完成；Import I-0：3／3；Phase 1：9／9；Phase 2：10／10；下一階段為 Phase 3 報價 |
+| 計畫版本 | v1.18（Phase 3 Slice 3.1～3.8 全部完成） |
+| 架構版本 | v1.19（報價單號、快照、作廢、API 與列印同步） |
+| 目前階段 | Phase 3 報價工程完成（8／8）；等待公司印表機 UAT |
+| 目前切片 | Phase 3 收尾：報價 schema、CRUD、確認／另存／作廢、同頁 UI 與 A4 橫向列印已完成 |
+| 實作完成度 | Phase 0：完成；Import I-0：3／3；Phase 1：9／9；Phase 2：10／10；Phase 3：8／8；下一階段為 Phase 4 案件與工單 |
 | 規劃文件完成度 | 100% |
-| 最新中型進度備份 | Git tag `checkpoint-phase-2`；經驗證 bundle 位於專案外層 `git-backups/` |
-| 正式遠端 Git 備份 | 尚未設定；R-11 維持 Open，Phase 2 開始前優先建立私人 repository |
+| 最新中型進度備份 | 本次提交後建立 Git tag `checkpoint-phase-3` 與專案外 bundle |
+| 正式遠端 Git 備份 | 尚未設定；R-11 維持 Open，正式部署前必須建立私人 repository |
 
 ### 已完成
 
@@ -117,10 +117,11 @@
 - 完成 Phase 2 Slice 2.2：新增可逆 `0009_organization_settings`，每家公司只有一筆設定；對帳單計稅預設關閉，啟用後稅率、取整範圍與小數位才必須完整。ADR-018 的七類單號格式及公司 PDF 已確認的報價 A4 橫向、工單 A4 直向九製程以唯讀政策版本呈現，不允許 UI 改寫。`GET／PUT /api/v1/organizations/current/settings` 受公司 scope、`settings.manage`、signed CSRF、更新衝突與同交易 audit 保護；React `/settings/defaults` 已通過 RWD、axe 與實際桌面存檔驗證。正式稅額計算、單號配發、文件與列印仍留在對應 Phase；186 個非 DB、84 個 PostgreSQL integration 與 76 個 React 測試通過。
 - 完成 Phase 2 Slice 2.3～2.5 客戶管理垂直功能：可逆 `0010_customers` 建立公司範圍客戶主檔，保存代號、名稱、簡稱、統編、主要聯絡與地址；同公司代號 trim＋不分大小寫唯一，停用不刪除。`GET／POST／PUT /api/v1/customers` 與狀態 API 使用 Cookie Session、`customers.read／manage`、公司 scope、signed CSRF、樂觀衝突及同交易 audit。React `/customers`、`/customers/new`、`/customers/:id` 完成查詢、新增、編輯、停用、唯讀權限、loading／empty／error、RWD 與 axe；186 個非 DB、86 個 PostgreSQL integration 與 78 個 React 測試通過。舊稅務／取整、付款條件及 221 筆舊客戶 Import 仍留在 Slice 2.6／I-1.1。
 - 完成 Phase 2 Slice 2.6～2.10：客戶加入付款條件與舊稅額／取整唯讀證據；建立廠商、紙質、紙廠、固定 13 道製程及客戶常用工作項目 schema、公司隔離 API、權限、稽核與正式 React 頁面。Import I-1.1～I-1.3 已執行 aggregate-only dry-run，沒有 apply 正式資料；`cust` 221 筆有 109 個替代字元，`wpa` 9,831 筆中 189 筆客戶代號未對上且 6 筆缺客戶代號，必須先修復／簽認 mapping。
+- 完成 Phase 3 Slice 3.1～3.8：可逆 `0014_document_sequences`／`0015_quotations`、每公司每日 `QUO-YYYYMMDD-SS`、客戶與抬頭快照、報價明細、草稿更新、確認凍結、另存新號、具原因的作廢及 legacy 舊號查詢。React 正式提供查詢、同頁建檔與 A4 橫向列印；頁首／頁尾維持公司稿「另存新檔、存檔、取消、列印」，新報價沒有稅額欄。Import I-1.4 aggregate-only dry-run 已核對 4 主檔／10 明細；3 筆缺明細主鍵，其餘 7 筆也未對上主檔，故未 apply 且列為來源回查 blocker。
 
 ### 進行中
 
-- Phase 0、Phase 1 與 Phase 2 Slice 2.1～2.10 已完成；公司資料、客戶、採購／生產主檔及常用工作項目已成為後續報價、工單與列印的公司範圍來源。舊資料目前只有 dry-run，尚未正式 apply。
+- Phase 0～Phase 3 工程已完成；公司資料、客戶、主檔與報價已形成可操作垂直流程。舊資料目前只有 dry-run，尚未正式 apply；報價 A4 仍需公司實際印表機簽認不截字。
 - 工單查詢與單頁建檔的介面邊界已依原稿修正；正式儲存、編輯、列印、API 與資料表仍屬 Phase 4，不把原型誤報為業務功能。
 - 介面正式方向已定案；`/style-preview` 只保留為歷史比較與 ADR-010 決策證據，不是正式業務頁。
 - 公司 P0 已確認 10／10。正式 migration、API 與舊客戶資料 apply 仍只會在對應 Phase／Import Slice 通過測試後逐批建立，不因 Gate 通過而提前寫入。
@@ -128,10 +129,10 @@
 
 ### 接下來要做
 
-1. 下一個垂直批次進入 Phase 3 報價：先完成 quotation schema、單號與明細，再接公司 PDF 的同頁建檔與 A4 橫向列印。
+1. 下一個垂直批次進入 Phase 4：先完成案件 schema／API，再把目前工單原型接上正式儲存、案件分組及報價明細轉工單。
 2. 舊資料 apply 前先處理 `cust` 轉碼替代字元及 `wpa` 的 189 筆孤兒／6 筆缺客戶代號；修復後重跑相同 dry-run，不能跳過公司抽查。
-2. 公司簽認客戶 mapping 與例外分類後，才規劃正式 apply；舊值不得自動啟用新 statement 計稅。
-3. 後續以 2.7 供應商／協力廠作下一個完整 schema＋API＋UI 批次；Phase 3／4 仍嚴格依 Gmail 附件契約，但程式拆成可維護元件。
+3. 公司簽認客戶 mapping 與例外分類後，才規劃正式 apply；舊值不得自動啟用新 statement 計稅。
+4. 以公司實際印表機驗收報價 A4 橫向；程式端的欄位、列印 CSS、隱藏操作與快照測試已完成。
 
 ### 後續 Phase／UAT 仍待確認
 

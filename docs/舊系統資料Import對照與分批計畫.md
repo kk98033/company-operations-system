@@ -215,7 +215,7 @@ P0-04 新版「基礎計價只取正式量」不回溯改寫舊金額。舊備�
 | I-1.1 | DONE（未 apply） | `cust` 221 筆 aggregate-only dry-run | 無重複代號；109 個替代字元待修復／抽查 |
 | I-1.2 | DONE（未 apply） | `fact`、paper、gloss、paste aggregate-only dry-run | 筆數與重複統計已產生；mapping／停用仍須簽認 |
 | I-1.3 | DONE（未 apply） | `wpa` 9,831 筆全量 aggregate-only dry-run | 189 筆孤兒、6 筆缺客戶代號、1 筆缺名稱待處理 |
-| I-1.4 | Phase 3 quotation 完成 | `b_replay1`＋`b_replay2` 全量 dry-run | 4 主檔／10 明細、主從關聯、金額及不臆造工單關係 |
+| I-1.4 | DONE（未 apply） | `b_replay1`＋`b_replay2` aggregate-only dry-run | 4 主檔／10 明細；3 筆明細缺 `br_no`、其餘 7 筆也無法對上 4 個主檔號，正式匯入前須回查來源；金額格式 10／10 可解析，不臆造工單關係 |
 | I-2.1 | Phase 4 work order 完成 | `subpoena`＋`quote` 現行工單 | 50 筆試匯＋公司抽樣 |
 | I-2.2 | Phase 4 history 完成 | `subpoena_his`＋`quote_his` | 現行／歷史去重、狀態及數量 |
 | I-3.1 | Phase 5 inventory 完成 | `merchandise` | 每工單完工／出貨／備品／餘額核對 |

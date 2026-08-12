@@ -76,6 +76,16 @@
   background: var(--color-surface-subtle);
 }
 
+.ui-button--danger {
+  border-color: var(--color-danger-700);
+  color: #fff;
+  background: var(--color-danger-700);
+}
+
+.ui-button--danger:hover {
+  filter: brightness(0.9);
+}
+
 .ui-button:disabled {
   cursor: not-allowed;
   opacity: 0.62;
