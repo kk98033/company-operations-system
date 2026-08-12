@@ -135,6 +135,26 @@ def test_organization_profile_openapi_is_scoped_and_csrf_protected() -> None:
     assert "expected_updated_at" in update["required"]
 
 
+def test_organization_settings_openapi_keeps_fixed_policies_read_only() -> None:
+    schema = TestClient(create_app(settings=make_test_settings())).get(
+        "/openapi.json"
+    ).json()
+    path = schema["paths"]["/api/v1/organizations/current/settings"]
+
+    assert path["get"]["operationId"] == "organization_settings_get"
+    assert path["put"]["operationId"] == "organization_settings_update"
+    assert path["get"]["security"] == [{"SessionCookie": []}]
+    assert path["put"]["security"] == [{"SessionCookie": []}]
+    update = schema["components"]["schemas"]["OrganizationSettingsUpdate"]
+    assert "document_numbering" not in update["properties"]
+    assert "printing" not in update["properties"]
+    assert "organization_id" not in update["properties"]
+    assert "expected_updated_at" in update["required"]
+    response = schema["components"]["schemas"]["OrganizationSettingsResponse"]
+    assert "document_numbering" in response["required"]
+    assert "printing" in response["required"]
+
+
 def test_development_swagger_ui_remains_available() -> None:
     client = TestClient(create_app(settings=make_test_settings()))
 

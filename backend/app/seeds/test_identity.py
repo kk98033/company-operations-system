@@ -13,7 +13,12 @@ from sqlalchemy.orm import Session
 from app.core.config import AppEnvironment
 from app.modules.auth.models import User
 from app.modules.auth.passwords import hash_password, verify_password
-from app.modules.organizations.models import Organization, OrganizationMember
+from app.modules.organizations.models import (
+    Organization,
+    OrganizationMember,
+    OrganizationSettings,
+)
+from app.modules.organizations.settings import new_organization_settings
 
 TEST_ORGANIZATION_ID = UUID("10000000-0000-4000-8000-000000000001")
 TEST_ADMIN_USER_ID = UUID("20000000-0000-4000-8000-000000000001")
@@ -131,6 +136,20 @@ def _ensure_user(session: Session, spec: _UserSeedSpec) -> int:
     return 0
 
 
+def _ensure_organization_settings(session: Session) -> None:
+    settings = session.get(OrganizationSettings, TEST_ORGANIZATION_ID)
+    if settings is None:
+        session.add(new_organization_settings(TEST_ORGANIZATION_ID))
+        return
+    if (
+        settings.document_number_policy_version != "adr-018-v1"
+        or settings.quotation_print_layout_version != "gmail-a4-landscape-v1"
+        or settings.work_order_print_layout_version
+        != "gmail-a4-portrait-9-process-v1"
+    ):
+        raise SeedConflictError("固定測試公司的文件政策版本不相容")
+
+
 def _ensure_membership(session: Session, spec: _UserSeedSpec) -> int:
     membership = session.get(OrganizationMember, spec.membership_id)
     if membership is None:
@@ -182,6 +201,8 @@ def seed_test_identity(
     try:
         with session.begin():
             created_organizations = _ensure_organization(session)
+            session.flush()
+            _ensure_organization_settings(session)
             created_users = sum(_ensure_user(session, spec) for spec in specs)
             session.flush()
             created_memberships = sum(

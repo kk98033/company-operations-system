@@ -1,9 +1,11 @@
 """Public contracts for the current company's printable profile."""
 
 from datetime import datetime
+from decimal import Decimal
+from typing import Literal
 from uuid import UUID
 
-from pydantic import BaseModel, ConfigDict, Field, field_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 
 class OrganizationLogoMetadata(BaseModel):
@@ -58,3 +60,63 @@ class OrganizationProfileUpdate(BaseModel):
         if value is None:
             return None
         return value.strip() or None
+
+
+class StatementTaxDefaults(BaseModel):
+    enabled: bool
+    tax_rate_percent: Decimal | None
+    rounding_scope: Literal["per_line", "grand_total"] | None
+    rounding_decimal_places: int | None
+    calculation_status: Literal["pending_phase_8_uat"]
+
+
+class DocumentNumberPolicyResponse(BaseModel):
+    document_type: str
+    label: str
+    format: str
+    reset_period: Literal["daily", "monthly"]
+
+
+class PrintPolicyResponse(BaseModel):
+    document_type: str
+    label: str
+    paper_size: Literal["A4"]
+    orientation: Literal["landscape", "portrait"] | None
+    status: Literal["confirmed", "pending_uat"]
+    note: str
+
+
+class OrganizationSettingsResponse(BaseModel):
+    organization_id: UUID
+    statement_tax: StatementTaxDefaults
+    document_number_policy_version: Literal["adr-018-v1"]
+    document_numbering: list[DocumentNumberPolicyResponse]
+    quotation_print_layout_version: Literal["gmail-a4-landscape-v1"]
+    work_order_print_layout_version: Literal["gmail-a4-portrait-9-process-v1"]
+    printing: list[PrintPolicyResponse]
+    updated_at: datetime
+
+
+class OrganizationSettingsUpdate(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    expected_updated_at: datetime
+    statement_tax_default_enabled: bool
+    statement_tax_rate_percent: Decimal | None = Field(default=None, gt=0, le=100, decimal_places=4)
+    statement_rounding_scope: Literal["per_line", "grand_total"] | None = None
+    statement_rounding_decimal_places: int | None = Field(default=None, ge=0, le=4)
+
+    @model_validator(mode="after")
+    def require_complete_tax_policy(self) -> "OrganizationSettingsUpdate":
+        conditional = (
+            self.statement_tax_rate_percent,
+            self.statement_rounding_scope,
+            self.statement_rounding_decimal_places,
+        )
+        if self.statement_tax_default_enabled and any(value is None for value in conditional):
+            raise ValueError("enabled statement tax requires rate and rounding fields")
+        if not self.statement_tax_default_enabled and any(
+            value is not None for value in conditional
+        ):
+            raise ValueError("disabled statement tax must not carry active tax fields")
+        return self

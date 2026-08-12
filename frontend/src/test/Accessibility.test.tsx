@@ -145,4 +145,31 @@ describe('自動無障礙基線', () => {
       .toBeInTheDocument()
     await expectNoAccessibilityViolations()
   })
+
+  it('文件與帳務預設路由沒有 axe WCAG A／AA 與 best-practice 違規', async () => {
+    vi.stubGlobal('fetch', vi.fn<typeof fetch>().mockResolvedValue(Response.json({
+      document_number_policy_version: 'adr-018-v1',
+      document_numbering: [
+        { document_type: 'quotation', format: 'QUO-YYYYMMDD-SS', label: '報價', reset_period: 'daily' },
+      ],
+      organization_id: syntheticCurrentSession.organization.id,
+      printing: [
+        { document_type: 'quotation', label: '報價單', note: '公司稿', orientation: 'landscape', paper_size: 'A4', status: 'confirmed' },
+      ],
+      quotation_print_layout_version: 'gmail-a4-landscape-v1',
+      statement_tax: {
+        calculation_status: 'pending_phase_8_uat', enabled: false,
+        rounding_decimal_places: null, rounding_scope: null, tax_rate_percent: null,
+      },
+      updated_at: '2026-08-13T08:00:00Z',
+      work_order_print_layout_version: 'gmail-a4-portrait-9-process-v1',
+    })))
+    await renderApp(['/settings/defaults'], {
+      session: { ...syntheticCurrentSession, capabilities: ['settings.manage'] },
+    })
+
+    expect(await screen.findByRole('heading', { level: 1, name: '文件與帳務預設' }))
+      .toBeInTheDocument()
+    await expectNoAccessibilityViolations()
+  })
 })

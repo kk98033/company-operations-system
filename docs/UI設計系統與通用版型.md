@@ -139,6 +139,7 @@ Slice 0.8 原型頁只允許共用 `PageHeader`、`Section`、`StatusLabel`、`D
 ### 4.1.2 系統管理正式路由
 
 - `/settings/company` 使用「新增／編輯分區表單」版型，桌面為基本資料＋文件頁首預覽，1024px 以下轉單欄，390px 不得產生整頁水平捲動。
+- `/settings/defaults` 使用同一設定表單版型；只有對帳單計稅草稿可編輯，七類單號與報價／工單列印政策用唯讀表格呈現，不提供看似可修改的輸入框。頁面必須明示計稅待 Phase 8 UAT，不能讓操作員誤以為已影響正式文件計算。
 - 導覽與頁面都以 `settings.manage` gate 控制；UI 隱藏不取代 API 403。
 - Logo 區只顯示 metadata 狀態；附件切片完成前不出現假上傳按鈕或可手填 object key。
 - 預覽只確認共用抬頭資訊，不冒充報價單／工單完整列印稿；正式列印仍依 Gmail PDF 契約逐 Slice 驗收。

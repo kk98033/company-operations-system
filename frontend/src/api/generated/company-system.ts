@@ -57,6 +57,21 @@ export interface CurrentSessionResponse {
   user: AuthenticatedUserResponse;
 }
 
+export type DocumentNumberPolicyResponseResetPeriod = typeof DocumentNumberPolicyResponseResetPeriod[keyof typeof DocumentNumberPolicyResponseResetPeriod];
+
+
+export const DocumentNumberPolicyResponseResetPeriod = {
+  daily: 'daily',
+  monthly: 'monthly',
+} as const;
+
+export interface DocumentNumberPolicyResponse {
+  document_type: string;
+  format: string;
+  label: string;
+  reset_period: DocumentNumberPolicyResponseResetPeriod;
+}
+
 /**
  * Stable, machine-readable API error fields.
  */
@@ -184,6 +199,74 @@ export interface OrganizationProfileUpdate {
   phone?: string | null;
   representative_name?: string | null;
   tax_identifier?: string | null;
+}
+
+export type PrintPolicyResponseOrientation = typeof PrintPolicyResponseOrientation[keyof typeof PrintPolicyResponseOrientation] | null;
+
+
+export const PrintPolicyResponseOrientation = {
+  landscape: 'landscape',
+  portrait: 'portrait',
+} as const;
+
+export type PrintPolicyResponseStatus = typeof PrintPolicyResponseStatus[keyof typeof PrintPolicyResponseStatus];
+
+
+export const PrintPolicyResponseStatus = {
+  confirmed: 'confirmed',
+  pending_uat: 'pending_uat',
+} as const;
+
+export interface PrintPolicyResponse {
+  document_type: string;
+  label: string;
+  note: string;
+  orientation: PrintPolicyResponseOrientation;
+  paper_size: 'A4';
+  status: PrintPolicyResponseStatus;
+}
+
+export type StatementTaxDefaultsRoundingScope = typeof StatementTaxDefaultsRoundingScope[keyof typeof StatementTaxDefaultsRoundingScope] | null;
+
+
+export const StatementTaxDefaultsRoundingScope = {
+  per_line: 'per_line',
+  grand_total: 'grand_total',
+} as const;
+
+export interface StatementTaxDefaults {
+  calculation_status: 'pending_phase_8_uat';
+  enabled: boolean;
+  rounding_decimal_places: number | null;
+  rounding_scope: StatementTaxDefaultsRoundingScope;
+  tax_rate_percent: string | null;
+}
+
+export interface OrganizationSettingsResponse {
+  document_number_policy_version: 'adr-018-v1';
+  document_numbering: DocumentNumberPolicyResponse[];
+  organization_id: string;
+  printing: PrintPolicyResponse[];
+  quotation_print_layout_version: 'gmail-a4-landscape-v1';
+  statement_tax: StatementTaxDefaults;
+  updated_at: string;
+  work_order_print_layout_version: 'gmail-a4-portrait-9-process-v1';
+}
+
+export type OrganizationSettingsUpdateStatementRoundingScope = typeof OrganizationSettingsUpdateStatementRoundingScope[keyof typeof OrganizationSettingsUpdateStatementRoundingScope] | null;
+
+
+export const OrganizationSettingsUpdateStatementRoundingScope = {
+  per_line: 'per_line',
+  grand_total: 'grand_total',
+} as const;
+
+export interface OrganizationSettingsUpdate {
+  expected_updated_at: string;
+  statement_rounding_decimal_places?: number | null;
+  statement_rounding_scope?: OrganizationSettingsUpdateStatementRoundingScope;
+  statement_tax_default_enabled: boolean;
+  statement_tax_rate_percent?: number | string | null;
 }
 
 export type ReadinessCheckResultStatus = typeof ReadinessCheckResultStatus[keyof typeof ReadinessCheckResultStatus];
@@ -958,4 +1041,184 @@ export const organizationProfileUpdate = async (organizationProfileUpdateBody: O
 
   const data: organizationProfileUpdateResponse['data'] = body ? JSON.parse(body) : {}
   return { data, status: res.status, headers: res.headers } as organizationProfileUpdateResponse
+}
+
+
+
+export type organizationSettingsGetResponse200 = {
+  data: OrganizationSettingsResponse
+  status: 200
+}
+
+export type organizationSettingsGetResponse400 = {
+  data: ErrorResponse
+  status: 400
+}
+
+export type organizationSettingsGetResponse401 = {
+  data: ErrorResponse
+  status: 401
+}
+
+export type organizationSettingsGetResponse403 = {
+  data: ErrorResponse
+  status: 403
+}
+
+export type organizationSettingsGetResponse404 = {
+  data: ErrorResponse
+  status: 404
+}
+
+export type organizationSettingsGetResponse405 = {
+  data: ErrorResponse
+  status: 405
+}
+
+export type organizationSettingsGetResponse409 = {
+  data: ErrorResponse
+  status: 409
+}
+
+export type organizationSettingsGetResponse422 = {
+  data: ErrorResponse
+  status: 422
+}
+
+export type organizationSettingsGetResponse429 = {
+  data: ErrorResponse
+  status: 429
+}
+
+export type organizationSettingsGetResponse500 = {
+  data: ErrorResponse
+  status: 500
+}
+
+export type organizationSettingsGetResponseSuccess = (organizationSettingsGetResponse200) & {
+  headers: Headers;
+};
+export type organizationSettingsGetResponseError = (organizationSettingsGetResponse400 | organizationSettingsGetResponse401 | organizationSettingsGetResponse403 | organizationSettingsGetResponse404 | organizationSettingsGetResponse405 | organizationSettingsGetResponse409 | organizationSettingsGetResponse422 | organizationSettingsGetResponse429 | organizationSettingsGetResponse500) & {
+  headers: Headers;
+};
+
+export type organizationSettingsGetResponse = (organizationSettingsGetResponseSuccess | organizationSettingsGetResponseError)
+
+export const getOrganizationSettingsGetUrl = () => {
+
+
+
+
+  return `${import.meta.env.VITE_API_ORIGIN || ''}/api/v1/organizations/current/settings`
+}
+
+/**
+ * @summary 讀取目前公司的帳務與文件預設設定
+ */
+export const organizationSettingsGet = async ( options?: RequestInit): Promise<organizationSettingsGetResponse> => {
+
+  const res = await fetch(getOrganizationSettingsGetUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+)
+
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+
+  const data: organizationSettingsGetResponse['data'] = body ? JSON.parse(body) : {}
+  return { data, status: res.status, headers: res.headers } as organizationSettingsGetResponse
+}
+
+
+
+export type organizationSettingsUpdateResponse200 = {
+  data: OrganizationSettingsResponse
+  status: 200
+}
+
+export type organizationSettingsUpdateResponse400 = {
+  data: ErrorResponse
+  status: 400
+}
+
+export type organizationSettingsUpdateResponse401 = {
+  data: ErrorResponse
+  status: 401
+}
+
+export type organizationSettingsUpdateResponse403 = {
+  data: ErrorResponse
+  status: 403
+}
+
+export type organizationSettingsUpdateResponse404 = {
+  data: ErrorResponse
+  status: 404
+}
+
+export type organizationSettingsUpdateResponse405 = {
+  data: ErrorResponse
+  status: 405
+}
+
+export type organizationSettingsUpdateResponse409 = {
+  data: ErrorResponse
+  status: 409
+}
+
+export type organizationSettingsUpdateResponse422 = {
+  data: ErrorResponse
+  status: 422
+}
+
+export type organizationSettingsUpdateResponse429 = {
+  data: ErrorResponse
+  status: 429
+}
+
+export type organizationSettingsUpdateResponse500 = {
+  data: ErrorResponse
+  status: 500
+}
+
+export type organizationSettingsUpdateResponseSuccess = (organizationSettingsUpdateResponse200) & {
+  headers: Headers;
+};
+export type organizationSettingsUpdateResponseError = (organizationSettingsUpdateResponse400 | organizationSettingsUpdateResponse401 | organizationSettingsUpdateResponse403 | organizationSettingsUpdateResponse404 | organizationSettingsUpdateResponse405 | organizationSettingsUpdateResponse409 | organizationSettingsUpdateResponse422 | organizationSettingsUpdateResponse429 | organizationSettingsUpdateResponse500) & {
+  headers: Headers;
+};
+
+export type organizationSettingsUpdateResponse = (organizationSettingsUpdateResponseSuccess | organizationSettingsUpdateResponseError)
+
+export const getOrganizationSettingsUpdateUrl = () => {
+
+
+
+
+  return `${import.meta.env.VITE_API_ORIGIN || ''}/api/v1/organizations/current/settings`
+}
+
+/**
+ * @summary 更新目前公司的對帳單預設設定
+ */
+export const organizationSettingsUpdate = async (organizationSettingsUpdateBody: OrganizationSettingsUpdate, options?: RequestInit): Promise<organizationSettingsUpdateResponse> => {
+
+  const res = await fetch(getOrganizationSettingsUpdateUrl(),
+  {
+    ...options,
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(organizationSettingsUpdateBody)
+  }
+)
+
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+
+  const data: organizationSettingsUpdateResponse['data'] = body ? JSON.parse(body) : {}
+  return { data, status: res.status, headers: res.headers } as organizationSettingsUpdateResponse
 }

@@ -16,7 +16,7 @@ from app.core.database import create_database_resources
 from app.core.database.model_registry import REGISTERED_MODELS
 from app.modules.auth.models import User
 from app.modules.imports.models import ImportRun
-from app.modules.organizations.models import Organization, OrganizationMember
+from app.modules.organizations.models import Organization, OrganizationMember, OrganizationSettings
 from tests.integration.database_settings import load_database_test_settings
 
 pytestmark = [
@@ -66,6 +66,8 @@ IDENTITY_TABLES = [
     "users",
 ]
 
+ORGANIZATION_SETTINGS_TABLES = ["organization_settings"]
+
 AUTHORIZATION_TABLES = [
     "organization_member_roles",
     "permissions",
@@ -89,7 +91,7 @@ def test_schema_upgrade_downgrade_upgrade_round_trip(
     assert REGISTERED_MODELS
 
     command.upgrade(config, "head")
-    assert _current_revision() == "0008_organization_profile"
+    assert _current_revision() == "0009_organization_settings"
     assert _table_names() == [
         "alembic_version",
         *sorted(
@@ -99,6 +101,7 @@ def test_schema_upgrade_downgrade_upgrade_round_trip(
                 *AUDIT_TABLES,
                 *LOGIN_SECURITY_TABLES,
                 *IDENTITY_TABLES,
+                *ORGANIZATION_SETTINGS_TABLES,
             ]
         ),
     ]
@@ -110,7 +113,7 @@ def test_schema_upgrade_downgrade_upgrade_round_trip(
     assert _table_names() == ["alembic_version"]
 
     command.upgrade(config, "head")
-    assert _current_revision() == "0008_organization_profile"
+    assert _current_revision() == "0009_organization_settings"
     assert _table_names() == [
         "alembic_version",
         *sorted(
@@ -120,6 +123,7 @@ def test_schema_upgrade_downgrade_upgrade_round_trip(
                 *AUDIT_TABLES,
                 *LOGIN_SECURITY_TABLES,
                 *IDENTITY_TABLES,
+                *ORGANIZATION_SETTINGS_TABLES,
             ]
         ),
     ]
@@ -168,7 +172,7 @@ def test_identity_downgrade_preserves_existing_import_foundation(
         resources.dispose()
 
     command.upgrade(config, "head")
-    assert _current_revision() == "0008_organization_profile"
+    assert _current_revision() == "0009_organization_settings"
     command.check(config)
 
     resources = create_database_resources(settings)
@@ -251,6 +255,11 @@ def test_authorization_downgrade_preserves_existing_identity_rows(
                 )
             )
             connection.execute(User.__table__.delete().where(User.id == user_id))
+            connection.execute(
+                OrganizationSettings.__table__.delete().where(
+                    OrganizationSettings.organization_id == organization_id
+                )
+            )
             connection.execute(
                 Organization.__table__.delete().where(
                     Organization.id == organization_id

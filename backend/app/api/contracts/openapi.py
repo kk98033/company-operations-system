@@ -21,7 +21,11 @@ API_TAGS = [
     {
         "name": "health",
         "description": "進程存活與必要相依服務就緒狀態。",
-    }
+    },
+    {
+        "name": "organizations",
+        "description": "目前公司的基本資料、帳務預設與固定文件政策。",
+    },
 ]
 
 

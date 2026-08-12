@@ -12,6 +12,7 @@ import { LoginPage } from '../pages/LoginPage'
 import { AuditLogPage } from '../pages/audit/AuditLogPage'
 import { CasePrototypePage } from '../pages/cases/CasePrototypePage'
 import { CompanyProfilePage } from '../pages/settings/CompanyProfilePage'
+import { CompanyDefaultsPage } from '../pages/settings/CompanyDefaultsPage'
 import { ModulePrototypePage } from '../pages/ModulePrototypePage'
 import { NotFoundPage } from '../pages/NotFoundPage'
 import { RouteErrorPage } from '../pages/RouteErrorPage'
@@ -69,6 +70,12 @@ const companyProfileRoute = createRoute({
   component: CompanyProfilePage,
 })
 
+const companyDefaultsRoute = createRoute({
+  getParentRoute: () => authenticatedRoute,
+  path: '/settings/defaults',
+  component: CompanyDefaultsPage,
+})
+
 const workflowRoutes = workflowModules.map((module) => createRoute({
   getParentRoute: () => authenticatedRoute,
   path: module.path,
@@ -93,6 +100,7 @@ const routeTree = rootRoute.addChildren([
     workOrderNewRoute,
     auditLogsRoute,
     companyProfileRoute,
+    companyDefaultsRoute,
     uiPatternsRoute,
     stylePreviewRoute,
   ]),

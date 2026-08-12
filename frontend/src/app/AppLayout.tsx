@@ -76,15 +76,26 @@ export function AppLayout() {
             <>
               <p className="sidebar__section-label sidebar__section-label--modules">系統管理</p>
               {canManageSettings ? (
-                <Link
-                  activeOptions={{ exact: false }}
-                  activeProps={{ className: 'sidebar__link--active' }}
-                  className="sidebar__link"
-                  to="/settings/company"
-                >
-                  <span className="sidebar__link-icon" aria-hidden="true">司</span>
-                  <span className="sidebar__link-label">公司基本資料</span>
-                </Link>
+                <>
+                  <Link
+                    activeOptions={{ exact: true }}
+                    activeProps={{ className: 'sidebar__link--active' }}
+                    className="sidebar__link"
+                    to="/settings/company"
+                  >
+                    <span className="sidebar__link-icon" aria-hidden="true">司</span>
+                    <span className="sidebar__link-label">公司基本資料</span>
+                  </Link>
+                  <Link
+                    activeOptions={{ exact: true }}
+                    activeProps={{ className: 'sidebar__link--active' }}
+                    className="sidebar__link"
+                    to="/settings/defaults"
+                  >
+                    <span className="sidebar__link-icon" aria-hidden="true">設</span>
+                    <span className="sidebar__link-label">文件與帳務預設</span>
+                  </Link>
+                </>
               ) : null}
               {canReadAudit ? (
                 <Link

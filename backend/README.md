@@ -137,7 +137,7 @@ python -m pytest -ra
 
 ## Alembic migration
 
-Alembic 設定在 `alembic.ini`，版本檔在 `migrations/versions/`。`0001_empty_baseline` 是空白起點；`0002_import_staging` 建立 run／source file／staging，`0003_import_trace` 建立 errors／mappings；`0004_identity_foundation` 建立 organizations／users／organization_members／sessions。`0004` 不建立 seed、角色、權限或登入行為，也不建立 `customers` 等正式業務流程資料。應用程式啟動不會自動 migration。
+Alembic 設定在 `alembic.ini`，版本檔在 `migrations/versions/`。`0001_empty_baseline` 是空白起點；`0002_import_staging` 建立 run／source file／staging，`0003_import_trace` 建立 errors／mappings；`0004_identity_foundation` 建立 organizations／users／organization_members／sessions；`0005_authorization_foundation` 建立 capability 與公司角色；`0006_audit_foundation` 建立 append-only audit；`0007_login_security` 建立登入限制；`0008_organization_profile` 擴充公司抬頭；`0009_organization_settings` 建立公司帳務草稿與固定政策版本。Migration 不建立 `customers` 等尚未進入對應 Slice 的正式業務流程資料；應用程式啟動不會自動 migration。
 
 Identity schema 的邊界：
 
@@ -145,7 +145,7 @@ Identity schema 的邊界：
 - `organization_members` 只表達使用者屬於哪間公司；角色與 capability 留在 Slice 1.6。
 - `sessions` 只保存 64 字元的小寫 SHA-256 token digest 並綁定 membership；禁止保存 raw cookie token。
 - 父資料有 membership／session 時使用 `RESTRICT`，不以 cascade 抹除身分軌跡。
-- Slice 1.2 已加入可重跑的 test-only seed，使用 `argon2-cffi` 25.x 與明確 RFC 9106 low-memory Argon2id profile；角色與登入 API 仍未建立。
+- Slice 1.2 已加入可重跑的 test-only seed，使用 `argon2-cffi` 25.x 與明確 RFC 9106 low-memory Argon2id profile；後續 Slice 已完成 Cookie Session 登入、capability、公司 scope、audit、登入限制、公司資料及公司預設設定骨架，正式角色 mapping 與業務資料表仍留在對應 Slice。
 
 ## 虛構 identity seed
 

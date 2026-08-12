@@ -24,7 +24,11 @@ from app.modules.authorization.models import (
     Role,
     RolePermission,
 )
-from app.modules.organizations.models import Organization, OrganizationMember
+from app.modules.organizations.models import (
+    Organization,
+    OrganizationMember,
+    OrganizationSettings,
+)
 from tests.integration.database_settings import load_database_test_settings
 
 BACKEND_ROOT = Path(__file__).resolve().parents[2]
@@ -66,6 +70,7 @@ def identity_engine(migrated_engine: Engine) -> Generator[Engine, None, None]:
             connection.execute(RolePermission.__table__.delete())
             connection.execute(Role.__table__.delete())
             connection.execute(Permission.__table__.delete())
+            connection.execute(OrganizationSettings.__table__.delete())
             connection.execute(OrganizationMember.__table__.delete())
             connection.execute(User.__table__.delete())
             connection.execute(Organization.__table__.delete())

@@ -14,7 +14,11 @@ from app.core.database import DatabaseResources
 from app.main import create_app
 from app.modules.auth.models import User
 from app.modules.auth.passwords import hash_password
-from app.modules.organizations.models import Organization, OrganizationMember
+from app.modules.organizations.models import (
+    Organization,
+    OrganizationMember,
+    OrganizationSettings,
+)
 from tests.settings_factory import make_test_settings
 
 
@@ -45,6 +49,10 @@ def create_auth_identity(
                 "id": organization_id,
                 "name": f"Synthetic Organization {organization_id.hex}",
             },
+        )
+        connection.execute(
+            OrganizationSettings.__table__.insert(),
+            {"organization_id": organization_id},
         )
         connection.execute(
             User.__table__.insert(),

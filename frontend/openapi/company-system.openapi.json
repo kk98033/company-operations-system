@@ -253,6 +253,38 @@
         "title": "CurrentSessionResponse",
         "type": "object"
       },
+      "DocumentNumberPolicyResponse": {
+        "properties": {
+          "document_type": {
+            "title": "Document Type",
+            "type": "string"
+          },
+          "format": {
+            "title": "Format",
+            "type": "string"
+          },
+          "label": {
+            "title": "Label",
+            "type": "string"
+          },
+          "reset_period": {
+            "enum": [
+              "daily",
+              "monthly"
+            ],
+            "title": "Reset Period",
+            "type": "string"
+          }
+        },
+        "required": [
+          "document_type",
+          "label",
+          "format",
+          "reset_period"
+        ],
+        "title": "DocumentNumberPolicyResponse",
+        "type": "object"
+      },
       "ErrorBody": {
         "description": "Stable, machine-readable API error fields.",
         "properties": {
@@ -639,6 +671,129 @@
         "title": "OrganizationProfileUpdate",
         "type": "object"
       },
+      "OrganizationSettingsResponse": {
+        "properties": {
+          "document_number_policy_version": {
+            "const": "adr-018-v1",
+            "title": "Document Number Policy Version",
+            "type": "string"
+          },
+          "document_numbering": {
+            "items": {
+              "$ref": "#/components/schemas/DocumentNumberPolicyResponse"
+            },
+            "title": "Document Numbering",
+            "type": "array"
+          },
+          "organization_id": {
+            "format": "uuid",
+            "title": "Organization Id",
+            "type": "string"
+          },
+          "printing": {
+            "items": {
+              "$ref": "#/components/schemas/PrintPolicyResponse"
+            },
+            "title": "Printing",
+            "type": "array"
+          },
+          "quotation_print_layout_version": {
+            "const": "gmail-a4-landscape-v1",
+            "title": "Quotation Print Layout Version",
+            "type": "string"
+          },
+          "statement_tax": {
+            "$ref": "#/components/schemas/StatementTaxDefaults"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "title": "Updated At",
+            "type": "string"
+          },
+          "work_order_print_layout_version": {
+            "const": "gmail-a4-portrait-9-process-v1",
+            "title": "Work Order Print Layout Version",
+            "type": "string"
+          }
+        },
+        "required": [
+          "organization_id",
+          "statement_tax",
+          "document_number_policy_version",
+          "document_numbering",
+          "quotation_print_layout_version",
+          "work_order_print_layout_version",
+          "printing",
+          "updated_at"
+        ],
+        "title": "OrganizationSettingsResponse",
+        "type": "object"
+      },
+      "OrganizationSettingsUpdate": {
+        "additionalProperties": false,
+        "properties": {
+          "expected_updated_at": {
+            "format": "date-time",
+            "title": "Expected Updated At",
+            "type": "string"
+          },
+          "statement_rounding_decimal_places": {
+            "anyOf": [
+              {
+                "maximum": 4.0,
+                "minimum": 0.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Statement Rounding Decimal Places"
+          },
+          "statement_rounding_scope": {
+            "anyOf": [
+              {
+                "enum": [
+                  "per_line",
+                  "grand_total"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Statement Rounding Scope"
+          },
+          "statement_tax_default_enabled": {
+            "title": "Statement Tax Default Enabled",
+            "type": "boolean"
+          },
+          "statement_tax_rate_percent": {
+            "anyOf": [
+              {
+                "exclusiveMinimum": 0.0,
+                "maximum": 100.0,
+                "type": "number"
+              },
+              {
+                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d{0,4}0*$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Statement Tax Rate Percent"
+          }
+        },
+        "required": [
+          "expected_updated_at",
+          "statement_tax_default_enabled"
+        ],
+        "title": "OrganizationSettingsUpdate",
+        "type": "object"
+      },
       "PaginationMeta": {
         "description": "Counts and navigation state for one bounded result page.",
         "properties": {
@@ -682,6 +837,60 @@
           "has_next"
         ],
         "title": "PaginationMeta",
+        "type": "object"
+      },
+      "PrintPolicyResponse": {
+        "properties": {
+          "document_type": {
+            "title": "Document Type",
+            "type": "string"
+          },
+          "label": {
+            "title": "Label",
+            "type": "string"
+          },
+          "note": {
+            "title": "Note",
+            "type": "string"
+          },
+          "orientation": {
+            "anyOf": [
+              {
+                "enum": [
+                  "landscape",
+                  "portrait"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Orientation"
+          },
+          "paper_size": {
+            "const": "A4",
+            "title": "Paper Size",
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "confirmed",
+              "pending_uat"
+            ],
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "document_type",
+          "label",
+          "paper_size",
+          "orientation",
+          "status",
+          "note"
+        ],
+        "title": "PrintPolicyResponse",
         "type": "object"
       },
       "ReadinessCheckResult": {
@@ -766,6 +975,66 @@
           "direction"
         ],
         "title": "SortMeta",
+        "type": "object"
+      },
+      "StatementTaxDefaults": {
+        "properties": {
+          "calculation_status": {
+            "const": "pending_phase_8_uat",
+            "title": "Calculation Status",
+            "type": "string"
+          },
+          "enabled": {
+            "title": "Enabled",
+            "type": "boolean"
+          },
+          "rounding_decimal_places": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Rounding Decimal Places"
+          },
+          "rounding_scope": {
+            "anyOf": [
+              {
+                "enum": [
+                  "per_line",
+                  "grand_total"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Rounding Scope"
+          },
+          "tax_rate_percent": {
+            "anyOf": [
+              {
+                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tax Rate Percent"
+          }
+        },
+        "required": [
+          "enabled",
+          "tax_rate_percent",
+          "rounding_scope",
+          "rounding_decimal_places",
+          "calculation_status"
+        ],
+        "title": "StatementTaxDefaults",
         "type": "object"
       }
     },
@@ -1865,6 +2134,246 @@
           "organizations"
         ]
       }
+    },
+    "/api/v1/organizations/current/settings": {
+      "get": {
+        "operationId": "organization_settings_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrganizationSettingsResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "請求格式錯誤"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "尚未通過身分驗證"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "沒有執行此操作的權限"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "資源不存在"
+          },
+          "405": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "HTTP method 不允許用於此資源"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "資料狀態或版本衝突"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "輸入資料驗證失敗"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "請求次數暫時超過安全限制"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "伺服器發生未預期錯誤"
+          }
+        },
+        "security": [
+          {
+            "SessionCookie": []
+          }
+        ],
+        "summary": "讀取目前公司的帳務與文件預設設定",
+        "tags": [
+          "organizations"
+        ]
+      },
+      "put": {
+        "operationId": "organization_settings_update",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OrganizationSettingsUpdate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrganizationSettingsResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "請求格式錯誤"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "尚未通過身分驗證"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "沒有執行此操作的權限"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "資源不存在"
+          },
+          "405": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "HTTP method 不允許用於此資源"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "資料狀態或版本衝突"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "輸入資料驗證失敗"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "請求次數暫時超過安全限制"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "伺服器發生未預期錯誤"
+          }
+        },
+        "security": [
+          {
+            "SessionCookie": []
+          }
+        ],
+        "summary": "更新目前公司的對帳單預設設定",
+        "tags": [
+          "organizations"
+        ]
+      }
     }
   },
   "tags": [
@@ -1879,6 +2388,10 @@
     {
       "description": "進程存活與必要相依服務就緒狀態。",
       "name": "health"
+    },
+    {
+      "description": "目前公司的基本資料、帳務預設與固定文件政策。",
+      "name": "organizations"
     }
   ]
 }

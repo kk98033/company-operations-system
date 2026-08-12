@@ -20,7 +20,11 @@ from app.modules.imports.models import (
     ImportStagingRecord,
     LegacyMapping,
 )
-from app.modules.organizations.models import Organization, OrganizationMember
+from app.modules.organizations.models import (
+    Organization,
+    OrganizationMember,
+    OrganizationSettings,
+)
 
 REGISTERED_MODELS = (
     ImportError,
@@ -29,6 +33,7 @@ REGISTERED_MODELS = (
     ImportStagingRecord,
     LegacyMapping,
     Organization,
+    OrganizationSettings,
     User,
     OrganizationMember,
     Session,

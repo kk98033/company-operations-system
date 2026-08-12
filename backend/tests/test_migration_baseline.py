@@ -32,6 +32,7 @@ def test_base_metadata_contains_import_and_identity_foundation_tables() -> None:
         "login_throttle_states",
         "organization_member_roles",
         "organization_members",
+        "organization_settings",
         "organizations",
         "permissions",
         "role_permissions",
