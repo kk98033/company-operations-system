@@ -12,9 +12,7 @@ from app.modules.auth.models import User
 from app.modules.organizations.models import Organization, OrganizationMember
 
 
-def assert_insert_rejected(
-    engine: Engine, table: Table, values: dict[str, object]
-) -> None:
+def assert_insert_rejected(engine: Engine, table: Table, values: dict[str, object]) -> None:
     with engine.connect() as connection:
         with pytest.raises(IntegrityError):
             with connection.begin():

@@ -209,9 +209,7 @@ def test_database_url_requires_database_name_username_and_password() -> None:
     with pytest.raises(SettingsLoadError, match="必須指定資料庫名稱"):
         load_settings(
             environ=valid_settings_values(
-                DATABASE_URL=(
-                    "postgresql+psycopg://company_system_dev:secret@db"
-                )
+                DATABASE_URL=("postgresql+psycopg://company_system_dev:secret@db")
             ),
             env_file=None,
         )
@@ -219,9 +217,7 @@ def test_database_url_requires_database_name_username_and_password() -> None:
     with pytest.raises(SettingsLoadError, match="必須指定資料庫帳號"):
         load_settings(
             environ=valid_settings_values(
-                DATABASE_URL=(
-                    "postgresql+psycopg://db.internal/company_system_dev"
-                )
+                DATABASE_URL=("postgresql+psycopg://db.internal/company_system_dev")
             ),
             env_file=None,
         )
@@ -230,8 +226,7 @@ def test_database_url_requires_database_name_username_and_password() -> None:
         load_settings(
             environ=valid_settings_values(
                 DATABASE_URL=(
-                    "postgresql+psycopg://company_system_dev@db.internal/"
-                    "company_system_dev"
+                    "postgresql+psycopg://company_system_dev@db.internal/company_system_dev"
                 )
             ),
             env_file=None,

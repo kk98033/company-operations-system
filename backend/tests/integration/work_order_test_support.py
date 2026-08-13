@@ -59,6 +59,11 @@ def setup_company(engine: Engine, suffix: str):
         "work_orders.read",
         "work_orders.manage",
         "work_orders.confirm",
+        "production.read",
+        "production.manage",
+        "production.complete",
+        "inventory.read",
+        "inventory.adjust",
     )
     client = make_auth_client(engine)
     login = client.post(

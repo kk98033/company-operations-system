@@ -234,9 +234,7 @@ def test_unauthorized_preserves_authentication_challenge() -> None:
     response = TestClient(app).get("/_test/unauthorized")
 
     assert response.status_code == 401
-    assert response.headers["www-authenticate"] == (
-        'Bearer realm="company-system"'
-    )
+    assert response.headers["www-authenticate"] == ('Bearer realm="company-system"')
     assert response.json()["error"]["code"] == "UNAUTHORIZED"
 
 
@@ -265,6 +263,5 @@ def test_unexpected_error_does_not_expose_exception(
     assert "database password" not in response.text
     assert "database password" not in caplog.text
     assert any(
-        getattr(record, "exception_type", None) == "RuntimeError"
-        for record in caplog.records
+        getattr(record, "exception_type", None) == "RuntimeError" for record in caplog.records
     )

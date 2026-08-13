@@ -80,10 +80,7 @@ def test_mapping_idempotency_crosses_runs_and_supports_child_slots() -> None:
         "target_table",
         "mapping_slot",
     ) in _unique_column_sets("legacy_mappings")
-    assert all(
-        "import_run_id" not in columns
-        for columns in _unique_column_sets("legacy_mappings")
-    )
+    assert all("import_run_id" not in columns for columns in _unique_column_sets("legacy_mappings"))
     assert LegacyMapping.__table__.c.source_key.type.length == 256
     assert LegacyMapping.__table__.c.mapping_slot.type.length == 64
 

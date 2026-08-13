@@ -34,9 +34,7 @@ def test_migrated_schema_has_expected_constraints_and_indexes(
     migrated_engine: Engine,
 ) -> None:
     database_inspector = inspect(migrated_engine)
-    staging_uniques = database_inspector.get_unique_constraints(
-        "import_staging_records"
-    )
+    staging_uniques = database_inspector.get_unique_constraints("import_staging_records")
     mapping_uniques = database_inspector.get_unique_constraints("legacy_mappings")
 
     assert any(
@@ -54,16 +52,12 @@ def test_migrated_schema_has_expected_constraints_and_indexes(
         ]
         for unique in mapping_uniques
     )
-    assert {
-        index["name"]
-        for index in database_inspector.get_indexes("import_errors")
-    } >= {
+    assert {index["name"] for index in database_inspector.get_indexes("import_errors")} >= {
         "ix_import_errors_import_run_id_resolution_status",
         "ix_import_errors_run_table_source_row_number",
     }
     assert "ix_import_source_files_source_table_content_sha256" in {
-        index["name"]
-        for index in database_inspector.get_indexes("import_source_files")
+        index["name"] for index in database_inspector.get_indexes("import_source_files")
     }
 
 
@@ -143,15 +137,17 @@ def test_staging_and_errors_preserve_traceability_boundaries(
             staging_record_id=staging_record_id,
         )
 
-        staged_payload = connection.execute(
-            ImportStagingRecord.__table__.select().where(
-                ImportStagingRecord.id == staging_record_id
+        staged_payload = (
+            connection.execute(
+                ImportStagingRecord.__table__.select().where(
+                    ImportStagingRecord.id == staging_record_id
+                )
             )
-        ).mappings().one()
+            .mappings()
+            .one()
+        )
         assert staged_payload["raw_payload"] == {"legacy_label": "raw canary"}
-        assert staged_payload["normalized_payload"] == {
-            "display_label": "normalized canary"
-        }
+        assert staged_payload["normalized_payload"] == {"display_label": "normalized canary"}
 
         connection.execute(
             ImportError.__table__.insert(),

@@ -84,11 +84,7 @@ def test_current_session_dependency_rejects_duplicate_session_cookies(
 
     response = dependency_client.get(
         "/_test/current-session",
-        headers={
-            "Cookie": "; ".join(
-                f"{SESSION_COOKIE_NAME}={value}" for value in ordered
-            )
-        },
+        headers={"Cookie": "; ".join(f"{SESSION_COOKIE_NAME}={value}" for value in ordered)},
     )
 
     assert response.status_code == 401

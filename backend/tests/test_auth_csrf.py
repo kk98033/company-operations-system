@@ -23,10 +23,13 @@ def test_csrf_token_is_urlsafe_and_bound_to_one_session_and_key() -> None:
 
     assert len(token) == CSRF_TOKEN_LENGTH
     assert token.replace("-", "").replace("_", "").isalnum()
-    assert token != derive_csrf_token(
-        second_session,
-        signing_key=settings.csrf_hmac_key_value(),
-    ).get_secret_value()
+    assert (
+        token
+        != derive_csrf_token(
+            second_session,
+            signing_key=settings.csrf_hmac_key_value(),
+        ).get_secret_value()
+    )
     assert csrf_token_matches(
         first_session,
         signing_key=settings.csrf_hmac_key_value(),

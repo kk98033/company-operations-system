@@ -126,9 +126,7 @@ def test_login_binds_the_explicit_membership_for_a_multi_organization_user(
     assert response.status_code == 200
     assert response.json()["organization"]["id"] == str(second_organization_id)
     with identity_engine.connect() as connection:
-        assert connection.scalar(select(Session.organization_member_id)) == (
-            second_membership_id
-        )
+        assert connection.scalar(select(Session.organization_member_id)) == (second_membership_id)
 
 
 def test_database_normalization_keeps_tab_wrapped_login_distinct(
@@ -173,9 +171,7 @@ def test_database_normalization_keeps_tab_wrapped_login_distinct(
     assert response.status_code == 200
     assert response.json()["user"]["id"] == str(tab_user_id)
     with identity_engine.connect() as connection:
-        assert connection.scalar(select(Session.organization_member_id)) == (
-            tab_membership_id
-        )
+        assert connection.scalar(select(Session.organization_member_id)) == (tab_membership_id)
 
 
 def test_unknown_login_still_runs_one_argon2_verification(
@@ -281,6 +277,6 @@ def test_all_credential_and_status_failures_have_the_same_safe_401(
     assert payload["password"] not in response.text
     with identity_engine.connect() as connection:
         assert connection.scalar(select(func.count()).select_from(Session)) == 0
-        assert connection.scalar(
-            select(User.last_login_at).where(User.id == identity.user_id)
-        ) is None
+        assert (
+            connection.scalar(select(User.last_login_at).where(User.id == identity.user_id)) is None
+        )

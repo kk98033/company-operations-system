@@ -48,8 +48,7 @@ def test_process_environment_overrides_dotenv_file(tmp_path: Path) -> None:
         environ={
             "APP_ENV": "test",
             "DATABASE_URL": (
-                "postgresql+psycopg://company_system_test:secret@127.0.0.1/"
-                "company_system_test"
+                "postgresql+psycopg://company_system_test:secret@127.0.0.1/company_system_test"
             ),
         },
         env_file=env_file,
@@ -91,8 +90,7 @@ def test_dotenv_expands_postgres_components_into_database_url(
     settings = load_settings(environ={}, env_file=env_file)
 
     assert settings.database_url_value() == (
-        "postgresql+psycopg://company_system_dev:local-only@127.0.0.1:5432/"
-        "company_system_dev"
+        "postgresql+psycopg://company_system_dev:local-only@127.0.0.1:5432/company_system_dev"
     )
 
 
@@ -101,9 +99,7 @@ def test_settings_and_validation_error_repr_hide_database_secret() -> None:
 
     assert "local-only" not in repr(settings)
 
-    invalid_values = valid_settings_values(
-        DATABASE_URL=["validation-canary"]
-    )
+    invalid_values = valid_settings_values(DATABASE_URL=["validation-canary"])
     with pytest.raises(ValidationError) as error:
         AppSettings.model_validate(invalid_values)
 

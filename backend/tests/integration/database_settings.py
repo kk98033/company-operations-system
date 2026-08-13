@@ -18,26 +18,16 @@ def load_database_test_settings() -> AppSettings:
     """Build a guarded test DSN without printing or exporting its password."""
 
     values = dotenv_values(PROJECT_ROOT / ".env")
-    password = os.getenv("POSTGRES_TEST_PASSWORD") or values.get(
-        "POSTGRES_TEST_PASSWORD"
-    )
+    password = os.getenv("POSTGRES_TEST_PASSWORD") or values.get("POSTGRES_TEST_PASSWORD")
     password = password or DEFAULT_TEST_PASSWORD
 
     database_name = (
-        os.getenv("POSTGRES_TEST_DB")
-        or values.get("POSTGRES_TEST_DB")
-        or "company_system_test"
+        os.getenv("POSTGRES_TEST_DB") or values.get("POSTGRES_TEST_DB") or "company_system_test"
     )
     username = (
-        os.getenv("POSTGRES_TEST_USER")
-        or values.get("POSTGRES_TEST_USER")
-        or "company_system_test"
+        os.getenv("POSTGRES_TEST_USER") or values.get("POSTGRES_TEST_USER") or "company_system_test"
     )
-    port = (
-        os.getenv("POSTGRES_TEST_PORT")
-        or values.get("POSTGRES_TEST_PORT")
-        or "5433"
-    )
+    port = os.getenv("POSTGRES_TEST_PORT") or values.get("POSTGRES_TEST_PORT") or "5433"
     database_url = (
         f"postgresql+psycopg://{quote(username, safe='')}:{quote(password, safe='')}"
         f"@127.0.0.1:{port}/{quote(database_name, safe='')}"

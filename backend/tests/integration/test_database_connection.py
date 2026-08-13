@@ -37,9 +37,7 @@ def test_separate_sessions_do_not_share_uncommitted_state() -> None:
             first_session.execute(text("INSERT INTO slice05_dirty VALUES (1)"))
 
         with resources.session_factory() as second_session:
-            relation = second_session.scalar(
-                text("SELECT to_regclass('pg_temp.slice05_dirty')")
-            )
+            relation = second_session.scalar(text("SELECT to_regclass('pg_temp.slice05_dirty')"))
             assert relation is None
     finally:
         resources.dispose()

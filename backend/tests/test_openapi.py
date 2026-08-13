@@ -18,9 +18,9 @@ def test_development_openapi_has_stable_health_and_error_contracts() -> None:
     ready = schema["paths"]["/api/v1/health/ready"]["get"]
     assert live["operationId"] == "health_live"
     assert ready["operationId"] == "health_ready"
-    assert ready["responses"]["503"]["content"]["application/json"][
-        "schema"
-    ] == {"$ref": "#/components/schemas/ErrorResponse"}
+    assert ready["responses"]["503"]["content"]["application/json"]["schema"] == {
+        "$ref": "#/components/schemas/ErrorResponse"
+    }
 
     for operation in (live, ready):
         for status_code in (
@@ -34,9 +34,9 @@ def test_development_openapi_has_stable_health_and_error_contracts() -> None:
             "422",
             "500",
         ):
-            response_schema = operation["responses"][status_code]["content"][
-                "application/json"
-            ]["schema"]
+            response_schema = operation["responses"][status_code]["content"]["application/json"][
+                "schema"
+            ]
             assert response_schema == {"$ref": "#/components/schemas/ErrorResponse"}
     assert "503" not in live["responses"]
     assert "503" in ready["responses"]
@@ -44,9 +44,7 @@ def test_development_openapi_has_stable_health_and_error_contracts() -> None:
 
 
 def test_auth_openapi_declares_secret_input_and_cookie_transport() -> None:
-    schema = TestClient(create_app(settings=make_test_settings())).get(
-        "/openapi.json"
-    ).json()
+    schema = TestClient(create_app(settings=make_test_settings())).get("/openapi.json").json()
     login = schema["paths"]["/api/v1/auth/login"]["post"]
     current = schema["paths"]["/api/v1/auth/session"]["get"]
     logout = schema["paths"]["/api/v1/auth/logout"]["post"]
@@ -84,13 +82,11 @@ def test_auth_openapi_declares_secret_input_and_cookie_transport() -> None:
     }
     assert "session_token" not in login_response["properties"]
     assert "token_type" not in login_response["properties"]
-    assert login["responses"]["429"]["content"]["application/json"][
-        "schema"
-    ] == {"$ref": "#/components/schemas/ErrorResponse"}
+    assert login["responses"]["429"]["content"]["application/json"]["schema"] == {
+        "$ref": "#/components/schemas/ErrorResponse"
+    }
     csrf_parameter = next(
-        parameter
-        for parameter in logout["parameters"]
-        if parameter["name"] == "X-CSRF-Token"
+        parameter for parameter in logout["parameters"] if parameter["name"] == "X-CSRF-Token"
     )
     assert csrf_parameter["in"] == "header"
     assert csrf_parameter["required"] is False
@@ -105,9 +101,7 @@ def test_auth_openapi_declares_secret_input_and_cookie_transport() -> None:
 
 
 def test_audit_openapi_is_read_only_bounded_and_cookie_protected() -> None:
-    schema = TestClient(create_app(settings=make_test_settings())).get(
-        "/openapi.json"
-    ).json()
+    schema = TestClient(create_app(settings=make_test_settings())).get("/openapi.json").json()
     operation = schema["paths"]["/api/v1/audit-logs"]["get"]
     parameters = {item["name"]: item for item in operation["parameters"]}
 
@@ -120,9 +114,7 @@ def test_audit_openapi_is_read_only_bounded_and_cookie_protected() -> None:
 
 
 def test_organization_profile_openapi_is_scoped_and_csrf_protected() -> None:
-    schema = TestClient(create_app(settings=make_test_settings())).get(
-        "/openapi.json"
-    ).json()
+    schema = TestClient(create_app(settings=make_test_settings())).get("/openapi.json").json()
     path = schema["paths"]["/api/v1/organizations/current/profile"]
 
     assert path["get"]["operationId"] == "organization_profile_get"
@@ -136,9 +128,7 @@ def test_organization_profile_openapi_is_scoped_and_csrf_protected() -> None:
 
 
 def test_organization_settings_openapi_keeps_fixed_policies_read_only() -> None:
-    schema = TestClient(create_app(settings=make_test_settings())).get(
-        "/openapi.json"
-    ).json()
+    schema = TestClient(create_app(settings=make_test_settings())).get("/openapi.json").json()
     path = schema["paths"]["/api/v1/organizations/current/settings"]
 
     assert path["get"]["operationId"] == "organization_settings_get"

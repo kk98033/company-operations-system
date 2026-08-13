@@ -30,9 +30,7 @@ pytestmark = [
 
 
 def _grant_settings_manage(engine: Engine, *, organization_id, membership_id) -> None:
-    permission = Permission(
-        id=uuid4(), code="settings.manage", name="Manage synthetic settings"
-    )
+    permission = Permission(id=uuid4(), code="settings.manage", name="Manage synthetic settings")
     role = Role(
         id=uuid4(),
         organization_id=organization_id,
@@ -82,12 +80,8 @@ def _profile_payload(profile: dict[str, object]) -> dict[str, object]:
 def test_profile_update_is_company_scoped_permission_guarded_and_audited(
     identity_engine: Engine,
 ) -> None:
-    identity_a = create_auth_identity(
-        identity_engine, password=SecretStr(f"Synthetic-A-{uuid4()}")
-    )
-    identity_b = create_auth_identity(
-        identity_engine, password=SecretStr(f"Synthetic-B-{uuid4()}")
-    )
+    identity_a = create_auth_identity(identity_engine, password=SecretStr(f"Synthetic-A-{uuid4()}"))
+    identity_b = create_auth_identity(identity_engine, password=SecretStr(f"Synthetic-B-{uuid4()}"))
     _grant_settings_manage(
         identity_engine,
         organization_id=identity_a.organization_id,
@@ -142,9 +136,7 @@ def test_profile_update_is_company_scoped_permission_guarded_and_audited(
 def test_profile_update_requires_csrf_and_rejects_stale_editor(
     identity_engine: Engine,
 ) -> None:
-    identity = create_auth_identity(
-        identity_engine, password=SecretStr(f"Synthetic-{uuid4()}")
-    )
+    identity = create_auth_identity(identity_engine, password=SecretStr(f"Synthetic-{uuid4()}"))
     _grant_settings_manage(
         identity_engine,
         organization_id=identity.organization_id,
@@ -155,9 +147,7 @@ def test_profile_update_requires_csrf_and_rejects_stale_editor(
     initial = client.get("/api/v1/organizations/current/profile").json()
     payload = _profile_payload(initial)
 
-    missing_csrf = client.put(
-        "/api/v1/organizations/current/profile", json=payload
-    )
+    missing_csrf = client.put("/api/v1/organizations/current/profile", json=payload)
     first = client.put(
         "/api/v1/organizations/current/profile",
         json=payload,
@@ -178,9 +168,7 @@ def test_profile_update_requires_csrf_and_rejects_stale_editor(
 def test_logo_metadata_is_read_only_and_must_be_complete(
     identity_engine: Engine,
 ) -> None:
-    identity = create_auth_identity(
-        identity_engine, password=SecretStr(f"Synthetic-{uuid4()}")
-    )
+    identity = create_auth_identity(identity_engine, password=SecretStr(f"Synthetic-{uuid4()}"))
     _grant_settings_manage(
         identity_engine,
         organization_id=identity.organization_id,

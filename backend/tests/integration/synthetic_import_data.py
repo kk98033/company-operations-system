@@ -84,9 +84,7 @@ def insert_staged_source(
     source_file_id: UUID,
     staging_record_id: UUID,
 ) -> None:
-    insert_source_file(
-        connection, run_id=run_id, source_file_id=source_file_id
-    )
+    insert_source_file(connection, run_id=run_id, source_file_id=source_file_id)
     insert_staging_record(
         connection,
         run_id=run_id,

@@ -218,7 +218,7 @@ P0-04 新版「基礎計價只取正式量」不回溯改寫舊金額。舊備�
 | I-1.4 | DONE（未 apply） | `b_replay1`＋`b_replay2` aggregate-only dry-run | 4 主檔／10 明細；3 筆明細缺 `br_no`、其餘 7 筆也無法對上 4 個主檔號，正式匯入前須回查來源；金額格式 10／10 可解析，不臆造工單關係 |
 | I-2.1 | DONE（未 apply） | `subpoena`＋`quote` 現行工單 aggregate-only dry-run | 1,451 筆製程父鍵全數未命中，取得可靠 join 前不得試匯 |
 | I-2.2 | Phase 4 history 完成 | `subpoena_his`＋`quote_his` | 現行／歷史去重、狀態及數量 |
-| I-3.1 | Phase 5 inventory 完成 | `merchandise` | 每工單完工／出貨／備品／餘額核對 |
+| I-3.1 | DONE（未 apply） | `merchandise` 1,451 筆 aggregate-only dry-run | 數量皆可解析且餘額皆為正；8 碼 `subpoenaid` 對 11 碼工單號直接命中 0，日期前綴候選不可當正式關聯 |
 | I-4.1 | Phase 6 shipment 完成 | `subp_sale`＋`subp_sale2` | 主明細、工單來源、數量及 orphan |
 | I-5.1 | Phase 7 pricing 完成 | `sal`＋`sal2` | 來源出貨、防重複、金額總計 |
 | I-6.1 | Phase 8 billing 完成 | `rec`、`income`、`lsm`、`rece` | 客戶／月份、稅額、已收／未收核對 |
@@ -227,6 +227,8 @@ P0-04 新版「基礎計價只取正式量」不回溯改寫舊金額。舊備�
 | I-8.1 | Phase 12 | 最終差異匯入 | 公司簽認筆數、數量、金額 |
 
 I-2.1 已於 2026-08-13 完成 aggregate-only dry-run：目前 CSV 讀得 `subpoena` 1,431 筆、`quote` 1,451 筆；`quote.subpoenaid` 對 `subpoena.id`、`idbuffer`、`ordernumber`、`orderid` 的直接命中皆為 0。報告沒有輸出客戶、品名或製程內容，且 `apply_performed=false`。下一步必須回查舊程式實際 join／另一版匯出或請公司提供可核對樣本，不能以列序或相似文字臆造父子關係。
+
+I-3.1 已於 2026-08-13 完成 aggregate-only dry-run：`merchandise` 讀得 1,451 筆，`finishnumber - delivernumber - sparenumber` 全部可解析且目前均為正值；來源包含 5,804 個 NUL bytes，dry-run 只在記憶體移除並保留原檔 SHA-256。`merchandise.subpoenaid` 為 8 碼日期型參考，對 11 碼 `subpoena.id` 直接命中 0；日期前綴雖有候選但可能一對多，禁止據此 apply。報告不含客戶、品名或逐列值，且 `apply_performed=false`。
 
 每個 Import Slice 都是小切片，必須各自測試、更新進度及 commit；不能把全部 Import 寫成一個超大腳本。
 

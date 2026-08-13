@@ -27,6 +27,12 @@ from app.modules.organizations.models import (
     OrganizationMember,
     OrganizationSettings,
 )
+from app.modules.production.models import (
+    FinalCompletionEntry,
+    InventoryAdjustment,
+    InventoryLedgerEntry,
+    ProcessEvent,
+)
 from app.modules.quotations.models import DocumentSequence, Quotation, QuotationItem
 from app.modules.work_orders.models import ProductionCase, WorkOrder, WorkOrderAttachment
 
@@ -46,6 +52,10 @@ REGISTERED_MODELS = (
     ProductionCase,
     WorkOrder,
     WorkOrderAttachment,
+    ProcessEvent,
+    FinalCompletionEntry,
+    InventoryAdjustment,
+    InventoryLedgerEntry,
     Vendor,
     PaperType,
     PaperMill,

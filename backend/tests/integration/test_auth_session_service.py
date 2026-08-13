@@ -217,6 +217,6 @@ def test_digest_collision_rolls_back_last_login_and_new_session(
 
     with identity_engine.connect() as connection:
         assert connection.scalar(select(func.count()).select_from(Session)) == 1
-        assert connection.scalar(
-            select(User.last_login_at).where(User.id == identity.user_id)
-        ) is None
+        assert (
+            connection.scalar(select(User.last_login_at).where(User.id == identity.user_id)) is None
+        )

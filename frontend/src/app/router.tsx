@@ -15,6 +15,9 @@ import { CustomerCreatePage } from '../pages/customers/CustomerCreatePage'
 import { CustomerEditPage } from '../pages/customers/CustomerEditPage'
 import { CustomerListPage } from '../pages/customers/CustomerListPage'
 import { MasterDataPage } from '../pages/master-data/MasterDataPage'
+import { InventoryPage } from '../pages/inventory/InventoryPage'
+import { ProductionDetailPage } from '../pages/production/ProductionDetailPage'
+import { ProductionListPage } from '../pages/production/ProductionListPage'
 import { QuotationEditPage, QuotationNewPage } from '../pages/quotations/QuotationEditorPage'
 import { QuotationListPage } from '../pages/quotations/QuotationListPage'
 import { QuotationPrintPage } from '../pages/quotations/QuotationPrintPage'
@@ -101,6 +104,10 @@ const workflowRoutes = workflowModules.map((module) => createRoute({
       ? QuotationListPage
     : module.id === 'cases'
       ? CasePrototypePage
+    : module.id === 'production'
+      ? ProductionListPage
+    : module.id === 'inventory'
+      ? InventoryPage
     : () => <ModulePrototypePage module={module} />,
 }))
 
@@ -126,6 +133,12 @@ const caseDetailRoute = createRoute({
   getParentRoute: () => authenticatedRoute,
   path: '/cases/$caseId',
   component: CaseDetailPage,
+})
+
+const productionDetailRoute = createRoute({
+  getParentRoute: () => authenticatedRoute,
+  path: '/production/work-orders/$workOrderId',
+  component: ProductionDetailPage,
 })
 
 const customerNewRoute = createRoute({
@@ -172,6 +185,7 @@ const routeTree = rootRoute.addChildren([
     workOrderEditRoute,
     workOrderPrintRoute,
     caseDetailRoute,
+    productionDetailRoute,
     auditLogsRoute,
     companyProfileRoute,
     companyDefaultsRoute,

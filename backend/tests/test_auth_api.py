@@ -105,9 +105,7 @@ def test_login_sets_browser_session_cookies_without_returning_raw_token(
     session_header = next(
         value for value in cookie_headers if value.startswith(SESSION_COOKIE_NAME)
     )
-    csrf_header = next(
-        value for value in cookie_headers if value.startswith(CSRF_COOKIE_NAME)
-    )
+    csrf_header = next(value for value in cookie_headers if value.startswith(CSRF_COOKIE_NAME))
     assert "HttpOnly" in session_header
     assert "Path=/api/v1" in session_header
     assert "HttpOnly" not in csrf_header

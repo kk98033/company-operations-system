@@ -257,13 +257,9 @@ def test_parent_run_and_source_file_deletes_are_restricted(
         with pytest.raises(IntegrityError):
             with connection.begin_nested():
                 connection.execute(
-                    ImportSourceFile.__table__.delete().where(
-                        ImportSourceFile.id == source_file_id
-                    )
+                    ImportSourceFile.__table__.delete().where(ImportSourceFile.id == source_file_id)
                 )
         with pytest.raises(IntegrityError):
             with connection.begin_nested():
-                connection.execute(
-                    ImportRun.__table__.delete().where(ImportRun.id == run_id)
-                )
+                connection.execute(ImportRun.__table__.delete().where(ImportRun.id == run_id))
         transaction.rollback()

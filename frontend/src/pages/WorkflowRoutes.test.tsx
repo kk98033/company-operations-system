@@ -5,7 +5,9 @@ import { workflowModules } from '../app/workflowModules'
 import { renderApp } from '../test/renderApp'
 
 const prototypeModules = workflowModules.filter(
-  (module) => !['customers', 'quotations', 'cases', 'work-orders'].includes(module.id),
+  (module) => ![
+    'customers', 'quotations', 'cases', 'work-orders', 'production', 'inventory',
+  ].includes(module.id),
 )
 
 describe('公司主流程路由', () => {
@@ -64,6 +66,10 @@ describe('公司主流程路由', () => {
             ? '沒有案件權限'
             : module.id === 'work-orders'
               ? '沒有工單資料權限'
+              : module.id === 'production'
+                ? '沒有生產資料權限'
+                : module.id === 'inventory'
+                  ? '沒有庫存資料權限'
           : module.label
       expect(screen.getByRole('heading', { level: 1, name: heading }))
         .toBeInTheDocument()

@@ -82,9 +82,7 @@ def test_active_grant_is_exact_sorted_and_inactive_rows_deny(
         role_code="operator",
         permission_code="work_order.read",
     )
-    second_permission = Permission(
-        id=uuid4(), code="case.read", name="Synthetic Case Read"
-    )
+    second_permission = Permission(id=uuid4(), code="case.read", name="Synthetic Case Read")
     with OrmSession(identity_engine) as session, session.begin():
         session.add(second_permission)
         session.flush()

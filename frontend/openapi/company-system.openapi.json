@@ -1489,6 +1489,346 @@
         "title": "ErrorResponse",
         "type": "object"
       },
+      "FinalCompletionCreate": {
+        "additionalProperties": false,
+        "properties": {
+          "idempotency_key": {
+            "format": "uuid",
+            "title": "Idempotency Key",
+            "type": "string"
+          },
+          "quantity": {
+            "anyOf": [
+              {
+                "exclusiveMinimum": 0.0,
+                "type": "number"
+              },
+              {
+                "pattern": "^(?!^[-+.]*$)[+-]?0*(?:\\d{0,10}|(?=[\\d.]{1,15}0*$)\\d{0,10}\\.\\d{0,4}0*$)",
+                "type": "string"
+              }
+            ],
+            "title": "Quantity"
+          },
+          "reason": {
+            "maxLength": 1000,
+            "minLength": 1,
+            "title": "Reason",
+            "type": "string"
+          }
+        },
+        "required": [
+          "quantity",
+          "reason",
+          "idempotency_key"
+        ],
+        "title": "FinalCompletionCreate",
+        "type": "object"
+      },
+      "FinalCompletionResponse": {
+        "properties": {
+          "available_quantity": {
+            "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+            "title": "Available Quantity",
+            "type": "string"
+          },
+          "correlation_id": {
+            "format": "uuid",
+            "title": "Correlation Id",
+            "type": "string"
+          },
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "entry_type": {
+            "title": "Entry Type",
+            "type": "string"
+          },
+          "exceeds_order_quantity": {
+            "title": "Exceeds Order Quantity",
+            "type": "boolean"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "occurred_at": {
+            "format": "date-time",
+            "title": "Occurred At",
+            "type": "string"
+          },
+          "quantity": {
+            "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+            "title": "Quantity",
+            "type": "string"
+          },
+          "reason": {
+            "title": "Reason",
+            "type": "string"
+          },
+          "reversal_of_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reversal Of Id"
+          },
+          "source_type": {
+            "title": "Source Type",
+            "type": "string"
+          },
+          "transport_process_event_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Transport Process Event Id"
+          },
+          "work_order_id": {
+            "format": "uuid",
+            "title": "Work Order Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "work_order_id",
+          "entry_type",
+          "source_type",
+          "quantity",
+          "transport_process_event_id",
+          "reversal_of_id",
+          "correlation_id",
+          "reason",
+          "occurred_at",
+          "created_at",
+          "available_quantity",
+          "exceeds_order_quantity"
+        ],
+        "title": "FinalCompletionResponse",
+        "type": "object"
+      },
+      "InventoryAdjustmentCreate": {
+        "additionalProperties": false,
+        "properties": {
+          "idempotency_key": {
+            "format": "uuid",
+            "title": "Idempotency Key",
+            "type": "string"
+          },
+          "quantity": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "pattern": "^(?!^[-+.]*$)[+-]?0*(?:\\d{0,10}|(?=[\\d.]{1,15}0*$)\\d{0,10}\\.\\d{0,4}0*$)",
+                "type": "string"
+              }
+            ],
+            "title": "Quantity"
+          },
+          "reason": {
+            "maxLength": 1000,
+            "minLength": 1,
+            "title": "Reason",
+            "type": "string"
+          }
+        },
+        "required": [
+          "quantity",
+          "reason",
+          "idempotency_key"
+        ],
+        "title": "InventoryAdjustmentCreate",
+        "type": "object"
+      },
+      "InventoryFilters": {
+        "properties": {
+          "keyword": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Keyword"
+          },
+          "positive_only": {
+            "title": "Positive Only",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "keyword",
+          "positive_only"
+        ],
+        "title": "InventoryFilters",
+        "type": "object"
+      },
+      "InventoryLedgerResponse": {
+        "properties": {
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "event_type": {
+            "title": "Event Type",
+            "type": "string"
+          },
+          "final_completion_entry_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Final Completion Entry Id"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "inventory_adjustment_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Inventory Adjustment Id"
+          },
+          "occurred_at": {
+            "format": "date-time",
+            "title": "Occurred At",
+            "type": "string"
+          },
+          "quantity": {
+            "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+            "title": "Quantity",
+            "type": "string"
+          },
+          "reason": {
+            "title": "Reason",
+            "type": "string"
+          },
+          "work_order_id": {
+            "format": "uuid",
+            "title": "Work Order Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "work_order_id",
+          "event_type",
+          "quantity",
+          "reason",
+          "final_completion_entry_id",
+          "inventory_adjustment_id",
+          "occurred_at",
+          "created_at"
+        ],
+        "title": "InventoryLedgerResponse",
+        "type": "object"
+      },
+      "InventoryListResponse": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/InventoryPosition"
+            },
+            "title": "Items",
+            "type": "array"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/ListResponseMeta_InventoryFilters_"
+          }
+        },
+        "required": [
+          "items",
+          "meta"
+        ],
+        "title": "InventoryListResponse",
+        "type": "object"
+      },
+      "InventoryPosition": {
+        "properties": {
+          "available_quantity": {
+            "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+            "title": "Available Quantity",
+            "type": "string"
+          },
+          "customer_name": {
+            "title": "Customer Name",
+            "type": "string"
+          },
+          "delivery_date": {
+            "anyOf": [
+              {
+                "format": "date",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Delivery Date"
+          },
+          "document_number": {
+            "title": "Document Number",
+            "type": "string"
+          },
+          "order_quantity": {
+            "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+            "title": "Order Quantity",
+            "type": "string"
+          },
+          "product_name": {
+            "title": "Product Name",
+            "type": "string"
+          },
+          "work_order_id": {
+            "format": "uuid",
+            "title": "Work Order Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "work_order_id",
+          "document_number",
+          "customer_name",
+          "product_name",
+          "order_quantity",
+          "available_quantity",
+          "delivery_date"
+        ],
+        "title": "InventoryPosition",
+        "type": "object"
+      },
       "ListResponseMeta_AuditFilterSummary_": {
         "properties": {
           "filters": {
@@ -1549,6 +1889,26 @@
         "title": "ListResponseMeta[CustomerFilterSummary]",
         "type": "object"
       },
+      "ListResponseMeta_InventoryFilters_": {
+        "properties": {
+          "filters": {
+            "$ref": "#/components/schemas/InventoryFilters"
+          },
+          "pagination": {
+            "$ref": "#/components/schemas/PaginationMeta"
+          },
+          "sort": {
+            "$ref": "#/components/schemas/SortMeta"
+          }
+        },
+        "required": [
+          "pagination",
+          "sort",
+          "filters"
+        ],
+        "title": "ListResponseMeta[InventoryFilters]",
+        "type": "object"
+      },
       "ListResponseMeta_MasterFilters_": {
         "properties": {
           "filters": {
@@ -1567,6 +1927,26 @@
           "filters"
         ],
         "title": "ListResponseMeta[MasterFilters]",
+        "type": "object"
+      },
+      "ListResponseMeta_ProductionFilters_": {
+        "properties": {
+          "filters": {
+            "$ref": "#/components/schemas/ProductionFilters"
+          },
+          "pagination": {
+            "$ref": "#/components/schemas/PaginationMeta"
+          },
+          "sort": {
+            "$ref": "#/components/schemas/SortMeta"
+          }
+        },
+        "required": [
+          "pagination",
+          "sort",
+          "filters"
+        ],
+        "title": "ListResponseMeta[ProductionFilters]",
         "type": "object"
       },
       "ListResponseMeta_QuotationFilters_": {
@@ -2675,6 +3055,25 @@
         "title": "PrintSpecification",
         "type": "object"
       },
+      "ProcessCode": {
+        "enum": [
+          "artwork",
+          "output",
+          "plate",
+          "proof",
+          "printing",
+          "coating",
+          "mounting",
+          "die",
+          "die_cutting",
+          "finishing",
+          "gluing",
+          "transport",
+          "other"
+        ],
+        "title": "ProcessCode",
+        "type": "string"
+      },
       "ProcessDefinitionResponse": {
         "properties": {
           "code": {
@@ -2724,6 +3123,142 @@
         ],
         "title": "ProcessDefinitionResponse",
         "type": "object"
+      },
+      "ProcessEventCreate": {
+        "additionalProperties": false,
+        "properties": {
+          "completed_quantity": {
+            "anyOf": [
+              {
+                "exclusiveMinimum": 0.0,
+                "type": "number"
+              },
+              {
+                "pattern": "^(?!^[-+.]*$)[+-]?0*(?:\\d{0,10}|(?=[\\d.]{1,15}0*$)\\d{0,10}\\.\\d{0,4}0*$)",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Completed Quantity"
+          },
+          "event_type": {
+            "$ref": "#/components/schemas/ProcessEventType"
+          },
+          "idempotency_key": {
+            "format": "uuid",
+            "title": "Idempotency Key",
+            "type": "string"
+          },
+          "process_code": {
+            "$ref": "#/components/schemas/ProcessCode"
+          },
+          "reason": {
+            "anyOf": [
+              {
+                "maxLength": 1000,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reason"
+          }
+        },
+        "required": [
+          "process_code",
+          "event_type",
+          "idempotency_key"
+        ],
+        "title": "ProcessEventCreate",
+        "type": "object"
+      },
+      "ProcessEventResponse": {
+        "properties": {
+          "completed_quantity": {
+            "anyOf": [
+              {
+                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Completed Quantity"
+          },
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "event_type": {
+            "$ref": "#/components/schemas/ProcessEventType"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "occurred_at": {
+            "format": "date-time",
+            "title": "Occurred At",
+            "type": "string"
+          },
+          "process_code": {
+            "$ref": "#/components/schemas/ProcessCode"
+          },
+          "process_name": {
+            "title": "Process Name",
+            "type": "string"
+          },
+          "reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reason"
+          },
+          "sequence_no": {
+            "title": "Sequence No",
+            "type": "integer"
+          },
+          "work_order_id": {
+            "format": "uuid",
+            "title": "Work Order Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "work_order_id",
+          "process_code",
+          "process_name",
+          "event_type",
+          "sequence_no",
+          "completed_quantity",
+          "reason",
+          "occurred_at",
+          "created_at"
+        ],
+        "title": "ProcessEventResponse",
+        "type": "object"
+      },
+      "ProcessEventType": {
+        "enum": [
+          "start",
+          "partial_complete",
+          "complete",
+          "reopen"
+        ],
+        "title": "ProcessEventType",
+        "type": "string"
       },
       "ProcessPlan": {
         "additionalProperties": false,
@@ -2838,6 +3373,187 @@
           "name"
         ],
         "title": "ProcessPlan",
+        "type": "object"
+      },
+      "ProcessState": {
+        "enum": [
+          "not_started",
+          "in_progress",
+          "partial",
+          "completed"
+        ],
+        "title": "ProcessState",
+        "type": "string"
+      },
+      "ProcessStateResponse": {
+        "properties": {
+          "code": {
+            "$ref": "#/components/schemas/ProcessCode"
+          },
+          "latest_event": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ProcessEventResponse"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "state": {
+            "$ref": "#/components/schemas/ProcessState"
+          }
+        },
+        "required": [
+          "code",
+          "name",
+          "state",
+          "latest_event"
+        ],
+        "title": "ProcessStateResponse",
+        "type": "object"
+      },
+      "ProductionFilters": {
+        "properties": {
+          "keyword": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Keyword"
+          }
+        },
+        "required": [
+          "keyword"
+        ],
+        "title": "ProductionFilters",
+        "type": "object"
+      },
+      "ProductionOrderDetail": {
+        "properties": {
+          "final_completions": {
+            "items": {
+              "$ref": "#/components/schemas/FinalCompletionResponse"
+            },
+            "title": "Final Completions",
+            "type": "array"
+          },
+          "ledger": {
+            "items": {
+              "$ref": "#/components/schemas/InventoryLedgerResponse"
+            },
+            "title": "Ledger",
+            "type": "array"
+          },
+          "order": {
+            "$ref": "#/components/schemas/ProductionOrderSummary"
+          },
+          "processes": {
+            "items": {
+              "$ref": "#/components/schemas/ProcessStateResponse"
+            },
+            "title": "Processes",
+            "type": "array"
+          }
+        },
+        "required": [
+          "order",
+          "processes",
+          "final_completions",
+          "ledger"
+        ],
+        "title": "ProductionOrderDetail",
+        "type": "object"
+      },
+      "ProductionOrderListResponse": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/ProductionOrderSummary"
+            },
+            "title": "Items",
+            "type": "array"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/ListResponseMeta_ProductionFilters_"
+          }
+        },
+        "required": [
+          "items",
+          "meta"
+        ],
+        "title": "ProductionOrderListResponse",
+        "type": "object"
+      },
+      "ProductionOrderSummary": {
+        "properties": {
+          "available_quantity": {
+            "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+            "title": "Available Quantity",
+            "type": "string"
+          },
+          "customer_name": {
+            "title": "Customer Name",
+            "type": "string"
+          },
+          "delivery_date": {
+            "anyOf": [
+              {
+                "format": "date",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Delivery Date"
+          },
+          "document_number": {
+            "title": "Document Number",
+            "type": "string"
+          },
+          "order_quantity": {
+            "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+            "title": "Order Quantity",
+            "type": "string"
+          },
+          "process_completed_count": {
+            "title": "Process Completed Count",
+            "type": "integer"
+          },
+          "product_name": {
+            "title": "Product Name",
+            "type": "string"
+          },
+          "transport_state": {
+            "$ref": "#/components/schemas/ProcessState"
+          },
+          "work_order_id": {
+            "format": "uuid",
+            "title": "Work Order Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "work_order_id",
+          "document_number",
+          "customer_name",
+          "product_name",
+          "order_quantity",
+          "delivery_date",
+          "process_completed_count",
+          "transport_state",
+          "available_quantity"
+        ],
+        "title": "ProductionOrderSummary",
         "type": "object"
       },
       "QuotationClone": {
@@ -3644,6 +4360,28 @@
           "checks"
         ],
         "title": "ReadyResponse",
+        "type": "object"
+      },
+      "ReversalCreate": {
+        "additionalProperties": false,
+        "properties": {
+          "idempotency_key": {
+            "format": "uuid",
+            "title": "Idempotency Key",
+            "type": "string"
+          },
+          "reason": {
+            "maxLength": 1000,
+            "minLength": 1,
+            "title": "Reason",
+            "type": "string"
+          }
+        },
+        "required": [
+          "reason",
+          "idempotency_key"
+        ],
+        "title": "ReversalCreate",
         "type": "object"
       },
       "SortDirection": {
@@ -8380,6 +9118,441 @@
         ]
       }
     },
+    "/api/v1/inventory": {
+      "get": {
+        "operationId": "inventory_list",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "positive_only",
+            "required": false,
+            "schema": {
+              "default": true,
+              "title": "Positive Only",
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 1,
+              "maximum": 1000000,
+              "minimum": 1,
+              "title": "Page",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page_size",
+            "required": false,
+            "schema": {
+              "default": 25,
+              "maximum": 100,
+              "minimum": 1,
+              "title": "Page Size",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "keyword",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "maxLength": 100,
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Keyword"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InventoryListResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "請求格式錯誤"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "尚未通過身分驗證"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "沒有執行此操作的權限"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "資源不存在"
+          },
+          "405": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "HTTP method 不允許用於此資源"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "資料狀態或版本衝突"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "輸入資料驗證失敗"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "請求次數暫時超過安全限制"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "伺服器發生未預期錯誤"
+          }
+        },
+        "security": [
+          {
+            "SessionCookie": []
+          }
+        ],
+        "summary": "Inventory List",
+        "tags": [
+          "production"
+        ]
+      }
+    },
+    "/api/v1/inventory/{work_order_id}/adjustments": {
+      "post": {
+        "operationId": "inventory_adjustment_create",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "work_order_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Work Order Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/InventoryAdjustmentCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InventoryLedgerResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "請求格式錯誤"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "尚未通過身分驗證"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "沒有執行此操作的權限"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "資源不存在"
+          },
+          "405": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "HTTP method 不允許用於此資源"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "資料狀態或版本衝突"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "輸入資料驗證失敗"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "請求次數暫時超過安全限制"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "伺服器發生未預期錯誤"
+          }
+        },
+        "security": [
+          {
+            "SessionCookie": []
+          }
+        ],
+        "summary": "Inventory Adjustment Create",
+        "tags": [
+          "production"
+        ]
+      }
+    },
+    "/api/v1/inventory/{work_order_id}/ledger": {
+      "get": {
+        "operationId": "inventory_ledger_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "work_order_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Work Order Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProductionOrderDetail"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "請求格式錯誤"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "尚未通過身分驗證"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "沒有執行此操作的權限"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "資源不存在"
+          },
+          "405": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "HTTP method 不允許用於此資源"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "資料狀態或版本衝突"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "輸入資料驗證失敗"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "請求次數暫時超過安全限制"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "伺服器發生未預期錯誤"
+          }
+        },
+        "security": [
+          {
+            "SessionCookie": []
+          }
+        ],
+        "summary": "Inventory Ledger Get",
+        "tags": [
+          "production"
+        ]
+      }
+    },
     "/api/v1/master-data/paper-mills": {
       "get": {
         "operationId": "paper_mill_list",
@@ -10283,6 +11456,707 @@
         "summary": "更新目前公司的對帳單預設設定",
         "tags": [
           "organizations"
+        ]
+      }
+    },
+    "/api/v1/production": {
+      "get": {
+        "operationId": "production_list",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 1,
+              "maximum": 1000000,
+              "minimum": 1,
+              "title": "Page",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page_size",
+            "required": false,
+            "schema": {
+              "default": 25,
+              "maximum": 100,
+              "minimum": 1,
+              "title": "Page Size",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "keyword",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "maxLength": 100,
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Keyword"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProductionOrderListResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "請求格式錯誤"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "尚未通過身分驗證"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "沒有執行此操作的權限"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "資源不存在"
+          },
+          "405": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "HTTP method 不允許用於此資源"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "資料狀態或版本衝突"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "輸入資料驗證失敗"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "請求次數暫時超過安全限制"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "伺服器發生未預期錯誤"
+          }
+        },
+        "security": [
+          {
+            "SessionCookie": []
+          }
+        ],
+        "summary": "Production List",
+        "tags": [
+          "production"
+        ]
+      }
+    },
+    "/api/v1/production/final-completions/{entry_id}/reverse": {
+      "post": {
+        "operationId": "production_final_completion_reverse",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "entry_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Entry Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReversalCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinalCompletionResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "請求格式錯誤"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "尚未通過身分驗證"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "沒有執行此操作的權限"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "資源不存在"
+          },
+          "405": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "HTTP method 不允許用於此資源"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "資料狀態或版本衝突"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "輸入資料驗證失敗"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "請求次數暫時超過安全限制"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "伺服器發生未預期錯誤"
+          }
+        },
+        "security": [
+          {
+            "SessionCookie": []
+          }
+        ],
+        "summary": "Final Completion Reverse",
+        "tags": [
+          "production"
+        ]
+      }
+    },
+    "/api/v1/production/work-orders/{work_order_id}": {
+      "get": {
+        "operationId": "production_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "work_order_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Work Order Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProductionOrderDetail"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "請求格式錯誤"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "尚未通過身分驗證"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "沒有執行此操作的權限"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "資源不存在"
+          },
+          "405": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "HTTP method 不允許用於此資源"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "資料狀態或版本衝突"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "輸入資料驗證失敗"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "請求次數暫時超過安全限制"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "伺服器發生未預期錯誤"
+          }
+        },
+        "security": [
+          {
+            "SessionCookie": []
+          }
+        ],
+        "summary": "Production Get",
+        "tags": [
+          "production"
+        ]
+      }
+    },
+    "/api/v1/production/work-orders/{work_order_id}/final-completions": {
+      "post": {
+        "operationId": "production_final_completion_create",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "work_order_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Work Order Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FinalCompletionCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinalCompletionResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "請求格式錯誤"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "尚未通過身分驗證"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "沒有執行此操作的權限"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "資源不存在"
+          },
+          "405": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "HTTP method 不允許用於此資源"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "資料狀態或版本衝突"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "輸入資料驗證失敗"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "請求次數暫時超過安全限制"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "伺服器發生未預期錯誤"
+          }
+        },
+        "security": [
+          {
+            "SessionCookie": []
+          }
+        ],
+        "summary": "Final Completion Create",
+        "tags": [
+          "production"
+        ]
+      }
+    },
+    "/api/v1/production/work-orders/{work_order_id}/process-events": {
+      "post": {
+        "operationId": "production_process_event_create",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "work_order_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Work Order Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProcessEventCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProcessEventResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "請求格式錯誤"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "尚未通過身分驗證"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "沒有執行此操作的權限"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "資源不存在"
+          },
+          "405": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "HTTP method 不允許用於此資源"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "資料狀態或版本衝突"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "輸入資料驗證失敗"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "請求次數暫時超過安全限制"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "伺服器發生未預期錯誤"
+          }
+        },
+        "security": [
+          {
+            "SessionCookie": []
+          }
+        ],
+        "summary": "Process Event Create",
+        "tags": [
+          "production"
         ]
       }
     },

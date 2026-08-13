@@ -48,8 +48,7 @@ def test_fifth_failure_is_limited_without_storing_raw_identity(
     client = make_auth_client(identity_engine)
 
     responses = [
-        client.post("/api/v1/auth/login", json=_payload(identity, wrong_password))
-        for _ in range(6)
+        client.post("/api/v1/auth/login", json=_payload(identity, wrong_password)) for _ in range(6)
     ]
 
     assert [response.status_code for response in responses] == [
@@ -63,9 +62,7 @@ def test_fifth_failure_is_limited_without_storing_raw_identity(
     assert int(responses[-1].headers["retry-after"]) > 0
     assert responses[-1].json()["error"]["code"] == "LOGIN_RATE_LIMITED"
     with identity_engine.connect() as connection:
-        failure_count = connection.scalar(
-            select(LoginThrottleState.failure_count)
-        )
+        failure_count = connection.scalar(select(LoginThrottleState.failure_count))
         events = connection.execute(
             select(
                 LoginSecurityEvent.event_type,
@@ -85,9 +82,7 @@ def test_fifth_failure_is_limited_without_storing_raw_identity(
         "login_rate_limited",
     ]
     persisted = " ".join(
-        str(value)
-        for event in events
-        for value in (event.credential_fingerprint, event.request_id)
+        str(value) for event in events for value in (event.credential_fingerprint, event.request_id)
     )
     assert identity.login_name not in persisted
     assert wrong_password not in persisted
@@ -107,21 +102,24 @@ def test_success_clears_prior_failures_and_restarts_the_counter(
     wrong_password = token_urlsafe(24)
 
     for _ in range(2):
-        assert client.post(
-            "/api/v1/auth/login", json=_payload(identity, wrong_password)
-        ).status_code == 401
-    assert client.post(
-        "/api/v1/auth/login",
-        json=_payload(identity, identity.password.get_secret_value()),
-    ).status_code == 200
-    assert client.post(
-        "/api/v1/auth/login", json=_payload(identity, wrong_password)
-    ).status_code == 401
+        assert (
+            client.post("/api/v1/auth/login", json=_payload(identity, wrong_password)).status_code
+            == 401
+        )
+    assert (
+        client.post(
+            "/api/v1/auth/login",
+            json=_payload(identity, identity.password.get_secret_value()),
+        ).status_code
+        == 200
+    )
+    assert (
+        client.post("/api/v1/auth/login", json=_payload(identity, wrong_password)).status_code
+        == 401
+    )
 
     with identity_engine.connect() as connection:
-        failure_count = connection.scalar(
-            select(LoginThrottleState.failure_count)
-        )
+        failure_count = connection.scalar(select(LoginThrottleState.failure_count))
         prior_failure_count = connection.scalar(
             select(LoginSecurityEvent.failure_count).where(
                 LoginSecurityEvent.event_type == "login_succeeded"
@@ -146,9 +144,7 @@ def test_unknown_identity_uses_the_same_limit_and_public_response(
         "password": token_urlsafe(24),
     }
 
-    responses = [
-        client.post("/api/v1/auth/login", json=payload) for _ in range(5)
-    ]
+    responses = [client.post("/api/v1/auth/login", json=payload) for _ in range(5)]
 
     assert [response.status_code for response in responses] == [
         401,
@@ -176,14 +172,17 @@ def test_same_unknown_login_is_limited_independently_per_company(
     password = token_urlsafe(24)
 
     for _ in range(4):
-        assert client.post(
-            "/api/v1/auth/login",
-            json={
-                "organization_id": str(company_a.organization_id),
-                "login_name": unknown_login,
-                "password": password,
-            },
-        ).status_code == 401
+        assert (
+            client.post(
+                "/api/v1/auth/login",
+                json={
+                    "organization_id": str(company_a.organization_id),
+                    "login_name": unknown_login,
+                    "password": password,
+                },
+            ).status_code
+            == 401
+        )
     company_b_response = client.post(
         "/api/v1/auth/login",
         json={
@@ -204,9 +203,7 @@ def test_same_unknown_login_is_limited_independently_per_company(
     assert company_b_response.status_code == 401
     assert company_a_response.status_code == 429
     with identity_engine.connect() as connection:
-        assert sorted(
-            connection.scalars(select(LoginThrottleState.failure_count)).all()
-        ) == [1, 5]
+        assert sorted(connection.scalars(select(LoginThrottleState.failure_count)).all()) == [1, 5]
 
 
 def test_concurrent_failures_do_not_lose_counts(identity_engine: Engine) -> None:
@@ -227,9 +224,7 @@ def test_concurrent_failures_do_not_lose_counts(identity_engine: Engine) -> None
                     password=wrong_password,
                     organization_id=identity.organization_id,
                     request_id=uuid4(),
-                    security_hmac_key=(
-                        make_test_settings().auth_security_hmac_key_value()
-                    ),
+                    security_hmac_key=(make_test_settings().auth_security_hmac_key_value()),
                 )
             except AuthenticationFailedError:
                 return 401
@@ -243,12 +238,8 @@ def test_concurrent_failures_do_not_lose_counts(identity_engine: Engine) -> None
     assert statuses.count(401) == 4
     assert statuses.count(429) == 2
     with identity_engine.connect() as connection:
-        assert connection.scalar(
-            select(LoginThrottleState.failure_count)
-        ) == 5
-        assert connection.scalar(
-            select(func.count()).select_from(LoginSecurityEvent)
-        ) == 6
+        assert connection.scalar(select(LoginThrottleState.failure_count)) == 5
+        assert connection.scalar(select(func.count()).select_from(LoginSecurityEvent)) == 6
 
 
 def test_login_security_events_are_append_only(identity_engine: Engine) -> None:
@@ -263,6 +254,4 @@ def test_login_security_events_are_append_only(identity_engine: Engine) -> None:
 
     with pytest.raises(DBAPIError):
         with identity_engine.begin() as connection:
-            connection.execute(
-                update(LoginSecurityEvent).values(failure_count=999)
-            )
+            connection.execute(update(LoginSecurityEvent).values(failure_count=999))

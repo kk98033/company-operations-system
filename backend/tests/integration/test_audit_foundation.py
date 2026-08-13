@@ -46,9 +46,7 @@ def test_business_change_and_sanitized_audit_commit_together(
     scope, role_id = _scope_and_role(identity_engine)
     request_id = uuid4()
     with OrmSession(identity_engine) as session, session.begin():
-        session.execute(
-            update(Role).where(Role.id == role_id).values(name="Updated Operator")
-        )
+        session.execute(update(Role).where(Role.id == role_id).values(name="Updated Operator"))
         record_user_audit_event(
             session,
             scope=scope,
@@ -62,9 +60,7 @@ def test_business_change_and_sanitized_audit_commit_together(
         )
 
     with OrmSession(identity_engine) as session:
-        event = session.scalar(
-            select(AuditLog).where(AuditLog.request_id == request_id)
-        )
+        event = session.scalar(select(AuditLog).where(AuditLog.request_id == request_id))
         assert session.get(Role, role_id).name == "Updated Operator"
         assert event.before_data["password"] == REDACTED
         assert event.after_data == {"name": "Updated Operator"}
@@ -79,9 +75,7 @@ def test_business_change_and_audit_both_rollback_on_failure(
 
     with pytest.raises(RuntimeError, match="rollback"):
         with OrmSession(identity_engine) as session, session.begin():
-            session.execute(
-                update(Role).where(Role.id == role_id).values(name="Must Roll Back")
-            )
+            session.execute(update(Role).where(Role.id == role_id).values(name="Must Roll Back"))
             record_user_audit_event(
                 session,
                 scope=scope,
@@ -94,9 +88,7 @@ def test_business_change_and_audit_both_rollback_on_failure(
 
     with OrmSession(identity_engine) as session:
         assert session.get(Role, role_id).name == "Synthetic Operator"
-        assert session.scalar(
-            select(AuditLog).where(AuditLog.request_id == request_id)
-        ) is None
+        assert session.scalar(select(AuditLog).where(AuditLog.request_id == request_id)) is None
 
 
 @pytest.mark.parametrize("operation", ["update", "delete"])
@@ -122,9 +114,7 @@ def test_database_trigger_rejects_audit_mutation(
             with session.begin():
                 if operation == "update":
                     session.execute(
-                        update(AuditLog)
-                        .where(AuditLog.id == event_id)
-                        .values(reason="tampered")
+                        update(AuditLog).where(AuditLog.id == event_id).values(reason="tampered")
                     )
                 else:
                     session.delete(session.get(AuditLog, event_id))

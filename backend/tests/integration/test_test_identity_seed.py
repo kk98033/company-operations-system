@@ -78,9 +78,7 @@ def test_seed_creates_only_synthetic_company_users_and_memberships(
         users = session.scalars(
             select(User).where(User.id.in_([TEST_ADMIN_USER_ID, TEST_OPERATOR_USER_ID]))
         ).all()
-        membership_count = session.scalar(
-            select(func.count()).select_from(OrganizationMember)
-        )
+        membership_count = session.scalar(select(func.count()).select_from(OrganizationMember))
         session_count = session.scalar(select(func.count()).select_from(Session))
 
     assert organization is not None
@@ -100,9 +98,7 @@ def test_seed_creates_only_synthetic_company_users_and_memberships(
         assert user.password_hash.startswith("$argon2id$")
         password = passwords_by_login[user.login_name]
         assert password.get_secret_value() not in user.password_hash
-        assert PasswordHasher().verify(
-            user.password_hash, password.get_secret_value()
-        )
+        assert PasswordHasher().verify(user.password_hash, password.get_secret_value())
 
 
 def test_seed_is_idempotent_and_keeps_existing_hashes(
@@ -216,9 +212,7 @@ def test_seed_conflict_rolls_back_without_creating_partial_users(
 
     with OrmSession(identity_engine) as session:
         assert session.scalar(select(func.count()).select_from(User)) == 0
-        assert session.scalar(
-            select(func.count()).select_from(OrganizationMember)
-        ) == 0
+        assert session.scalar(select(func.count()).select_from(OrganizationMember)) == 0
 
 
 def test_normalized_login_conflict_rolls_back_new_seed_rows(
@@ -245,9 +239,7 @@ def test_normalized_login_conflict_rolls_back_new_seed_rows(
     with OrmSession(identity_engine) as session:
         assert session.scalar(select(func.count()).select_from(Organization)) == 0
         assert session.scalar(select(func.count()).select_from(User)) == 1
-        assert session.scalar(
-            select(func.count()).select_from(OrganizationMember)
-        ) == 0
+        assert session.scalar(select(func.count()).select_from(OrganizationMember)) == 0
 
 
 def test_seed_recovers_missing_memberships_without_rehashing_users(

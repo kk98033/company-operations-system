@@ -11,8 +11,7 @@ def valid_settings_values(**overrides: object) -> dict[str, object]:
         "APP_HOST": "127.0.0.1",
         "APP_PORT": "8000",
         "DATABASE_URL": (
-            "postgresql+psycopg://company_system_dev:local-only@127.0.0.1/"
-            "company_system_dev"
+            "postgresql+psycopg://company_system_dev:local-only@127.0.0.1/company_system_dev"
         ),
         "APP_PUBLIC_ORIGIN": "http://testserver",
         "CSRF_HMAC_KEY": "dGVzdC1vbmx5LWNzcmYta2V5LTMyLWJ5dGVzISEhISE",
@@ -38,8 +37,7 @@ def database_url_for(
         "production": "prod",
     }[environment]
     return (
-        f"postgresql+psycopg://company_system_{marker}:{password}"
-        f"@database.internal/{database_name}"
+        f"postgresql+psycopg://company_system_{marker}:{password}@database.internal/{database_name}"
     )
 
 

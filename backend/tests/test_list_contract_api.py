@@ -117,9 +117,9 @@ def test_list_contract_openapi_exposes_enum_and_shared_envelopes() -> None:
         "name",
     ]
     assert parameters["page_size"]["schema"]["maximum"] == 100
-    assert operation["responses"]["422"]["content"]["application/json"][
-        "schema"
-    ] == {"$ref": "#/components/schemas/ErrorResponse"}
-    assert operation["responses"]["500"]["content"]["application/json"][
-        "schema"
-    ] == {"$ref": "#/components/schemas/ErrorResponse"}
+    assert operation["responses"]["422"]["content"]["application/json"]["schema"] == {
+        "$ref": "#/components/schemas/ErrorResponse"
+    }
+    assert operation["responses"]["500"]["content"]["application/json"]["schema"] == {
+        "$ref": "#/components/schemas/ErrorResponse"
+    }

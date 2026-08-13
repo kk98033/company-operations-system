@@ -438,8 +438,97 @@ export interface ErrorResponse {
   error: ErrorBody;
 }
 
+export interface FinalCompletionCreate {
+  idempotency_key: string;
+  quantity: number | string;
+  /**
+     * @minLength 1
+     * @maxLength 1000
+     */
+  reason: string;
+}
+
+export interface FinalCompletionResponse {
+  /** @pattern ^(?!^[-+.]*$)[+-]?0*\d*\.?\d*$ */
+  available_quantity: string;
+  correlation_id: string;
+  created_at: string;
+  entry_type: string;
+  exceeds_order_quantity: boolean;
+  id: string;
+  occurred_at: string;
+  /** @pattern ^(?!^[-+.]*$)[+-]?0*\d*\.?\d*$ */
+  quantity: string;
+  reason: string;
+  reversal_of_id: string | null;
+  source_type: string;
+  transport_process_event_id: string | null;
+  work_order_id: string;
+}
+
+export interface InventoryAdjustmentCreate {
+  idempotency_key: string;
+  quantity: number | string;
+  /**
+     * @minLength 1
+     * @maxLength 1000
+     */
+  reason: string;
+}
+
+export interface InventoryFilters {
+  keyword: string | null;
+  positive_only: boolean;
+}
+
+export interface InventoryLedgerResponse {
+  created_at: string;
+  event_type: string;
+  final_completion_entry_id: string | null;
+  id: string;
+  inventory_adjustment_id: string | null;
+  occurred_at: string;
+  /** @pattern ^(?!^[-+.]*$)[+-]?0*\d*\.?\d*$ */
+  quantity: string;
+  reason: string;
+  work_order_id: string;
+}
+
+export interface InventoryPosition {
+  /** @pattern ^(?!^[-+.]*$)[+-]?0*\d*\.?\d*$ */
+  available_quantity: string;
+  customer_name: string;
+  delivery_date: string | null;
+  document_number: string;
+  /** @pattern ^(?!^[-+.]*$)[+-]?0*\d*\.?\d*$ */
+  order_quantity: string;
+  product_name: string;
+  work_order_id: string;
+}
+
+export interface ListResponseMetaInventoryFilters {
+  filters: InventoryFilters;
+  pagination: PaginationMeta;
+  sort: SortMeta;
+}
+
+export interface InventoryListResponse {
+  items: InventoryPosition[];
+  meta: ListResponseMetaInventoryFilters;
+}
+
 export interface ListResponseMetaAuditFilterSummary {
   filters: AuditFilterSummary;
+  pagination: PaginationMeta;
+  sort: SortMeta;
+}
+
+export interface ProductionFilters {
+  keyword: string | null;
+}
+
+export interface ListResponseMetaProductionFilters {
+  filters: ProductionFilters;
   pagination: PaginationMeta;
   sort: SortMeta;
 }
@@ -682,6 +771,25 @@ export interface PrintSpecificationOutput {
   width?: string | null;
 }
 
+export type ProcessCode = typeof ProcessCode[keyof typeof ProcessCode];
+
+
+export const ProcessCode = {
+  artwork: 'artwork',
+  output: 'output',
+  plate: 'plate',
+  proof: 'proof',
+  printing: 'printing',
+  coating: 'coating',
+  mounting: 'mounting',
+  die: 'die',
+  die_cutting: 'die_cutting',
+  finishing: 'finishing',
+  gluing: 'gluing',
+  transport: 'transport',
+  other: 'other',
+} as const;
+
 export interface ProcessDefinitionResponse {
   code: string;
   created_at: string;
@@ -691,6 +799,37 @@ export interface ProcessDefinitionResponse {
   sort_order: number;
   status: MasterStatus;
   updated_at: string;
+}
+
+export type ProcessEventType = typeof ProcessEventType[keyof typeof ProcessEventType];
+
+
+export const ProcessEventType = {
+  start: 'start',
+  partial_complete: 'partial_complete',
+  complete: 'complete',
+  reopen: 'reopen',
+} as const;
+
+export interface ProcessEventCreate {
+  completed_quantity?: number | string | null;
+  event_type: ProcessEventType;
+  idempotency_key: string;
+  process_code: ProcessCode;
+  reason?: string | null;
+}
+
+export interface ProcessEventResponse {
+  completed_quantity: string | null;
+  created_at: string;
+  event_type: ProcessEventType;
+  id: string;
+  occurred_at: string;
+  process_code: ProcessCode;
+  process_name: string;
+  reason: string | null;
+  sequence_no: number;
+  work_order_id: string;
 }
 
 export interface ProcessPlan {
@@ -704,6 +843,49 @@ export interface ProcessPlan {
   plate_rotation?: string | null;
   plate_version?: string | null;
   vendor?: string | null;
+}
+
+export type ProcessState = typeof ProcessState[keyof typeof ProcessState];
+
+
+export const ProcessState = {
+  not_started: 'not_started',
+  in_progress: 'in_progress',
+  partial: 'partial',
+  completed: 'completed',
+} as const;
+
+export interface ProcessStateResponse {
+  code: ProcessCode;
+  latest_event: ProcessEventResponse | null;
+  name: string;
+  state: ProcessState;
+}
+
+export interface ProductionOrderSummary {
+  /** @pattern ^(?!^[-+.]*$)[+-]?0*\d*\.?\d*$ */
+  available_quantity: string;
+  customer_name: string;
+  delivery_date: string | null;
+  document_number: string;
+  /** @pattern ^(?!^[-+.]*$)[+-]?0*\d*\.?\d*$ */
+  order_quantity: string;
+  process_completed_count: number;
+  product_name: string;
+  transport_state: ProcessState;
+  work_order_id: string;
+}
+
+export interface ProductionOrderDetail {
+  final_completions: FinalCompletionResponse[];
+  ledger: InventoryLedgerResponse[];
+  order: ProductionOrderSummary;
+  processes: ProcessStateResponse[];
+}
+
+export interface ProductionOrderListResponse {
+  items: ProductionOrderSummary[];
+  meta: ListResponseMetaProductionFilters;
 }
 
 export interface QuotationClone {
@@ -861,6 +1043,15 @@ export interface ReadinessCheckResult {
 export interface ReadyResponse {
   checks: ReadinessCheckResult[];
   status: 'ready';
+}
+
+export interface ReversalCreate {
+  idempotency_key: string;
+  /**
+     * @minLength 1
+     * @maxLength 1000
+     */
+  reason: string;
 }
 
 export type VendorCategory = typeof VendorCategory[keyof typeof VendorCategory];
@@ -1207,6 +1398,21 @@ page_size?: number;
 keyword?: string | null;
 };
 
+export type InventoryListParams = {
+positive_only?: boolean;
+/**
+ * @minimum 1
+ * @maximum 1000000
+ */
+page?: number;
+/**
+ * @minimum 1
+ * @maximum 100
+ */
+page_size?: number;
+keyword?: string | null;
+};
+
 export type PaperMillListParams = {
 status?: MasterStatus | null;
 /**
@@ -1239,6 +1445,20 @@ keyword?: string | null;
 
 export type ProcessDefinitionListParams = {
 status?: MasterStatus | null;
+};
+
+export type ProductionListParams = {
+/**
+ * @minimum 1
+ * @maximum 1000000
+ */
+page?: number;
+/**
+ * @minimum 1
+ * @maximum 100
+ */
+page_size?: number;
+keyword?: string | null;
 };
 
 export type QuotationListParams = {
@@ -3234,6 +3454,284 @@ export const healthReady = async ( options?: RequestInit): Promise<healthReadyRe
 
 
 
+export type inventoryListResponse200 = {
+  data: InventoryListResponse
+  status: 200
+}
+
+export type inventoryListResponse400 = {
+  data: ErrorResponse
+  status: 400
+}
+
+export type inventoryListResponse401 = {
+  data: ErrorResponse
+  status: 401
+}
+
+export type inventoryListResponse403 = {
+  data: ErrorResponse
+  status: 403
+}
+
+export type inventoryListResponse404 = {
+  data: ErrorResponse
+  status: 404
+}
+
+export type inventoryListResponse405 = {
+  data: ErrorResponse
+  status: 405
+}
+
+export type inventoryListResponse409 = {
+  data: ErrorResponse
+  status: 409
+}
+
+export type inventoryListResponse422 = {
+  data: ErrorResponse
+  status: 422
+}
+
+export type inventoryListResponse429 = {
+  data: ErrorResponse
+  status: 429
+}
+
+export type inventoryListResponse500 = {
+  data: ErrorResponse
+  status: 500
+}
+
+export type inventoryListResponseSuccess = (inventoryListResponse200) & {
+  headers: Headers;
+};
+export type inventoryListResponseError = (inventoryListResponse400 | inventoryListResponse401 | inventoryListResponse403 | inventoryListResponse404 | inventoryListResponse405 | inventoryListResponse409 | inventoryListResponse422 | inventoryListResponse429 | inventoryListResponse500) & {
+  headers: Headers;
+};
+
+export type inventoryListResponse = (inventoryListResponseSuccess | inventoryListResponseError)
+
+export const getInventoryListUrl = (params?: InventoryListParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `${import.meta.env.VITE_API_ORIGIN || ''}/api/v1/inventory?${stringifiedParams}` : `${import.meta.env.VITE_API_ORIGIN || ''}/api/v1/inventory`
+}
+
+/**
+ * @summary Inventory List
+ */
+export const inventoryList = async (params?: InventoryListParams, options?: RequestInit): Promise<inventoryListResponse> => {
+
+  const res = await fetch(getInventoryListUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+)
+
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+
+  const data: inventoryListResponse['data'] = body ? JSON.parse(body) : {}
+  return { data, status: res.status, headers: res.headers } as inventoryListResponse
+}
+
+
+
+export type inventoryAdjustmentCreateResponse201 = {
+  data: InventoryLedgerResponse
+  status: 201
+}
+
+export type inventoryAdjustmentCreateResponse400 = {
+  data: ErrorResponse
+  status: 400
+}
+
+export type inventoryAdjustmentCreateResponse401 = {
+  data: ErrorResponse
+  status: 401
+}
+
+export type inventoryAdjustmentCreateResponse403 = {
+  data: ErrorResponse
+  status: 403
+}
+
+export type inventoryAdjustmentCreateResponse404 = {
+  data: ErrorResponse
+  status: 404
+}
+
+export type inventoryAdjustmentCreateResponse405 = {
+  data: ErrorResponse
+  status: 405
+}
+
+export type inventoryAdjustmentCreateResponse409 = {
+  data: ErrorResponse
+  status: 409
+}
+
+export type inventoryAdjustmentCreateResponse422 = {
+  data: ErrorResponse
+  status: 422
+}
+
+export type inventoryAdjustmentCreateResponse429 = {
+  data: ErrorResponse
+  status: 429
+}
+
+export type inventoryAdjustmentCreateResponse500 = {
+  data: ErrorResponse
+  status: 500
+}
+
+export type inventoryAdjustmentCreateResponseSuccess = (inventoryAdjustmentCreateResponse201) & {
+  headers: Headers;
+};
+export type inventoryAdjustmentCreateResponseError = (inventoryAdjustmentCreateResponse400 | inventoryAdjustmentCreateResponse401 | inventoryAdjustmentCreateResponse403 | inventoryAdjustmentCreateResponse404 | inventoryAdjustmentCreateResponse405 | inventoryAdjustmentCreateResponse409 | inventoryAdjustmentCreateResponse422 | inventoryAdjustmentCreateResponse429 | inventoryAdjustmentCreateResponse500) & {
+  headers: Headers;
+};
+
+export type inventoryAdjustmentCreateResponse = (inventoryAdjustmentCreateResponseSuccess | inventoryAdjustmentCreateResponseError)
+
+export const getInventoryAdjustmentCreateUrl = (workOrderId: string,) => {
+
+
+
+
+  return `${import.meta.env.VITE_API_ORIGIN || ''}/api/v1/inventory/${workOrderId}/adjustments`
+}
+
+/**
+ * @summary Inventory Adjustment Create
+ */
+export const inventoryAdjustmentCreate = async (workOrderId: string,
+    inventoryAdjustmentCreateBody: InventoryAdjustmentCreate, options?: RequestInit): Promise<inventoryAdjustmentCreateResponse> => {
+
+  const res = await fetch(getInventoryAdjustmentCreateUrl(workOrderId),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(inventoryAdjustmentCreateBody)
+  }
+)
+
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+
+  const data: inventoryAdjustmentCreateResponse['data'] = body ? JSON.parse(body) : {}
+  return { data, status: res.status, headers: res.headers } as inventoryAdjustmentCreateResponse
+}
+
+
+
+export type inventoryLedgerGetResponse200 = {
+  data: ProductionOrderDetail
+  status: 200
+}
+
+export type inventoryLedgerGetResponse400 = {
+  data: ErrorResponse
+  status: 400
+}
+
+export type inventoryLedgerGetResponse401 = {
+  data: ErrorResponse
+  status: 401
+}
+
+export type inventoryLedgerGetResponse403 = {
+  data: ErrorResponse
+  status: 403
+}
+
+export type inventoryLedgerGetResponse404 = {
+  data: ErrorResponse
+  status: 404
+}
+
+export type inventoryLedgerGetResponse405 = {
+  data: ErrorResponse
+  status: 405
+}
+
+export type inventoryLedgerGetResponse409 = {
+  data: ErrorResponse
+  status: 409
+}
+
+export type inventoryLedgerGetResponse422 = {
+  data: ErrorResponse
+  status: 422
+}
+
+export type inventoryLedgerGetResponse429 = {
+  data: ErrorResponse
+  status: 429
+}
+
+export type inventoryLedgerGetResponse500 = {
+  data: ErrorResponse
+  status: 500
+}
+
+export type inventoryLedgerGetResponseSuccess = (inventoryLedgerGetResponse200) & {
+  headers: Headers;
+};
+export type inventoryLedgerGetResponseError = (inventoryLedgerGetResponse400 | inventoryLedgerGetResponse401 | inventoryLedgerGetResponse403 | inventoryLedgerGetResponse404 | inventoryLedgerGetResponse405 | inventoryLedgerGetResponse409 | inventoryLedgerGetResponse422 | inventoryLedgerGetResponse429 | inventoryLedgerGetResponse500) & {
+  headers: Headers;
+};
+
+export type inventoryLedgerGetResponse = (inventoryLedgerGetResponseSuccess | inventoryLedgerGetResponseError)
+
+export const getInventoryLedgerGetUrl = (workOrderId: string,) => {
+
+
+
+
+  return `${import.meta.env.VITE_API_ORIGIN || ''}/api/v1/inventory/${workOrderId}/ledger`
+}
+
+/**
+ * @summary Inventory Ledger Get
+ */
+export const inventoryLedgerGet = async (workOrderId: string, options?: RequestInit): Promise<inventoryLedgerGetResponse> => {
+
+  const res = await fetch(getInventoryLedgerGetUrl(workOrderId),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+)
+
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+
+  const data: inventoryLedgerGetResponse['data'] = body ? JSON.parse(body) : {}
+  return { data, status: res.status, headers: res.headers } as inventoryLedgerGetResponse
+}
+
+
+
 export type paperMillListResponse200 = {
   data: CatalogListResponse
   status: 200
@@ -4516,6 +5014,466 @@ export const organizationSettingsUpdate = async (organizationSettingsUpdateBody:
 
   const data: organizationSettingsUpdateResponse['data'] = body ? JSON.parse(body) : {}
   return { data, status: res.status, headers: res.headers } as organizationSettingsUpdateResponse
+}
+
+
+
+export type productionListResponse200 = {
+  data: ProductionOrderListResponse
+  status: 200
+}
+
+export type productionListResponse400 = {
+  data: ErrorResponse
+  status: 400
+}
+
+export type productionListResponse401 = {
+  data: ErrorResponse
+  status: 401
+}
+
+export type productionListResponse403 = {
+  data: ErrorResponse
+  status: 403
+}
+
+export type productionListResponse404 = {
+  data: ErrorResponse
+  status: 404
+}
+
+export type productionListResponse405 = {
+  data: ErrorResponse
+  status: 405
+}
+
+export type productionListResponse409 = {
+  data: ErrorResponse
+  status: 409
+}
+
+export type productionListResponse422 = {
+  data: ErrorResponse
+  status: 422
+}
+
+export type productionListResponse429 = {
+  data: ErrorResponse
+  status: 429
+}
+
+export type productionListResponse500 = {
+  data: ErrorResponse
+  status: 500
+}
+
+export type productionListResponseSuccess = (productionListResponse200) & {
+  headers: Headers;
+};
+export type productionListResponseError = (productionListResponse400 | productionListResponse401 | productionListResponse403 | productionListResponse404 | productionListResponse405 | productionListResponse409 | productionListResponse422 | productionListResponse429 | productionListResponse500) & {
+  headers: Headers;
+};
+
+export type productionListResponse = (productionListResponseSuccess | productionListResponseError)
+
+export const getProductionListUrl = (params?: ProductionListParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `${import.meta.env.VITE_API_ORIGIN || ''}/api/v1/production?${stringifiedParams}` : `${import.meta.env.VITE_API_ORIGIN || ''}/api/v1/production`
+}
+
+/**
+ * @summary Production List
+ */
+export const productionList = async (params?: ProductionListParams, options?: RequestInit): Promise<productionListResponse> => {
+
+  const res = await fetch(getProductionListUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+)
+
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+
+  const data: productionListResponse['data'] = body ? JSON.parse(body) : {}
+  return { data, status: res.status, headers: res.headers } as productionListResponse
+}
+
+
+
+export type productionFinalCompletionReverseResponse201 = {
+  data: FinalCompletionResponse
+  status: 201
+}
+
+export type productionFinalCompletionReverseResponse400 = {
+  data: ErrorResponse
+  status: 400
+}
+
+export type productionFinalCompletionReverseResponse401 = {
+  data: ErrorResponse
+  status: 401
+}
+
+export type productionFinalCompletionReverseResponse403 = {
+  data: ErrorResponse
+  status: 403
+}
+
+export type productionFinalCompletionReverseResponse404 = {
+  data: ErrorResponse
+  status: 404
+}
+
+export type productionFinalCompletionReverseResponse405 = {
+  data: ErrorResponse
+  status: 405
+}
+
+export type productionFinalCompletionReverseResponse409 = {
+  data: ErrorResponse
+  status: 409
+}
+
+export type productionFinalCompletionReverseResponse422 = {
+  data: ErrorResponse
+  status: 422
+}
+
+export type productionFinalCompletionReverseResponse429 = {
+  data: ErrorResponse
+  status: 429
+}
+
+export type productionFinalCompletionReverseResponse500 = {
+  data: ErrorResponse
+  status: 500
+}
+
+export type productionFinalCompletionReverseResponseSuccess = (productionFinalCompletionReverseResponse201) & {
+  headers: Headers;
+};
+export type productionFinalCompletionReverseResponseError = (productionFinalCompletionReverseResponse400 | productionFinalCompletionReverseResponse401 | productionFinalCompletionReverseResponse403 | productionFinalCompletionReverseResponse404 | productionFinalCompletionReverseResponse405 | productionFinalCompletionReverseResponse409 | productionFinalCompletionReverseResponse422 | productionFinalCompletionReverseResponse429 | productionFinalCompletionReverseResponse500) & {
+  headers: Headers;
+};
+
+export type productionFinalCompletionReverseResponse = (productionFinalCompletionReverseResponseSuccess | productionFinalCompletionReverseResponseError)
+
+export const getProductionFinalCompletionReverseUrl = (entryId: string,) => {
+
+
+
+
+  return `${import.meta.env.VITE_API_ORIGIN || ''}/api/v1/production/final-completions/${entryId}/reverse`
+}
+
+/**
+ * @summary Final Completion Reverse
+ */
+export const productionFinalCompletionReverse = async (entryId: string,
+    reversalCreate: ReversalCreate, options?: RequestInit): Promise<productionFinalCompletionReverseResponse> => {
+
+  const res = await fetch(getProductionFinalCompletionReverseUrl(entryId),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(reversalCreate)
+  }
+)
+
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+
+  const data: productionFinalCompletionReverseResponse['data'] = body ? JSON.parse(body) : {}
+  return { data, status: res.status, headers: res.headers } as productionFinalCompletionReverseResponse
+}
+
+
+
+export type productionGetResponse200 = {
+  data: ProductionOrderDetail
+  status: 200
+}
+
+export type productionGetResponse400 = {
+  data: ErrorResponse
+  status: 400
+}
+
+export type productionGetResponse401 = {
+  data: ErrorResponse
+  status: 401
+}
+
+export type productionGetResponse403 = {
+  data: ErrorResponse
+  status: 403
+}
+
+export type productionGetResponse404 = {
+  data: ErrorResponse
+  status: 404
+}
+
+export type productionGetResponse405 = {
+  data: ErrorResponse
+  status: 405
+}
+
+export type productionGetResponse409 = {
+  data: ErrorResponse
+  status: 409
+}
+
+export type productionGetResponse422 = {
+  data: ErrorResponse
+  status: 422
+}
+
+export type productionGetResponse429 = {
+  data: ErrorResponse
+  status: 429
+}
+
+export type productionGetResponse500 = {
+  data: ErrorResponse
+  status: 500
+}
+
+export type productionGetResponseSuccess = (productionGetResponse200) & {
+  headers: Headers;
+};
+export type productionGetResponseError = (productionGetResponse400 | productionGetResponse401 | productionGetResponse403 | productionGetResponse404 | productionGetResponse405 | productionGetResponse409 | productionGetResponse422 | productionGetResponse429 | productionGetResponse500) & {
+  headers: Headers;
+};
+
+export type productionGetResponse = (productionGetResponseSuccess | productionGetResponseError)
+
+export const getProductionGetUrl = (workOrderId: string,) => {
+
+
+
+
+  return `${import.meta.env.VITE_API_ORIGIN || ''}/api/v1/production/work-orders/${workOrderId}`
+}
+
+/**
+ * @summary Production Get
+ */
+export const productionGet = async (workOrderId: string, options?: RequestInit): Promise<productionGetResponse> => {
+
+  const res = await fetch(getProductionGetUrl(workOrderId),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+)
+
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+
+  const data: productionGetResponse['data'] = body ? JSON.parse(body) : {}
+  return { data, status: res.status, headers: res.headers } as productionGetResponse
+}
+
+
+
+export type productionFinalCompletionCreateResponse201 = {
+  data: FinalCompletionResponse
+  status: 201
+}
+
+export type productionFinalCompletionCreateResponse400 = {
+  data: ErrorResponse
+  status: 400
+}
+
+export type productionFinalCompletionCreateResponse401 = {
+  data: ErrorResponse
+  status: 401
+}
+
+export type productionFinalCompletionCreateResponse403 = {
+  data: ErrorResponse
+  status: 403
+}
+
+export type productionFinalCompletionCreateResponse404 = {
+  data: ErrorResponse
+  status: 404
+}
+
+export type productionFinalCompletionCreateResponse405 = {
+  data: ErrorResponse
+  status: 405
+}
+
+export type productionFinalCompletionCreateResponse409 = {
+  data: ErrorResponse
+  status: 409
+}
+
+export type productionFinalCompletionCreateResponse422 = {
+  data: ErrorResponse
+  status: 422
+}
+
+export type productionFinalCompletionCreateResponse429 = {
+  data: ErrorResponse
+  status: 429
+}
+
+export type productionFinalCompletionCreateResponse500 = {
+  data: ErrorResponse
+  status: 500
+}
+
+export type productionFinalCompletionCreateResponseSuccess = (productionFinalCompletionCreateResponse201) & {
+  headers: Headers;
+};
+export type productionFinalCompletionCreateResponseError = (productionFinalCompletionCreateResponse400 | productionFinalCompletionCreateResponse401 | productionFinalCompletionCreateResponse403 | productionFinalCompletionCreateResponse404 | productionFinalCompletionCreateResponse405 | productionFinalCompletionCreateResponse409 | productionFinalCompletionCreateResponse422 | productionFinalCompletionCreateResponse429 | productionFinalCompletionCreateResponse500) & {
+  headers: Headers;
+};
+
+export type productionFinalCompletionCreateResponse = (productionFinalCompletionCreateResponseSuccess | productionFinalCompletionCreateResponseError)
+
+export const getProductionFinalCompletionCreateUrl = (workOrderId: string,) => {
+
+
+
+
+  return `${import.meta.env.VITE_API_ORIGIN || ''}/api/v1/production/work-orders/${workOrderId}/final-completions`
+}
+
+/**
+ * @summary Final Completion Create
+ */
+export const productionFinalCompletionCreate = async (workOrderId: string,
+    finalCompletionCreate: FinalCompletionCreate, options?: RequestInit): Promise<productionFinalCompletionCreateResponse> => {
+
+  const res = await fetch(getProductionFinalCompletionCreateUrl(workOrderId),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(finalCompletionCreate)
+  }
+)
+
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+
+  const data: productionFinalCompletionCreateResponse['data'] = body ? JSON.parse(body) : {}
+  return { data, status: res.status, headers: res.headers } as productionFinalCompletionCreateResponse
+}
+
+
+
+export type productionProcessEventCreateResponse201 = {
+  data: ProcessEventResponse
+  status: 201
+}
+
+export type productionProcessEventCreateResponse400 = {
+  data: ErrorResponse
+  status: 400
+}
+
+export type productionProcessEventCreateResponse401 = {
+  data: ErrorResponse
+  status: 401
+}
+
+export type productionProcessEventCreateResponse403 = {
+  data: ErrorResponse
+  status: 403
+}
+
+export type productionProcessEventCreateResponse404 = {
+  data: ErrorResponse
+  status: 404
+}
+
+export type productionProcessEventCreateResponse405 = {
+  data: ErrorResponse
+  status: 405
+}
+
+export type productionProcessEventCreateResponse409 = {
+  data: ErrorResponse
+  status: 409
+}
+
+export type productionProcessEventCreateResponse422 = {
+  data: ErrorResponse
+  status: 422
+}
+
+export type productionProcessEventCreateResponse429 = {
+  data: ErrorResponse
+  status: 429
+}
+
+export type productionProcessEventCreateResponse500 = {
+  data: ErrorResponse
+  status: 500
+}
+
+export type productionProcessEventCreateResponseSuccess = (productionProcessEventCreateResponse201) & {
+  headers: Headers;
+};
+export type productionProcessEventCreateResponseError = (productionProcessEventCreateResponse400 | productionProcessEventCreateResponse401 | productionProcessEventCreateResponse403 | productionProcessEventCreateResponse404 | productionProcessEventCreateResponse405 | productionProcessEventCreateResponse409 | productionProcessEventCreateResponse422 | productionProcessEventCreateResponse429 | productionProcessEventCreateResponse500) & {
+  headers: Headers;
+};
+
+export type productionProcessEventCreateResponse = (productionProcessEventCreateResponseSuccess | productionProcessEventCreateResponseError)
+
+export const getProductionProcessEventCreateUrl = (workOrderId: string,) => {
+
+
+
+
+  return `${import.meta.env.VITE_API_ORIGIN || ''}/api/v1/production/work-orders/${workOrderId}/process-events`
+}
+
+/**
+ * @summary Process Event Create
+ */
+export const productionProcessEventCreate = async (workOrderId: string,
+    processEventCreate: ProcessEventCreate, options?: RequestInit): Promise<productionProcessEventCreateResponse> => {
+
+  const res = await fetch(getProductionProcessEventCreateUrl(workOrderId),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(processEventCreate)
+  }
+)
+
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+
+  const data: productionProcessEventCreateResponse['data'] = body ? JSON.parse(body) : {}
+  return { data, status: res.status, headers: res.headers } as productionProcessEventCreateResponse
 }
 
 

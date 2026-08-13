@@ -35,51 +35,39 @@ def test_identity_schema_has_expected_constraints_and_indexes(
         "organization_members",
         "sessions",
     } <= set(database_inspector.get_table_names())
-    user_indexes = {
-        index["name"]: index for index in database_inspector.get_indexes("users")
-    }
+    user_indexes = {index["name"]: index for index in database_inspector.get_indexes("users")}
     normalized_login_index = user_indexes["uq_users_login_name_normalized"]
     assert normalized_login_index["unique"] is True
     assert "lower" in " ".join(normalized_login_index["expressions"])
     assert "btrim" in " ".join(normalized_login_index["expressions"])
     assert "uq_organization_members_organization_id_user_id" in {
         constraint["name"]
-        for constraint in database_inspector.get_unique_constraints(
-            "organization_members"
-        )
+        for constraint in database_inspector.get_unique_constraints("organization_members")
     }
     assert "uq_sessions_token_digest" in {
-        constraint["name"]
-        for constraint in database_inspector.get_unique_constraints("sessions")
+        constraint["name"] for constraint in database_inspector.get_unique_constraints("sessions")
     }
     member_indexes = {
-        index["name"]: index
-        for index in database_inspector.get_indexes("organization_members")
+        index["name"]: index for index in database_inspector.get_indexes("organization_members")
     }
-    assert member_indexes[
-        "ix_organization_members_organization_id_status"
-    ]["column_names"] == ["organization_id", "status"]
-    assert member_indexes[
-        "ix_organization_members_user_id_status"
-    ]["column_names"] == ["user_id", "status"]
-
-    session_indexes = {
-        index["name"]: index
-        for index in database_inspector.get_indexes("sessions")
-    }
-    assert session_indexes[
-        "ix_sessions_organization_member_id_expires_at"
-    ]["column_names"] == ["organization_member_id", "expires_at"]
-    assert session_indexes["ix_sessions_expires_at"]["column_names"] == [
-        "expires_at"
+    assert member_indexes["ix_organization_members_organization_id_status"]["column_names"] == [
+        "organization_id",
+        "status",
+    ]
+    assert member_indexes["ix_organization_members_user_id_status"]["column_names"] == [
+        "user_id",
+        "status",
     ]
 
-    user_columns = {
-        column["name"] for column in database_inspector.get_columns("users")
-    }
-    session_columns = {
-        column["name"] for column in database_inspector.get_columns("sessions")
-    }
+    session_indexes = {index["name"]: index for index in database_inspector.get_indexes("sessions")}
+    assert session_indexes["ix_sessions_organization_member_id_expires_at"]["column_names"] == [
+        "organization_member_id",
+        "expires_at",
+    ]
+    assert session_indexes["ix_sessions_expires_at"]["column_names"] == ["expires_at"]
+
+    user_columns = {column["name"] for column in database_inspector.get_columns("users")}
+    session_columns = {column["name"] for column in database_inspector.get_columns("sessions")}
     assert "password" not in user_columns
     assert "password_hash" in user_columns
     assert "token" not in session_columns
@@ -202,6 +190,4 @@ def test_membership_foreign_keys_are_enforced(identity_engine: Engine) -> None:
             "user_id": uuid4(),
         },
     ):
-        assert_insert_rejected(
-            identity_engine, OrganizationMember.__table__, values
-        )
+        assert_insert_rejected(identity_engine, OrganizationMember.__table__, values)

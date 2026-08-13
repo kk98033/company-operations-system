@@ -42,12 +42,8 @@ def _seed_roles(
 ) -> tuple[OrganizationScope, UUID, UUID, UUID]:
     org_a, user_a, member_a, _ = seed_identity(engine)
     org_b, _, _, _ = seed_identity(engine)
-    role_a = Role(
-        id=uuid4(), organization_id=org_a, code="operator", name="A Operator"
-    )
-    role_b = Role(
-        id=uuid4(), organization_id=org_b, code="operator", name="B Operator"
-    )
+    role_a = Role(id=uuid4(), organization_id=org_a, code="operator", name="A Operator")
+    role_b = Role(id=uuid4(), organization_id=org_b, code="operator", name="B Operator")
     role_a_id, role_b_id = role_a.id, role_b.id
     with OrmSession(engine) as session, session.begin():
         session.add_all([role_a, role_b])
@@ -104,9 +100,7 @@ def test_create_ownership_is_injected_and_override_fails_before_write(
         session.add(
             Role(
                 id=role_id,
-                **scope_a.create_values(
-                    {"code": "reader", "name": "A Reader"}
-                ),
+                **scope_a.create_values({"code": "reader", "name": "A Reader"}),
             )
         )
 
@@ -121,6 +115,4 @@ def test_create_ownership_is_injected_and_override_fails_before_write(
     with OrmSession(identity_engine) as session:
         created = session.get(Role, role_id)
         assert created.organization_id == scope_a.organization_id
-        assert session.scalar(
-            select(Role).where(Role.code == "forged")
-        ) is None
+        assert session.scalar(select(Role).where(Role.code == "forged")) is None

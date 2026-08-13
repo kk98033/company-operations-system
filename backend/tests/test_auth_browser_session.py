@@ -24,9 +24,7 @@ def auth_client() -> TestClient:
     return TestClient(
         create_app(
             settings=make_test_settings(),
-            database_resources=make_database_resources(
-                session_factory=Mock(return_value=Mock())
-            ),
+            database_resources=make_database_resources(session_factory=Mock(return_value=Mock())),
             readiness_checks=[],
         ),
         raise_server_exceptions=False,
@@ -74,13 +72,9 @@ def test_logout_revokes_then_clears_both_cookie_paths(
     )
 
     assert response.status_code == 204
-    assert revoke.call_args.kwargs["raw_token"].get_secret_value() == (
-        raw_token.get_secret_value()
-    )
+    assert revoke.call_args.kwargs["raw_token"].get_secret_value() == (raw_token.get_secret_value())
     deleted = response.headers.get_list("set-cookie")
-    session_header = next(
-        value for value in deleted if value.startswith(SESSION_COOKIE_NAME)
-    )
+    session_header = next(value for value in deleted if value.startswith(SESSION_COOKIE_NAME))
     csrf_header = next(value for value in deleted if value.startswith(CSRF_COOKIE_NAME))
     assert "Path=/api/v1" in session_header
     assert "Path=/" in csrf_header
@@ -209,9 +203,7 @@ def test_production_login_cookies_are_always_secure(
     client = TestClient(
         create_app(
             settings=settings,
-            database_resources=make_database_resources(
-                session_factory=Mock(return_value=Mock())
-            ),
+            database_resources=make_database_resources(session_factory=Mock(return_value=Mock())),
             readiness_checks=[],
         )
     )
@@ -242,6 +234,4 @@ def test_production_login_cookies_are_always_secure(
     )
 
     assert response.status_code == 200
-    assert all(
-        "Secure" in header for header in response.headers.get_list("set-cookie")
-    )
+    assert all("Secure" in header for header in response.headers.get_list("set-cookie"))

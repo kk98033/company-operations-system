@@ -47,7 +47,10 @@ def test_login_fingerprint_is_deterministic_opaque_and_company_scoped() -> None:
 def test_retry_after_rounds_up_and_never_returns_zero() -> None:
     timestamp = datetime.now(UTC)
 
-    assert retry_after_seconds(
-        blocked_until=timestamp + timedelta(microseconds=1),
-        timestamp=timestamp,
-    ) == 1
+    assert (
+        retry_after_seconds(
+            blocked_until=timestamp + timedelta(microseconds=1),
+            timestamp=timestamp,
+        )
+        == 1
+    )
