@@ -573,6 +573,47 @@ export interface ListResponseMetaAuditFilterSummary {
   sort: SortMeta;
 }
 
+export type PendingPricingStatus = typeof PendingPricingStatus[keyof typeof PendingPricingStatus];
+
+
+export const PendingPricingStatus = {
+  pending: 'pending',
+  pricing: 'pricing',
+  priced: 'priced',
+  cancelled: 'cancelled',
+} as const;
+
+export interface PendingPricingFilters {
+  keyword: string | null;
+  status: PendingPricingStatus | null;
+}
+
+export interface ListResponseMetaPendingPricingFilters {
+  filters: PendingPricingFilters;
+  pagination: PaginationMeta;
+  sort: SortMeta;
+}
+
+export type PricingStatus = typeof PricingStatus[keyof typeof PricingStatus];
+
+
+export const PricingStatus = {
+  draft: 'draft',
+  confirmed: 'confirmed',
+  cancelled: 'cancelled',
+} as const;
+
+export interface PricingFilters {
+  keyword: string | null;
+  status: PricingStatus | null;
+}
+
+export interface ListResponseMetaPricingFilters {
+  filters: PricingFilters;
+  pagination: PaginationMeta;
+  sort: SortMeta;
+}
+
 export interface ProductionFilters {
   keyword: string | null;
 }
@@ -786,6 +827,185 @@ export interface PaperMaterialOutput {
   /** @pattern ^(face|back|flute)$ */
   type: string;
   vendor?: string | null;
+}
+
+export interface PendingPricingItem {
+  customer_id: string;
+  customer_name: string;
+  /** @pattern ^(?!^[-+.]*$)[+-]?0*\d*\.?\d*$ */
+  delivered_quantity: string;
+  pricing_document_id: string | null;
+  pricing_document_number: string | null;
+  pricing_status: PendingPricingStatus;
+  product_name: string;
+  shipment_date: string;
+  shipment_document_number: string;
+  shipment_id: string;
+  shipment_item_id: string;
+  /** @pattern ^(?!^[-+.]*$)[+-]?0*\d*\.?\d*$ */
+  spare_quantity: string;
+  specification: string | null;
+  /** @pattern ^(?!^[-+.]*$)[+-]?0*\d*\.?\d*$ */
+  suggested_unit_price: string;
+  work_order_document_number: string;
+}
+
+export interface PendingPricingListResponse {
+  items: PendingPricingItem[];
+  meta: ListResponseMetaPendingPricingFilters;
+}
+
+export interface PriceSuggestion {
+  content: string;
+  /** @pattern ^(?!^[-+.]*$)[+-]?0*\d*\.?\d*$ */
+  die_fee: string;
+  id: string;
+  is_default: boolean;
+  /** @pattern ^(?!^[-+.]*$)[+-]?0*\d*\.?\d*$ */
+  plate_fee: string;
+  price_date: string;
+  product_name: string;
+  source_pricing_item_id: string;
+  specification: string | null;
+  /** @pattern ^(?!^[-+.]*$)[+-]?0*\d*\.?\d*$ */
+  unit_price: string;
+}
+
+export interface PriceSuggestionListResponse {
+  items: PriceSuggestion[];
+}
+
+export interface PricingCancel {
+  /** @exclusiveMinimum 0 */
+  expected_version: number;
+  idempotency_key: string;
+  /**
+     * @minLength 1
+     * @maxLength 1000
+     */
+  reason: string;
+}
+
+export interface PricingConfirm {
+  /** @exclusiveMinimum 0 */
+  expected_version: number;
+  idempotency_key: string;
+  /** @maxItems 200 */
+  update_default_line_numbers?: number[];
+}
+
+export interface PricingDraftCreate {
+  idempotency_key: string;
+  notes?: string | null;
+  pricing_date: string;
+  /**
+     * @minItems 1
+     * @maxItems 100
+     */
+  shipment_item_ids: string[];
+}
+
+export type PricingItemType = typeof PricingItemType[keyof typeof PricingItemType];
+
+
+export const PricingItemType = {
+  base: 'base',
+  spare: 'spare',
+  manual: 'manual',
+} as const;
+
+export interface PricingItemInput {
+  /**
+     * @minLength 1
+     * @maxLength 500
+     */
+  content: string;
+  die_fee?: number | string;
+  item_type: PricingItemType;
+  plate_fee?: number | string;
+  product_name?: string | null;
+  quantity: number | string;
+  source_shipment_item_id?: string | null;
+  specification?: string | null;
+  unit_price: number | string;
+}
+
+export interface PricingDraftUpdate {
+  /** @exclusiveMinimum 0 */
+  expected_version: number;
+  /**
+     * @minItems 1
+     * @maxItems 200
+     */
+  items: PricingItemInput[];
+  notes?: string | null;
+  pricing_date: string;
+}
+
+export type PricingItemResponseSourceSnapshot = { [key: string]: unknown } | null;
+
+export interface PricingItemResponse {
+  content: string;
+  /** @pattern ^(?!^[-+.]*$)[+-]?0*\d*\.?\d*$ */
+  die_fee: string;
+  id: string;
+  item_type: PricingItemType;
+  line_no: number;
+  /** @pattern ^(?!^[-+.]*$)[+-]?0*\d*\.?\d*$ */
+  plate_fee: string;
+  product_name: string | null;
+  /** @pattern ^(?!^[-+.]*$)[+-]?0*\d*\.?\d*$ */
+  quantity: string;
+  source_shipment_item_id: string | null;
+  source_snapshot: PricingItemResponseSourceSnapshot;
+  specification: string | null;
+  /** @pattern ^(?!^[-+.]*$)[+-]?0*\d*\.?\d*$ */
+  subtotal: string;
+  /** @pattern ^(?!^[-+.]*$)[+-]?0*\d*\.?\d*$ */
+  unit_price: string;
+}
+
+export interface PricingSummary {
+  customer_name: string;
+  document_number: string;
+  id: string;
+  legacy_document_number: string | null;
+  line_count: number;
+  pricing_date: string;
+  status: PricingStatus;
+  /** @pattern ^(?!^[-+.]*$)[+-]?0*\d*\.?\d*$ */
+  total_amount: string;
+}
+
+export interface PricingListResponse {
+  items: PricingSummary[];
+  meta: ListResponseMetaPricingFilters;
+}
+
+export interface PricingReopen {
+  /** @exclusiveMinimum 0 */
+  expected_version: number;
+  idempotency_key: string;
+}
+
+export interface PricingResponse {
+  cancel_reason: string | null;
+  cancelled_at: string | null;
+  confirmed_at: string | null;
+  created_at: string;
+  customer_id: string;
+  customer_name: string;
+  document_number: string;
+  id: string;
+  items: PricingItemResponse[];
+  legacy_document_number: string | null;
+  notes: string | null;
+  pricing_date: string;
+  status: PricingStatus;
+  /** @pattern ^(?!^[-+.]*$)[+-]?0*\d*\.?\d*$ */
+  total_amount: string;
+  updated_at: string;
+  version: number;
 }
 
 export interface PrintSide {
@@ -1604,6 +1824,42 @@ keyword?: string | null;
 
 export type ProcessDefinitionListParams = {
 status?: MasterStatus | null;
+};
+
+export type PriceSuggestionListParams = {
+customer_id: string;
+product_name: string;
+specification?: string | null;
+};
+
+export type PricingListParams = {
+status?: PricingStatus | null;
+/**
+ * @minimum 1
+ * @maximum 1000000
+ */
+page?: number;
+/**
+ * @minimum 1
+ * @maximum 100
+ */
+page_size?: number;
+keyword?: string | null;
+};
+
+export type PricingPendingItemListParams = {
+status?: PendingPricingStatus | null;
+/**
+ * @minimum 1
+ * @maximum 1000000
+ */
+page?: number;
+/**
+ * @minimum 1
+ * @maximum 100
+ */
+page_size?: number;
+keyword?: string | null;
 };
 
 export type ProductionListParams = {
@@ -5203,6 +5459,841 @@ export const organizationSettingsUpdate = async (organizationSettingsUpdateBody:
 
   const data: organizationSettingsUpdateResponse['data'] = body ? JSON.parse(body) : {}
   return { data, status: res.status, headers: res.headers } as organizationSettingsUpdateResponse
+}
+
+
+
+export type priceSuggestionListResponse200 = {
+  data: PriceSuggestionListResponse
+  status: 200
+}
+
+export type priceSuggestionListResponse400 = {
+  data: ErrorResponse
+  status: 400
+}
+
+export type priceSuggestionListResponse401 = {
+  data: ErrorResponse
+  status: 401
+}
+
+export type priceSuggestionListResponse403 = {
+  data: ErrorResponse
+  status: 403
+}
+
+export type priceSuggestionListResponse404 = {
+  data: ErrorResponse
+  status: 404
+}
+
+export type priceSuggestionListResponse405 = {
+  data: ErrorResponse
+  status: 405
+}
+
+export type priceSuggestionListResponse409 = {
+  data: ErrorResponse
+  status: 409
+}
+
+export type priceSuggestionListResponse422 = {
+  data: ErrorResponse
+  status: 422
+}
+
+export type priceSuggestionListResponse429 = {
+  data: ErrorResponse
+  status: 429
+}
+
+export type priceSuggestionListResponse500 = {
+  data: ErrorResponse
+  status: 500
+}
+
+export type priceSuggestionListResponseSuccess = (priceSuggestionListResponse200) & {
+  headers: Headers;
+};
+export type priceSuggestionListResponseError = (priceSuggestionListResponse400 | priceSuggestionListResponse401 | priceSuggestionListResponse403 | priceSuggestionListResponse404 | priceSuggestionListResponse405 | priceSuggestionListResponse409 | priceSuggestionListResponse422 | priceSuggestionListResponse429 | priceSuggestionListResponse500) & {
+  headers: Headers;
+};
+
+export type priceSuggestionListResponse = (priceSuggestionListResponseSuccess | priceSuggestionListResponseError)
+
+export const getPriceSuggestionListUrl = (params: PriceSuggestionListParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `${import.meta.env.VITE_API_ORIGIN || ''}/api/v1/price-suggestions?${stringifiedParams}` : `${import.meta.env.VITE_API_ORIGIN || ''}/api/v1/price-suggestions`
+}
+
+/**
+ * @summary Suggestion List
+ */
+export const priceSuggestionList = async (params: PriceSuggestionListParams, options?: RequestInit): Promise<priceSuggestionListResponse> => {
+
+  const res = await fetch(getPriceSuggestionListUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+)
+
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+
+  const data: priceSuggestionListResponse['data'] = body ? JSON.parse(body) : {}
+  return { data, status: res.status, headers: res.headers } as priceSuggestionListResponse
+}
+
+
+
+export type pricingListResponse200 = {
+  data: PricingListResponse
+  status: 200
+}
+
+export type pricingListResponse400 = {
+  data: ErrorResponse
+  status: 400
+}
+
+export type pricingListResponse401 = {
+  data: ErrorResponse
+  status: 401
+}
+
+export type pricingListResponse403 = {
+  data: ErrorResponse
+  status: 403
+}
+
+export type pricingListResponse404 = {
+  data: ErrorResponse
+  status: 404
+}
+
+export type pricingListResponse405 = {
+  data: ErrorResponse
+  status: 405
+}
+
+export type pricingListResponse409 = {
+  data: ErrorResponse
+  status: 409
+}
+
+export type pricingListResponse422 = {
+  data: ErrorResponse
+  status: 422
+}
+
+export type pricingListResponse429 = {
+  data: ErrorResponse
+  status: 429
+}
+
+export type pricingListResponse500 = {
+  data: ErrorResponse
+  status: 500
+}
+
+export type pricingListResponseSuccess = (pricingListResponse200) & {
+  headers: Headers;
+};
+export type pricingListResponseError = (pricingListResponse400 | pricingListResponse401 | pricingListResponse403 | pricingListResponse404 | pricingListResponse405 | pricingListResponse409 | pricingListResponse422 | pricingListResponse429 | pricingListResponse500) & {
+  headers: Headers;
+};
+
+export type pricingListResponse = (pricingListResponseSuccess | pricingListResponseError)
+
+export const getPricingListUrl = (params?: PricingListParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `${import.meta.env.VITE_API_ORIGIN || ''}/api/v1/pricing-documents?${stringifiedParams}` : `${import.meta.env.VITE_API_ORIGIN || ''}/api/v1/pricing-documents`
+}
+
+/**
+ * @summary Pricing List
+ */
+export const pricingList = async (params?: PricingListParams, options?: RequestInit): Promise<pricingListResponse> => {
+
+  const res = await fetch(getPricingListUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+)
+
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+
+  const data: pricingListResponse['data'] = body ? JSON.parse(body) : {}
+  return { data, status: res.status, headers: res.headers } as pricingListResponse
+}
+
+
+
+export type pricingCreateResponse201 = {
+  data: PricingResponse
+  status: 201
+}
+
+export type pricingCreateResponse400 = {
+  data: ErrorResponse
+  status: 400
+}
+
+export type pricingCreateResponse401 = {
+  data: ErrorResponse
+  status: 401
+}
+
+export type pricingCreateResponse403 = {
+  data: ErrorResponse
+  status: 403
+}
+
+export type pricingCreateResponse404 = {
+  data: ErrorResponse
+  status: 404
+}
+
+export type pricingCreateResponse405 = {
+  data: ErrorResponse
+  status: 405
+}
+
+export type pricingCreateResponse409 = {
+  data: ErrorResponse
+  status: 409
+}
+
+export type pricingCreateResponse422 = {
+  data: ErrorResponse
+  status: 422
+}
+
+export type pricingCreateResponse429 = {
+  data: ErrorResponse
+  status: 429
+}
+
+export type pricingCreateResponse500 = {
+  data: ErrorResponse
+  status: 500
+}
+
+export type pricingCreateResponseSuccess = (pricingCreateResponse201) & {
+  headers: Headers;
+};
+export type pricingCreateResponseError = (pricingCreateResponse400 | pricingCreateResponse401 | pricingCreateResponse403 | pricingCreateResponse404 | pricingCreateResponse405 | pricingCreateResponse409 | pricingCreateResponse422 | pricingCreateResponse429 | pricingCreateResponse500) & {
+  headers: Headers;
+};
+
+export type pricingCreateResponse = (pricingCreateResponseSuccess | pricingCreateResponseError)
+
+export const getPricingCreateUrl = () => {
+
+
+
+
+  return `${import.meta.env.VITE_API_ORIGIN || ''}/api/v1/pricing-documents`
+}
+
+/**
+ * @summary Pricing Create
+ */
+export const pricingCreate = async (pricingDraftCreate: PricingDraftCreate, options?: RequestInit): Promise<pricingCreateResponse> => {
+
+  const res = await fetch(getPricingCreateUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(pricingDraftCreate)
+  }
+)
+
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+
+  const data: pricingCreateResponse['data'] = body ? JSON.parse(body) : {}
+  return { data, status: res.status, headers: res.headers } as pricingCreateResponse
+}
+
+
+
+export type pricingPendingItemListResponse200 = {
+  data: PendingPricingListResponse
+  status: 200
+}
+
+export type pricingPendingItemListResponse400 = {
+  data: ErrorResponse
+  status: 400
+}
+
+export type pricingPendingItemListResponse401 = {
+  data: ErrorResponse
+  status: 401
+}
+
+export type pricingPendingItemListResponse403 = {
+  data: ErrorResponse
+  status: 403
+}
+
+export type pricingPendingItemListResponse404 = {
+  data: ErrorResponse
+  status: 404
+}
+
+export type pricingPendingItemListResponse405 = {
+  data: ErrorResponse
+  status: 405
+}
+
+export type pricingPendingItemListResponse409 = {
+  data: ErrorResponse
+  status: 409
+}
+
+export type pricingPendingItemListResponse422 = {
+  data: ErrorResponse
+  status: 422
+}
+
+export type pricingPendingItemListResponse429 = {
+  data: ErrorResponse
+  status: 429
+}
+
+export type pricingPendingItemListResponse500 = {
+  data: ErrorResponse
+  status: 500
+}
+
+export type pricingPendingItemListResponseSuccess = (pricingPendingItemListResponse200) & {
+  headers: Headers;
+};
+export type pricingPendingItemListResponseError = (pricingPendingItemListResponse400 | pricingPendingItemListResponse401 | pricingPendingItemListResponse403 | pricingPendingItemListResponse404 | pricingPendingItemListResponse405 | pricingPendingItemListResponse409 | pricingPendingItemListResponse422 | pricingPendingItemListResponse429 | pricingPendingItemListResponse500) & {
+  headers: Headers;
+};
+
+export type pricingPendingItemListResponse = (pricingPendingItemListResponseSuccess | pricingPendingItemListResponseError)
+
+export const getPricingPendingItemListUrl = (params?: PricingPendingItemListParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `${import.meta.env.VITE_API_ORIGIN || ''}/api/v1/pricing-documents/pending-items?${stringifiedParams}` : `${import.meta.env.VITE_API_ORIGIN || ''}/api/v1/pricing-documents/pending-items`
+}
+
+/**
+ * @summary Pending List
+ */
+export const pricingPendingItemList = async (params?: PricingPendingItemListParams, options?: RequestInit): Promise<pricingPendingItemListResponse> => {
+
+  const res = await fetch(getPricingPendingItemListUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+)
+
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+
+  const data: pricingPendingItemListResponse['data'] = body ? JSON.parse(body) : {}
+  return { data, status: res.status, headers: res.headers } as pricingPendingItemListResponse
+}
+
+
+
+export type pricingGetResponse200 = {
+  data: PricingResponse
+  status: 200
+}
+
+export type pricingGetResponse400 = {
+  data: ErrorResponse
+  status: 400
+}
+
+export type pricingGetResponse401 = {
+  data: ErrorResponse
+  status: 401
+}
+
+export type pricingGetResponse403 = {
+  data: ErrorResponse
+  status: 403
+}
+
+export type pricingGetResponse404 = {
+  data: ErrorResponse
+  status: 404
+}
+
+export type pricingGetResponse405 = {
+  data: ErrorResponse
+  status: 405
+}
+
+export type pricingGetResponse409 = {
+  data: ErrorResponse
+  status: 409
+}
+
+export type pricingGetResponse422 = {
+  data: ErrorResponse
+  status: 422
+}
+
+export type pricingGetResponse429 = {
+  data: ErrorResponse
+  status: 429
+}
+
+export type pricingGetResponse500 = {
+  data: ErrorResponse
+  status: 500
+}
+
+export type pricingGetResponseSuccess = (pricingGetResponse200) & {
+  headers: Headers;
+};
+export type pricingGetResponseError = (pricingGetResponse400 | pricingGetResponse401 | pricingGetResponse403 | pricingGetResponse404 | pricingGetResponse405 | pricingGetResponse409 | pricingGetResponse422 | pricingGetResponse429 | pricingGetResponse500) & {
+  headers: Headers;
+};
+
+export type pricingGetResponse = (pricingGetResponseSuccess | pricingGetResponseError)
+
+export const getPricingGetUrl = (pricingId: string,) => {
+
+
+
+
+  return `${import.meta.env.VITE_API_ORIGIN || ''}/api/v1/pricing-documents/${pricingId}`
+}
+
+/**
+ * @summary Pricing Get
+ */
+export const pricingGet = async (pricingId: string, options?: RequestInit): Promise<pricingGetResponse> => {
+
+  const res = await fetch(getPricingGetUrl(pricingId),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+)
+
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+
+  const data: pricingGetResponse['data'] = body ? JSON.parse(body) : {}
+  return { data, status: res.status, headers: res.headers } as pricingGetResponse
+}
+
+
+
+export type pricingUpdateResponse200 = {
+  data: PricingResponse
+  status: 200
+}
+
+export type pricingUpdateResponse400 = {
+  data: ErrorResponse
+  status: 400
+}
+
+export type pricingUpdateResponse401 = {
+  data: ErrorResponse
+  status: 401
+}
+
+export type pricingUpdateResponse403 = {
+  data: ErrorResponse
+  status: 403
+}
+
+export type pricingUpdateResponse404 = {
+  data: ErrorResponse
+  status: 404
+}
+
+export type pricingUpdateResponse405 = {
+  data: ErrorResponse
+  status: 405
+}
+
+export type pricingUpdateResponse409 = {
+  data: ErrorResponse
+  status: 409
+}
+
+export type pricingUpdateResponse422 = {
+  data: ErrorResponse
+  status: 422
+}
+
+export type pricingUpdateResponse429 = {
+  data: ErrorResponse
+  status: 429
+}
+
+export type pricingUpdateResponse500 = {
+  data: ErrorResponse
+  status: 500
+}
+
+export type pricingUpdateResponseSuccess = (pricingUpdateResponse200) & {
+  headers: Headers;
+};
+export type pricingUpdateResponseError = (pricingUpdateResponse400 | pricingUpdateResponse401 | pricingUpdateResponse403 | pricingUpdateResponse404 | pricingUpdateResponse405 | pricingUpdateResponse409 | pricingUpdateResponse422 | pricingUpdateResponse429 | pricingUpdateResponse500) & {
+  headers: Headers;
+};
+
+export type pricingUpdateResponse = (pricingUpdateResponseSuccess | pricingUpdateResponseError)
+
+export const getPricingUpdateUrl = (pricingId: string,) => {
+
+
+
+
+  return `${import.meta.env.VITE_API_ORIGIN || ''}/api/v1/pricing-documents/${pricingId}`
+}
+
+/**
+ * @summary Pricing Update
+ */
+export const pricingUpdate = async (pricingId: string,
+    pricingDraftUpdate: PricingDraftUpdate, options?: RequestInit): Promise<pricingUpdateResponse> => {
+
+  const res = await fetch(getPricingUpdateUrl(pricingId),
+  {
+    ...options,
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(pricingDraftUpdate)
+  }
+)
+
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+
+  const data: pricingUpdateResponse['data'] = body ? JSON.parse(body) : {}
+  return { data, status: res.status, headers: res.headers } as pricingUpdateResponse
+}
+
+
+
+export type pricingCancelResponse200 = {
+  data: PricingResponse
+  status: 200
+}
+
+export type pricingCancelResponse400 = {
+  data: ErrorResponse
+  status: 400
+}
+
+export type pricingCancelResponse401 = {
+  data: ErrorResponse
+  status: 401
+}
+
+export type pricingCancelResponse403 = {
+  data: ErrorResponse
+  status: 403
+}
+
+export type pricingCancelResponse404 = {
+  data: ErrorResponse
+  status: 404
+}
+
+export type pricingCancelResponse405 = {
+  data: ErrorResponse
+  status: 405
+}
+
+export type pricingCancelResponse409 = {
+  data: ErrorResponse
+  status: 409
+}
+
+export type pricingCancelResponse422 = {
+  data: ErrorResponse
+  status: 422
+}
+
+export type pricingCancelResponse429 = {
+  data: ErrorResponse
+  status: 429
+}
+
+export type pricingCancelResponse500 = {
+  data: ErrorResponse
+  status: 500
+}
+
+export type pricingCancelResponseSuccess = (pricingCancelResponse200) & {
+  headers: Headers;
+};
+export type pricingCancelResponseError = (pricingCancelResponse400 | pricingCancelResponse401 | pricingCancelResponse403 | pricingCancelResponse404 | pricingCancelResponse405 | pricingCancelResponse409 | pricingCancelResponse422 | pricingCancelResponse429 | pricingCancelResponse500) & {
+  headers: Headers;
+};
+
+export type pricingCancelResponse = (pricingCancelResponseSuccess | pricingCancelResponseError)
+
+export const getPricingCancelUrl = (pricingId: string,) => {
+
+
+
+
+  return `${import.meta.env.VITE_API_ORIGIN || ''}/api/v1/pricing-documents/${pricingId}/cancel`
+}
+
+/**
+ * @summary Pricing Cancel
+ */
+export const pricingCancel = async (pricingId: string,
+    pricingCancelBody: PricingCancel, options?: RequestInit): Promise<pricingCancelResponse> => {
+
+  const res = await fetch(getPricingCancelUrl(pricingId),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(pricingCancelBody)
+  }
+)
+
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+
+  const data: pricingCancelResponse['data'] = body ? JSON.parse(body) : {}
+  return { data, status: res.status, headers: res.headers } as pricingCancelResponse
+}
+
+
+
+export type pricingConfirmResponse200 = {
+  data: PricingResponse
+  status: 200
+}
+
+export type pricingConfirmResponse400 = {
+  data: ErrorResponse
+  status: 400
+}
+
+export type pricingConfirmResponse401 = {
+  data: ErrorResponse
+  status: 401
+}
+
+export type pricingConfirmResponse403 = {
+  data: ErrorResponse
+  status: 403
+}
+
+export type pricingConfirmResponse404 = {
+  data: ErrorResponse
+  status: 404
+}
+
+export type pricingConfirmResponse405 = {
+  data: ErrorResponse
+  status: 405
+}
+
+export type pricingConfirmResponse409 = {
+  data: ErrorResponse
+  status: 409
+}
+
+export type pricingConfirmResponse422 = {
+  data: ErrorResponse
+  status: 422
+}
+
+export type pricingConfirmResponse429 = {
+  data: ErrorResponse
+  status: 429
+}
+
+export type pricingConfirmResponse500 = {
+  data: ErrorResponse
+  status: 500
+}
+
+export type pricingConfirmResponseSuccess = (pricingConfirmResponse200) & {
+  headers: Headers;
+};
+export type pricingConfirmResponseError = (pricingConfirmResponse400 | pricingConfirmResponse401 | pricingConfirmResponse403 | pricingConfirmResponse404 | pricingConfirmResponse405 | pricingConfirmResponse409 | pricingConfirmResponse422 | pricingConfirmResponse429 | pricingConfirmResponse500) & {
+  headers: Headers;
+};
+
+export type pricingConfirmResponse = (pricingConfirmResponseSuccess | pricingConfirmResponseError)
+
+export const getPricingConfirmUrl = (pricingId: string,) => {
+
+
+
+
+  return `${import.meta.env.VITE_API_ORIGIN || ''}/api/v1/pricing-documents/${pricingId}/confirm`
+}
+
+/**
+ * @summary Pricing Confirm
+ */
+export const pricingConfirm = async (pricingId: string,
+    pricingConfirmBody: PricingConfirm, options?: RequestInit): Promise<pricingConfirmResponse> => {
+
+  const res = await fetch(getPricingConfirmUrl(pricingId),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(pricingConfirmBody)
+  }
+)
+
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+
+  const data: pricingConfirmResponse['data'] = body ? JSON.parse(body) : {}
+  return { data, status: res.status, headers: res.headers } as pricingConfirmResponse
+}
+
+
+
+export type pricingReopenResponse200 = {
+  data: PricingResponse
+  status: 200
+}
+
+export type pricingReopenResponse400 = {
+  data: ErrorResponse
+  status: 400
+}
+
+export type pricingReopenResponse401 = {
+  data: ErrorResponse
+  status: 401
+}
+
+export type pricingReopenResponse403 = {
+  data: ErrorResponse
+  status: 403
+}
+
+export type pricingReopenResponse404 = {
+  data: ErrorResponse
+  status: 404
+}
+
+export type pricingReopenResponse405 = {
+  data: ErrorResponse
+  status: 405
+}
+
+export type pricingReopenResponse409 = {
+  data: ErrorResponse
+  status: 409
+}
+
+export type pricingReopenResponse422 = {
+  data: ErrorResponse
+  status: 422
+}
+
+export type pricingReopenResponse429 = {
+  data: ErrorResponse
+  status: 429
+}
+
+export type pricingReopenResponse500 = {
+  data: ErrorResponse
+  status: 500
+}
+
+export type pricingReopenResponseSuccess = (pricingReopenResponse200) & {
+  headers: Headers;
+};
+export type pricingReopenResponseError = (pricingReopenResponse400 | pricingReopenResponse401 | pricingReopenResponse403 | pricingReopenResponse404 | pricingReopenResponse405 | pricingReopenResponse409 | pricingReopenResponse422 | pricingReopenResponse429 | pricingReopenResponse500) & {
+  headers: Headers;
+};
+
+export type pricingReopenResponse = (pricingReopenResponseSuccess | pricingReopenResponseError)
+
+export const getPricingReopenUrl = (pricingId: string,) => {
+
+
+
+
+  return `${import.meta.env.VITE_API_ORIGIN || ''}/api/v1/pricing-documents/${pricingId}/reopen`
+}
+
+/**
+ * @summary Pricing Reopen
+ */
+export const pricingReopen = async (pricingId: string,
+    pricingReopenBody: PricingReopen, options?: RequestInit): Promise<pricingReopenResponse> => {
+
+  const res = await fetch(getPricingReopenUrl(pricingId),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(pricingReopenBody)
+  }
+)
+
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+
+  const data: pricingReopenResponse['data'] = body ? JSON.parse(body) : {}
+  return { data, status: res.status, headers: res.headers } as pricingReopenResponse
 }
 
 

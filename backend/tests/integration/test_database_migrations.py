@@ -59,16 +59,20 @@ IMPORT_TABLES = [
     "import_staging_records",
     "legacy_mappings",
 ]
-
 IDENTITY_TABLES = ["organization_members", "organizations", "sessions", "users"]
-
 ORGANIZATION_SETTINGS_TABLES = ["organization_settings"]
 CUSTOMER_TABLES = ["customers"]
 CUSTOMER_WORK_ITEM_TABLES = ["customer_work_items"]
 QUOTATION_TABLES = ["document_sequences", "quotation_items", "quotations"]
 WORK_ORDER_TABLES = ["production_cases", "work_order_attachments", "work_orders"]
-PRODUCTION_TABLES = ["final_completion_entries", "inventory_adjustments", "inventory_ledger", "process_events"]
+PRODUCTION_TABLES = [
+    "final_completion_entries",
+    "inventory_adjustments",
+    "inventory_ledger",
+    "process_events",
+]
 SHIPMENT_TABLES = ["shipment_items", "shipments"]
+PRICING_TABLES = ["price_history", "pricing_documents", "pricing_items"]
 MASTER_DATA_TABLES = ["paper_mills", "paper_types", "process_definitions", "vendors"]
 
 AUTHORIZATION_TABLES = [
@@ -94,7 +98,7 @@ def test_schema_upgrade_downgrade_upgrade_round_trip(
     assert REGISTERED_MODELS
 
     command.upgrade(config, "head")
-    assert _current_revision() == "0020_shipments"
+    assert _current_revision() == "0021_pricing"
     assert _table_names() == [
         "alembic_version",
         *sorted(
@@ -111,6 +115,7 @@ def test_schema_upgrade_downgrade_upgrade_round_trip(
                 *WORK_ORDER_TABLES,
                 *PRODUCTION_TABLES,
                 *SHIPMENT_TABLES,
+                *PRICING_TABLES,
                 *MASTER_DATA_TABLES,
             ]
         ),
@@ -123,7 +128,7 @@ def test_schema_upgrade_downgrade_upgrade_round_trip(
     assert _table_names() == ["alembic_version"]
 
     command.upgrade(config, "head")
-    assert _current_revision() == "0020_shipments"
+    assert _current_revision() == "0021_pricing"
     assert _table_names() == [
         "alembic_version",
         *sorted(
@@ -138,9 +143,10 @@ def test_schema_upgrade_downgrade_upgrade_round_trip(
                 *CUSTOMER_WORK_ITEM_TABLES,
                 *QUOTATION_TABLES,
                 *WORK_ORDER_TABLES,
-                    *PRODUCTION_TABLES,
-                    *SHIPMENT_TABLES,
-                    *MASTER_DATA_TABLES,
+                *PRODUCTION_TABLES,
+                *SHIPMENT_TABLES,
+                *PRICING_TABLES,
+                *MASTER_DATA_TABLES,
             ]
         ),
     ]
@@ -192,7 +198,7 @@ def test_identity_downgrade_preserves_existing_import_foundation(
         resources.dispose()
 
     command.upgrade(config, "head")
-    assert _current_revision() == "0020_shipments"
+    assert _current_revision() == "0021_pricing"
     command.check(config)
 
     resources = create_database_resources(settings)

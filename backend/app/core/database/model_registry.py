@@ -27,6 +27,7 @@ from app.modules.organizations.models import (
     OrganizationMember,
     OrganizationSettings,
 )
+from app.modules.pricing.models import PriceHistory, PricingDocument, PricingItem
 from app.modules.production.models import (
     FinalCompletionEntry,
     InventoryAdjustment,
@@ -59,6 +60,9 @@ REGISTERED_MODELS = (
     InventoryLedgerEntry,
     Shipment,
     ShipmentItem,
+    PricingDocument,
+    PricingItem,
+    PriceHistory,
     Vendor,
     PaperType,
     PaperMill,

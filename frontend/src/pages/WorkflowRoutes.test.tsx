@@ -6,7 +6,7 @@ import { renderApp } from '../test/renderApp'
 
 const prototypeModules = workflowModules.filter(
   (module) => ![
-    'customers', 'quotations', 'cases', 'work-orders', 'production', 'inventory', 'shipments',
+    'customers', 'quotations', 'cases', 'work-orders', 'production', 'inventory', 'shipments', 'pricing',
   ].includes(module.id),
 )
 
@@ -15,6 +15,7 @@ describe('公司主流程路由', () => {
     const quotations = workflowModules.find((module) => module.id === 'quotations')
     const cases = workflowModules.find((module) => module.id === 'cases')
     const workOrders = workflowModules.find((module) => module.id === 'work-orders')
+    const pricing = workflowModules.find((module) => module.id === 'pricing')
 
     expect(quotations?.requirementIds).toEqual([
       'QUO-001', 'QUO-002', 'QUO-003', 'QUO-004', 'QUO-005', 'QUO-006', 'QUO-007', 'QUO-008',
@@ -26,6 +27,9 @@ describe('公司主流程路由', () => {
       'WO-001', 'WO-002', 'WO-003', 'WO-004', 'WO-005', 'WO-006',
       'WO-007', 'WO-008', 'WO-009', 'WO-010', 'WO-011', 'WO-012',
       'WO-013', 'WO-014', 'WO-015', 'WO-016',
+    ])
+    expect(pricing?.requirementIds).toEqual([
+      'PRICE-001', 'PRICE-002', 'PRICE-003', 'PRICE-004', 'PRICE-005',
     ])
   })
 
@@ -72,6 +76,8 @@ describe('公司主流程路由', () => {
                   ? '沒有庫存資料權限'
                 : module.id === 'shipments'
                   ? '沒有出貨資料權限'
+                : module.id === 'pricing'
+                  ? '沒有計價資料權限'
           : module.label
       expect(screen.getByRole('heading', { level: 1, name: heading }))
         .toBeInTheDocument()

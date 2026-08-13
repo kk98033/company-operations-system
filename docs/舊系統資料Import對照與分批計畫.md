@@ -220,7 +220,7 @@ P0-04 新版「基礎計價只取正式量」不回溯改寫舊金額。舊備�
 | I-2.2 | Phase 4 history 完成 | `subpoena_his`＋`quote_his` | 現行／歷史去重、狀態及數量 |
 | I-3.1 | DONE（未 apply） | `merchandise` 1,451 筆 aggregate-only dry-run | 數量皆可解析且餘額皆為正；8 碼 `subpoenaid` 對 11 碼工單號直接命中 0，日期前綴候選不可當正式關聯 |
 | I-4.1 | DONE（未 apply） | `subp_sale`＋`subp_sale2` aggregate-only dry-run | 14,303 主檔／31,162 明細；5 筆缺主檔鍵、31,152 筆明細主鍵未直接命中、工單只直接命中 8 筆；不得猜測關聯 |
-| I-5.1 | Phase 7 pricing 完成 | `sal`＋`sal2` | 來源出貨、防重複、金額總計 |
+| I-5.1 | 已完成 aggregate-only dry-run，未 apply | `sal`＋`sal2` | 來源出貨、防重複、金額總計；異常舊金額、文字替代字元與關聯差異先隔離 |
 | I-6.1 | Phase 8 billing 完成 | `rec`、`income`、`lsm`、`rece` | 客戶／月份、稅額、已收／未收核對 |
 | I-7.1 | Phase 10 | 不限年份全模組整合 dry-run，含只讀封存與例外清單 | 零未解高風險錯誤，所有來源列皆有去向 |
 | I-7.2 | Phase 10 | 第二次完全重跑 | idempotent，不新增重複資料 |

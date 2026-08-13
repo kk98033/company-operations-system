@@ -49,6 +49,29 @@ def cancel_shipment(
             raise ShipmentStateError
         if shipment.version != payload.expected_version:
             raise ShipmentConflictError
+        from app.modules.pricing.models import PricingDocument, PricingItem
+
+        active_pricing = session.scalar(
+            select(PricingItem.id)
+            .join(
+                PricingDocument,
+                (PricingDocument.id == PricingItem.pricing_document_id)
+                & (PricingDocument.organization_id == PricingItem.organization_id),
+            )
+            .where(
+                PricingItem.organization_id == scope.organization_id,
+                PricingItem.source_shipment_item_id.in_(
+                    select(ShipmentItem.id).where(
+                        ShipmentItem.organization_id == scope.organization_id,
+                        ShipmentItem.shipment_id == shipment.id,
+                    )
+                ),
+                PricingDocument.status != "cancelled",
+            )
+            .limit(1)
+        )
+        if active_pricing is not None:
+            raise ShipmentStateError
         items = session.scalars(
             select(ShipmentItem)
             .where(

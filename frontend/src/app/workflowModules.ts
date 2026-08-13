@@ -66,7 +66,9 @@ export const workflowModules = [
     id: 'pricing', path: '/pricing', icon: '價', label: '計價管理', phase: 'Phase 7',
     description: '由出貨建立唯一基礎計價，並提供額外明細與歷史價格建議。',
     responsibilities: ['待計價清單', '防止同一出貨重複計價', '價格歷史與來源追溯'],
-    input: '已確認出貨', output: '待請款計價項目', requirementIds: ['PRICE-001', 'PRICE-002', 'PRICE-004'],
+    input: '已確認出貨', output: '待請款計價項目', requirementIds: [
+      'PRICE-001', 'PRICE-002', 'PRICE-003', 'PRICE-004', 'PRICE-005',
+    ],
   },
   {
     id: 'statements', path: '/statements', icon: '請', label: '請款／對帳', phase: 'Phase 8',

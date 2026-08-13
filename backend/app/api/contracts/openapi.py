@@ -39,8 +39,20 @@ API_TAGS = [
         "description": "目前公司的基本資料、帳務預設與固定文件政策。",
     },
     {
+        "name": "pricing",
+        "description": "目前公司的出貨計價、額外明細與價格記憶。",
+    },
+    {
+        "name": "production",
+        "description": "目前公司的製程、最終完工與庫存流水。",
+    },
+    {
         "name": "quotations",
         "description": "目前公司的報價建檔、確認與查詢。",
+    },
+    {
+        "name": "shipments",
+        "description": "目前公司的部分、多次、備品與取消出貨。",
     },
     {
         "name": "work-orders",

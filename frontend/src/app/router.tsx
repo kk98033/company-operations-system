@@ -18,6 +18,8 @@ import { MasterDataPage } from '../pages/master-data/MasterDataPage'
 import { InventoryPage } from '../pages/inventory/InventoryPage'
 import { ProductionDetailPage } from '../pages/production/ProductionDetailPage'
 import { ProductionListPage } from '../pages/production/ProductionListPage'
+import { PricingDetailPage } from '../pages/pricing/PricingDetailPage'
+import { PricingListPage } from '../pages/pricing/PricingListPage'
 import { QuotationEditPage, QuotationNewPage } from '../pages/quotations/QuotationEditorPage'
 import { QuotationListPage } from '../pages/quotations/QuotationListPage'
 import { QuotationPrintPage } from '../pages/quotations/QuotationPrintPage'
@@ -114,6 +116,8 @@ const workflowRoutes = workflowModules.map((module) => createRoute({
       ? InventoryPage
     : module.id === 'shipments'
       ? ShipmentListPage
+    : module.id === 'pricing'
+      ? PricingListPage
     : () => <ModulePrototypePage module={module} />,
 }))
 
@@ -165,6 +169,12 @@ const shipmentPrintRoute = createRoute({
   component: ShipmentPrintPage,
 })
 
+const pricingDetailRoute = createRoute({
+  getParentRoute: () => authenticatedRoute,
+  path: '/pricing/$pricingId',
+  component: PricingDetailPage,
+})
+
 const customerNewRoute = createRoute({
   getParentRoute: () => authenticatedRoute,
   path: '/customers/new',
@@ -213,6 +223,7 @@ const routeTree = rootRoute.addChildren([
     shipmentNewRoute,
     shipmentDetailRoute,
     shipmentPrintRoute,
+    pricingDetailRoute,
     auditLogsRoute,
     companyProfileRoute,
     companyDefaultsRoute,
