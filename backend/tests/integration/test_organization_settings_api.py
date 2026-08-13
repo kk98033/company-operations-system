@@ -82,7 +82,7 @@ def test_settings_defaults_and_fixed_company_policies(identity_engine: Engine) -
         "tax_rate_percent": None,
         "rounding_scope": None,
         "rounding_decimal_places": None,
-        "calculation_status": "pending_phase_8_uat",
+        "calculation_status": "active_company_uat_pending",
     }
     assert [policy["format"] for policy in body["document_numbering"]] == [
         "QUO-YYYYMMDD-SS",

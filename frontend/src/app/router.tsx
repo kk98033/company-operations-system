@@ -20,6 +20,10 @@ import { ProductionDetailPage } from '../pages/production/ProductionDetailPage'
 import { ProductionListPage } from '../pages/production/ProductionListPage'
 import { PricingDetailPage } from '../pages/pricing/PricingDetailPage'
 import { PricingListPage } from '../pages/pricing/PricingListPage'
+import { ReceiptListPage } from '../pages/billing/ReceiptListPage'
+import { StatementDetailPage } from '../pages/billing/StatementDetailPage'
+import { StatementListPage } from '../pages/billing/StatementListPage'
+import { StatementPrintPage } from '../pages/billing/StatementPrintPage'
 import { QuotationEditPage, QuotationNewPage } from '../pages/quotations/QuotationEditorPage'
 import { QuotationListPage } from '../pages/quotations/QuotationListPage'
 import { QuotationPrintPage } from '../pages/quotations/QuotationPrintPage'
@@ -118,6 +122,10 @@ const workflowRoutes = workflowModules.map((module) => createRoute({
       ? ShipmentListPage
     : module.id === 'pricing'
       ? PricingListPage
+    : module.id === 'statements'
+      ? StatementListPage
+    : module.id === 'receipts'
+      ? ReceiptListPage
     : () => <ModulePrototypePage module={module} />,
 }))
 
@@ -175,6 +183,9 @@ const pricingDetailRoute = createRoute({
   component: PricingDetailPage,
 })
 
+const statementDetailRoute = createRoute({ getParentRoute: () => authenticatedRoute, path: '/statements/$statementId', component: StatementDetailPage })
+const statementPrintRoute = createRoute({ getParentRoute: () => authenticatedRoute, path: '/statements/$statementId/print', component: StatementPrintPage })
+
 const customerNewRoute = createRoute({
   getParentRoute: () => authenticatedRoute,
   path: '/customers/new',
@@ -224,6 +235,8 @@ const routeTree = rootRoute.addChildren([
     shipmentDetailRoute,
     shipmentPrintRoute,
     pricingDetailRoute,
+    statementDetailRoute,
+    statementPrintRoute,
     auditLogsRoute,
     companyProfileRoute,
     companyDefaultsRoute,

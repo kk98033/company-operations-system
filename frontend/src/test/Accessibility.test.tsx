@@ -158,7 +158,7 @@ describe('自動無障礙基線', () => {
       ],
       quotation_print_layout_version: 'gmail-a4-landscape-v1',
       statement_tax: {
-        calculation_status: 'pending_phase_8_uat', enabled: false,
+        calculation_status: 'active_company_uat_pending', enabled: false,
         rounding_decimal_places: null, rounding_scope: null, tax_rate_percent: null,
       },
       updated_at: '2026-08-13T08:00:00Z',

@@ -81,7 +81,7 @@ def _settings_response(
             tax_rate_percent=settings.statement_tax_rate_percent,
             rounding_scope=settings.statement_rounding_scope,
             rounding_decimal_places=settings.statement_rounding_decimal_places,
-            calculation_status="pending_phase_8_uat",
+            calculation_status="active_company_uat_pending",
         ),
         document_number_policy_version=settings.document_number_policy_version,
         document_numbering=[

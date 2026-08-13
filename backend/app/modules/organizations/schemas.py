@@ -67,7 +67,7 @@ class StatementTaxDefaults(BaseModel):
     tax_rate_percent: Decimal | None
     rounding_scope: Literal["per_line", "grand_total"] | None
     rounding_decimal_places: int | None
-    calculation_status: Literal["pending_phase_8_uat"]
+    calculation_status: Literal["active_company_uat_pending"]
 
 
 class DocumentNumberPolicyResponse(BaseModel):

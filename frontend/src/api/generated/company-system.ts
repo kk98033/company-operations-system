@@ -5,6 +5,23 @@
  * 公司內部報價、工單、生產、出貨與帳務系統 API。
  * OpenAPI spec version: 0.1.0
  */
+export interface AgingSummary {
+  /** @pattern ^(?!^[-+.]*$)[+-]?0*\d*\.?\d*$ */
+  current_amount: string;
+  customer_id: string;
+  customer_name: string;
+  /** @pattern ^(?!^[-+.]*$)[+-]?0*\d*\.?\d*$ */
+  days_1_30: string;
+  /** @pattern ^(?!^[-+.]*$)[+-]?0*\d*\.?\d*$ */
+  days_31_60: string;
+  /** @pattern ^(?!^[-+.]*$)[+-]?0*\d*\.?\d*$ */
+  days_61_90: string;
+  /** @pattern ^(?!^[-+.]*$)[+-]?0*\d*\.?\d*$ */
+  days_over_90: string;
+  /** @pattern ^(?!^[-+.]*$)[+-]?0*\d*\.?\d*$ */
+  total_outstanding: string;
+}
+
 export interface AttachmentResponse {
   created_at: string;
   filename: string;
@@ -773,7 +790,7 @@ export const StatementTaxDefaultsRoundingScope = {
 } as const;
 
 export interface StatementTaxDefaults {
-  calculation_status: 'pending_phase_8_uat';
+  calculation_status: 'active_company_uat_pending';
   enabled: boolean;
   rounding_decimal_places: number | null;
   rounding_scope: StatementTaxDefaultsRoundingScope;
@@ -853,6 +870,23 @@ export interface PendingPricingItem {
 export interface PendingPricingListResponse {
   items: PendingPricingItem[];
   meta: ListResponseMetaPendingPricingFilters;
+}
+
+export interface PendingStatementItem {
+  /** @pattern ^(?!^[-+.]*$)[+-]?0*\d*\.?\d*$ */
+  amount: string;
+  content: string;
+  customer_id: string;
+  customer_name: string;
+  pricing_date: string;
+  pricing_document_id: string;
+  pricing_document_number: string;
+  pricing_item_id: string;
+}
+
+export interface PendingStatementListResponse {
+  items: PendingStatementItem[];
+  total_items: number;
 }
 
 export interface PriceSuggestion {
@@ -1315,6 +1349,69 @@ export interface ReadyResponse {
   status: 'ready';
 }
 
+export interface ReceiptAllocationInput {
+  amount: number | string;
+  statement_id: string;
+}
+
+export interface ReceiptAllocationResponse {
+  /** @pattern ^(?!^[-+.]*$)[+-]?0*\d*\.?\d*$ */
+  amount: string;
+  statement_id: string;
+  statement_number: string;
+}
+
+export interface ReceiptCreate {
+  /**
+     * @minItems 1
+     * @maxItems 500
+     */
+  allocations: ReceiptAllocationInput[];
+  amount: number | string;
+  customer_id: string;
+  idempotency_key: string;
+  notes?: string | null;
+  /**
+     * @minLength 1
+     * @maxLength 64
+     */
+  payment_method: string;
+  receipt_date: string;
+  reference_number?: string | null;
+}
+
+export interface ReceiptResponse {
+  allocations: ReceiptAllocationResponse[];
+  /** @pattern ^(?!^[-+.]*$)[+-]?0*\d*\.?\d*$ */
+  amount: string;
+  confirmed_at: string;
+  customer_id: string;
+  customer_name: string;
+  document_number: string;
+  id: string;
+  notes: string | null;
+  payment_method: string;
+  receipt_date: string;
+  reference_number: string | null;
+  reversal_reason: string | null;
+  reversed_at: string | null;
+  status: string;
+}
+
+export interface ReceiptListResponse {
+  items: ReceiptResponse[];
+  total_items: number;
+}
+
+export interface ReceiptReverse {
+  idempotency_key: string;
+  /**
+     * @minLength 1
+     * @maxLength 1000
+     */
+  reason: string;
+}
+
 export interface ReversalCreate {
   idempotency_key: string;
   /**
@@ -1431,6 +1528,128 @@ export interface ShipmentResponse {
   updated_at: string;
   version: number;
   warnings?: string[];
+}
+
+export interface StatementCancel {
+  /** @exclusiveMinimum 0 */
+  expected_version: number;
+  idempotency_key: string;
+  /**
+     * @minLength 1
+     * @maxLength 1000
+     */
+  reason: string;
+}
+
+export interface StatementCommand {
+  /** @exclusiveMinimum 0 */
+  expected_version: number;
+  idempotency_key: string;
+}
+
+export interface StatementCreate {
+  idempotency_key: string;
+  notes?: string | null;
+  period_from: string;
+  period_to: string;
+  /**
+     * @minItems 1
+     * @maxItems 500
+     */
+  pricing_item_ids: string[];
+  rounding_decimal_places?: number | null;
+  rounding_scope?: string | null;
+  statement_date: string;
+  tax_enabled?: boolean;
+  tax_rate_percent?: number | string | null;
+}
+
+export type StatementItemResponseSourceSnapshot = { [key: string]: unknown };
+
+export interface StatementItemResponse {
+  /** @pattern ^(?!^[-+.]*$)[+-]?0*\d*\.?\d*$ */
+  amount: string;
+  content: string;
+  /** @pattern ^(?!^[-+.]*$)[+-]?0*\d*\.?\d*$ */
+  die_fee: string;
+  id: string;
+  line_no: number;
+  /** @pattern ^(?!^[-+.]*$)[+-]?0*\d*\.?\d*$ */
+  plate_fee: string;
+  /** @pattern ^(?!^[-+.]*$)[+-]?0*\d*\.?\d*$ */
+  quantity: string;
+  source_pricing_document_id: string;
+  source_pricing_item_id: string;
+  source_snapshot: StatementItemResponseSourceSnapshot;
+  /** @pattern ^(?!^[-+.]*$)[+-]?0*\d*\.?\d*$ */
+  unit_price: string;
+}
+
+export type StatementStatus = typeof StatementStatus[keyof typeof StatementStatus];
+
+
+export const StatementStatus = {
+  draft: 'draft',
+  issued: 'issued',
+  partially_paid: 'partially_paid',
+  paid: 'paid',
+  cancelled: 'cancelled',
+} as const;
+
+export interface StatementSummary {
+  customer_id: string;
+  customer_name: string;
+  document_number: string;
+  /** @pattern ^(?!^[-+.]*$)[+-]?0*\d*\.?\d*$ */
+  grand_total: string;
+  id: string;
+  /** @pattern ^(?!^[-+.]*$)[+-]?0*\d*\.?\d*$ */
+  outstanding_amount: string;
+  /** @pattern ^(?!^[-+.]*$)[+-]?0*\d*\.?\d*$ */
+  paid_amount: string;
+  statement_date: string;
+  status: StatementStatus;
+}
+
+export interface StatementListResponse {
+  items: StatementSummary[];
+  total_items: number;
+}
+
+export interface StatementResponse {
+  cancel_reason: string | null;
+  cancelled_at: string | null;
+  created_at: string;
+  customer_id: string;
+  customer_name: string;
+  document_number: string;
+  /** @pattern ^(?!^[-+.]*$)[+-]?0*\d*\.?\d*$ */
+  grand_total: string;
+  id: string;
+  issued_at: string | null;
+  items: StatementItemResponse[];
+  notes: string | null;
+  /** @pattern ^(?!^[-+.]*$)[+-]?0*\d*\.?\d*$ */
+  outstanding_amount: string;
+  /** @pattern ^(?!^[-+.]*$)[+-]?0*\d*\.?\d*$ */
+  paid_amount: string;
+  period_from: string;
+  period_to: string;
+  /** @pattern ^(?!^[-+.]*$)[+-]?0*\d*\.?\d*$ */
+  rounding_adjustment: string;
+  rounding_decimal_places: number | null;
+  rounding_scope: string | null;
+  statement_date: string;
+  status: StatementStatus;
+  /** @pattern ^(?!^[-+.]*$)[+-]?0*\d*\.?\d*$ */
+  subtotal: string;
+  /** @pattern ^(?!^[-+.]*$)[+-]?0*\d*\.?\d*$ */
+  subtotal_before_rounding: string;
+  /** @pattern ^(?!^[-+.]*$)[+-]?0*\d*\.?\d*$ */
+  tax_amount: string;
+  tax_enabled: boolean;
+  tax_rate_percent: string | null;
+  version: number;
 }
 
 export type VendorCategory = typeof VendorCategory[keyof typeof VendorCategory];
@@ -1893,6 +2112,14 @@ page_size?: number;
 keyword?: string | null;
 };
 
+export type ReceiptListParams = {
+keyword?: string | null;
+};
+
+export type ReceivableAgingListParams = {
+as_of: string;
+};
+
 export type ShipmentListParams = {
 status?: ShipmentStatus | null;
 /**
@@ -1920,6 +2147,15 @@ page?: number;
  * @maximum 100
  */
 page_size?: number;
+keyword?: string | null;
+};
+
+export type StatementListParams = {
+keyword?: string | null;
+status?: string | null;
+};
+
+export type StatementPendingItemListParams = {
 keyword?: string | null;
 };
 
@@ -7399,6 +7635,471 @@ export const quotationVoid = async (quotationId: string,
 
 
 
+export type receiptListResponse200 = {
+  data: ReceiptListResponse
+  status: 200
+}
+
+export type receiptListResponse400 = {
+  data: ErrorResponse
+  status: 400
+}
+
+export type receiptListResponse401 = {
+  data: ErrorResponse
+  status: 401
+}
+
+export type receiptListResponse403 = {
+  data: ErrorResponse
+  status: 403
+}
+
+export type receiptListResponse404 = {
+  data: ErrorResponse
+  status: 404
+}
+
+export type receiptListResponse405 = {
+  data: ErrorResponse
+  status: 405
+}
+
+export type receiptListResponse409 = {
+  data: ErrorResponse
+  status: 409
+}
+
+export type receiptListResponse422 = {
+  data: ErrorResponse
+  status: 422
+}
+
+export type receiptListResponse429 = {
+  data: ErrorResponse
+  status: 429
+}
+
+export type receiptListResponse500 = {
+  data: ErrorResponse
+  status: 500
+}
+
+export type receiptListResponseSuccess = (receiptListResponse200) & {
+  headers: Headers;
+};
+export type receiptListResponseError = (receiptListResponse400 | receiptListResponse401 | receiptListResponse403 | receiptListResponse404 | receiptListResponse405 | receiptListResponse409 | receiptListResponse422 | receiptListResponse429 | receiptListResponse500) & {
+  headers: Headers;
+};
+
+export type receiptListResponse = (receiptListResponseSuccess | receiptListResponseError)
+
+export const getReceiptListUrl = (params?: ReceiptListParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `${import.meta.env.VITE_API_ORIGIN || ''}/api/v1/receipts?${stringifiedParams}` : `${import.meta.env.VITE_API_ORIGIN || ''}/api/v1/receipts`
+}
+
+/**
+ * @summary Receipts
+ */
+export const receiptList = async (params?: ReceiptListParams, options?: RequestInit): Promise<receiptListResponse> => {
+
+  const res = await fetch(getReceiptListUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+)
+
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+
+  const data: receiptListResponse['data'] = body ? JSON.parse(body) : {}
+  return { data, status: res.status, headers: res.headers } as receiptListResponse
+}
+
+
+
+export type receiptCreateResponse201 = {
+  data: ReceiptResponse
+  status: 201
+}
+
+export type receiptCreateResponse400 = {
+  data: ErrorResponse
+  status: 400
+}
+
+export type receiptCreateResponse401 = {
+  data: ErrorResponse
+  status: 401
+}
+
+export type receiptCreateResponse403 = {
+  data: ErrorResponse
+  status: 403
+}
+
+export type receiptCreateResponse404 = {
+  data: ErrorResponse
+  status: 404
+}
+
+export type receiptCreateResponse405 = {
+  data: ErrorResponse
+  status: 405
+}
+
+export type receiptCreateResponse409 = {
+  data: ErrorResponse
+  status: 409
+}
+
+export type receiptCreateResponse422 = {
+  data: ErrorResponse
+  status: 422
+}
+
+export type receiptCreateResponse429 = {
+  data: ErrorResponse
+  status: 429
+}
+
+export type receiptCreateResponse500 = {
+  data: ErrorResponse
+  status: 500
+}
+
+export type receiptCreateResponseSuccess = (receiptCreateResponse201) & {
+  headers: Headers;
+};
+export type receiptCreateResponseError = (receiptCreateResponse400 | receiptCreateResponse401 | receiptCreateResponse403 | receiptCreateResponse404 | receiptCreateResponse405 | receiptCreateResponse409 | receiptCreateResponse422 | receiptCreateResponse429 | receiptCreateResponse500) & {
+  headers: Headers;
+};
+
+export type receiptCreateResponse = (receiptCreateResponseSuccess | receiptCreateResponseError)
+
+export const getReceiptCreateUrl = () => {
+
+
+
+
+  return `${import.meta.env.VITE_API_ORIGIN || ''}/api/v1/receipts`
+}
+
+/**
+ * @summary Receipt Create
+ */
+export const receiptCreate = async (receiptCreateBody: ReceiptCreate, options?: RequestInit): Promise<receiptCreateResponse> => {
+
+  const res = await fetch(getReceiptCreateUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(receiptCreateBody)
+  }
+)
+
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+
+  const data: receiptCreateResponse['data'] = body ? JSON.parse(body) : {}
+  return { data, status: res.status, headers: res.headers } as receiptCreateResponse
+}
+
+
+
+export type receiptGetResponse200 = {
+  data: ReceiptResponse
+  status: 200
+}
+
+export type receiptGetResponse400 = {
+  data: ErrorResponse
+  status: 400
+}
+
+export type receiptGetResponse401 = {
+  data: ErrorResponse
+  status: 401
+}
+
+export type receiptGetResponse403 = {
+  data: ErrorResponse
+  status: 403
+}
+
+export type receiptGetResponse404 = {
+  data: ErrorResponse
+  status: 404
+}
+
+export type receiptGetResponse405 = {
+  data: ErrorResponse
+  status: 405
+}
+
+export type receiptGetResponse409 = {
+  data: ErrorResponse
+  status: 409
+}
+
+export type receiptGetResponse422 = {
+  data: ErrorResponse
+  status: 422
+}
+
+export type receiptGetResponse429 = {
+  data: ErrorResponse
+  status: 429
+}
+
+export type receiptGetResponse500 = {
+  data: ErrorResponse
+  status: 500
+}
+
+export type receiptGetResponseSuccess = (receiptGetResponse200) & {
+  headers: Headers;
+};
+export type receiptGetResponseError = (receiptGetResponse400 | receiptGetResponse401 | receiptGetResponse403 | receiptGetResponse404 | receiptGetResponse405 | receiptGetResponse409 | receiptGetResponse422 | receiptGetResponse429 | receiptGetResponse500) & {
+  headers: Headers;
+};
+
+export type receiptGetResponse = (receiptGetResponseSuccess | receiptGetResponseError)
+
+export const getReceiptGetUrl = (receiptId: string,) => {
+
+
+
+
+  return `${import.meta.env.VITE_API_ORIGIN || ''}/api/v1/receipts/${receiptId}`
+}
+
+/**
+ * @summary Receipt Get
+ */
+export const receiptGet = async (receiptId: string, options?: RequestInit): Promise<receiptGetResponse> => {
+
+  const res = await fetch(getReceiptGetUrl(receiptId),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+)
+
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+
+  const data: receiptGetResponse['data'] = body ? JSON.parse(body) : {}
+  return { data, status: res.status, headers: res.headers } as receiptGetResponse
+}
+
+
+
+export type receiptReverseResponse200 = {
+  data: ReceiptResponse
+  status: 200
+}
+
+export type receiptReverseResponse400 = {
+  data: ErrorResponse
+  status: 400
+}
+
+export type receiptReverseResponse401 = {
+  data: ErrorResponse
+  status: 401
+}
+
+export type receiptReverseResponse403 = {
+  data: ErrorResponse
+  status: 403
+}
+
+export type receiptReverseResponse404 = {
+  data: ErrorResponse
+  status: 404
+}
+
+export type receiptReverseResponse405 = {
+  data: ErrorResponse
+  status: 405
+}
+
+export type receiptReverseResponse409 = {
+  data: ErrorResponse
+  status: 409
+}
+
+export type receiptReverseResponse422 = {
+  data: ErrorResponse
+  status: 422
+}
+
+export type receiptReverseResponse429 = {
+  data: ErrorResponse
+  status: 429
+}
+
+export type receiptReverseResponse500 = {
+  data: ErrorResponse
+  status: 500
+}
+
+export type receiptReverseResponseSuccess = (receiptReverseResponse200) & {
+  headers: Headers;
+};
+export type receiptReverseResponseError = (receiptReverseResponse400 | receiptReverseResponse401 | receiptReverseResponse403 | receiptReverseResponse404 | receiptReverseResponse405 | receiptReverseResponse409 | receiptReverseResponse422 | receiptReverseResponse429 | receiptReverseResponse500) & {
+  headers: Headers;
+};
+
+export type receiptReverseResponse = (receiptReverseResponseSuccess | receiptReverseResponseError)
+
+export const getReceiptReverseUrl = (receiptId: string,) => {
+
+
+
+
+  return `${import.meta.env.VITE_API_ORIGIN || ''}/api/v1/receipts/${receiptId}/reverse`
+}
+
+/**
+ * @summary Reverse
+ */
+export const receiptReverse = async (receiptId: string,
+    receiptReverseBody: ReceiptReverse, options?: RequestInit): Promise<receiptReverseResponse> => {
+
+  const res = await fetch(getReceiptReverseUrl(receiptId),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(receiptReverseBody)
+  }
+)
+
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+
+  const data: receiptReverseResponse['data'] = body ? JSON.parse(body) : {}
+  return { data, status: res.status, headers: res.headers } as receiptReverseResponse
+}
+
+
+
+export type receivableAgingListResponse200 = {
+  data: AgingSummary[]
+  status: 200
+}
+
+export type receivableAgingListResponse400 = {
+  data: ErrorResponse
+  status: 400
+}
+
+export type receivableAgingListResponse401 = {
+  data: ErrorResponse
+  status: 401
+}
+
+export type receivableAgingListResponse403 = {
+  data: ErrorResponse
+  status: 403
+}
+
+export type receivableAgingListResponse404 = {
+  data: ErrorResponse
+  status: 404
+}
+
+export type receivableAgingListResponse405 = {
+  data: ErrorResponse
+  status: 405
+}
+
+export type receivableAgingListResponse409 = {
+  data: ErrorResponse
+  status: 409
+}
+
+export type receivableAgingListResponse422 = {
+  data: ErrorResponse
+  status: 422
+}
+
+export type receivableAgingListResponse429 = {
+  data: ErrorResponse
+  status: 429
+}
+
+export type receivableAgingListResponse500 = {
+  data: ErrorResponse
+  status: 500
+}
+
+export type receivableAgingListResponseSuccess = (receivableAgingListResponse200) & {
+  headers: Headers;
+};
+export type receivableAgingListResponseError = (receivableAgingListResponse400 | receivableAgingListResponse401 | receivableAgingListResponse403 | receivableAgingListResponse404 | receivableAgingListResponse405 | receivableAgingListResponse409 | receivableAgingListResponse422 | receivableAgingListResponse429 | receivableAgingListResponse500) & {
+  headers: Headers;
+};
+
+export type receivableAgingListResponse = (receivableAgingListResponseSuccess | receivableAgingListResponseError)
+
+export const getReceivableAgingListUrl = (params: ReceivableAgingListParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `${import.meta.env.VITE_API_ORIGIN || ''}/api/v1/receivables/aging?${stringifiedParams}` : `${import.meta.env.VITE_API_ORIGIN || ''}/api/v1/receivables/aging`
+}
+
+/**
+ * @summary Aging
+ */
+export const receivableAgingList = async (params: ReceivableAgingListParams, options?: RequestInit): Promise<receivableAgingListResponse> => {
+
+  const res = await fetch(getReceivableAgingListUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+)
+
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+
+  const data: receivableAgingListResponse['data'] = body ? JSON.parse(body) : {}
+  return { data, status: res.status, headers: res.headers } as receivableAgingListResponse
+}
+
+
+
 export type shipmentListResponse200 = {
   data: ShipmentListResponse
   status: 200
@@ -8042,6 +8743,562 @@ export const shipmentConfirm = async (shipmentId: string,
 
   const data: shipmentConfirmResponse['data'] = body ? JSON.parse(body) : {}
   return { data, status: res.status, headers: res.headers } as shipmentConfirmResponse
+}
+
+
+
+export type statementListResponse200 = {
+  data: StatementListResponse
+  status: 200
+}
+
+export type statementListResponse400 = {
+  data: ErrorResponse
+  status: 400
+}
+
+export type statementListResponse401 = {
+  data: ErrorResponse
+  status: 401
+}
+
+export type statementListResponse403 = {
+  data: ErrorResponse
+  status: 403
+}
+
+export type statementListResponse404 = {
+  data: ErrorResponse
+  status: 404
+}
+
+export type statementListResponse405 = {
+  data: ErrorResponse
+  status: 405
+}
+
+export type statementListResponse409 = {
+  data: ErrorResponse
+  status: 409
+}
+
+export type statementListResponse422 = {
+  data: ErrorResponse
+  status: 422
+}
+
+export type statementListResponse429 = {
+  data: ErrorResponse
+  status: 429
+}
+
+export type statementListResponse500 = {
+  data: ErrorResponse
+  status: 500
+}
+
+export type statementListResponseSuccess = (statementListResponse200) & {
+  headers: Headers;
+};
+export type statementListResponseError = (statementListResponse400 | statementListResponse401 | statementListResponse403 | statementListResponse404 | statementListResponse405 | statementListResponse409 | statementListResponse422 | statementListResponse429 | statementListResponse500) & {
+  headers: Headers;
+};
+
+export type statementListResponse = (statementListResponseSuccess | statementListResponseError)
+
+export const getStatementListUrl = (params?: StatementListParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `${import.meta.env.VITE_API_ORIGIN || ''}/api/v1/statements?${stringifiedParams}` : `${import.meta.env.VITE_API_ORIGIN || ''}/api/v1/statements`
+}
+
+/**
+ * @summary Statements
+ */
+export const statementList = async (params?: StatementListParams, options?: RequestInit): Promise<statementListResponse> => {
+
+  const res = await fetch(getStatementListUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+)
+
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+
+  const data: statementListResponse['data'] = body ? JSON.parse(body) : {}
+  return { data, status: res.status, headers: res.headers } as statementListResponse
+}
+
+
+
+export type statementCreateResponse201 = {
+  data: StatementResponse
+  status: 201
+}
+
+export type statementCreateResponse400 = {
+  data: ErrorResponse
+  status: 400
+}
+
+export type statementCreateResponse401 = {
+  data: ErrorResponse
+  status: 401
+}
+
+export type statementCreateResponse403 = {
+  data: ErrorResponse
+  status: 403
+}
+
+export type statementCreateResponse404 = {
+  data: ErrorResponse
+  status: 404
+}
+
+export type statementCreateResponse405 = {
+  data: ErrorResponse
+  status: 405
+}
+
+export type statementCreateResponse409 = {
+  data: ErrorResponse
+  status: 409
+}
+
+export type statementCreateResponse422 = {
+  data: ErrorResponse
+  status: 422
+}
+
+export type statementCreateResponse429 = {
+  data: ErrorResponse
+  status: 429
+}
+
+export type statementCreateResponse500 = {
+  data: ErrorResponse
+  status: 500
+}
+
+export type statementCreateResponseSuccess = (statementCreateResponse201) & {
+  headers: Headers;
+};
+export type statementCreateResponseError = (statementCreateResponse400 | statementCreateResponse401 | statementCreateResponse403 | statementCreateResponse404 | statementCreateResponse405 | statementCreateResponse409 | statementCreateResponse422 | statementCreateResponse429 | statementCreateResponse500) & {
+  headers: Headers;
+};
+
+export type statementCreateResponse = (statementCreateResponseSuccess | statementCreateResponseError)
+
+export const getStatementCreateUrl = () => {
+
+
+
+
+  return `${import.meta.env.VITE_API_ORIGIN || ''}/api/v1/statements`
+}
+
+/**
+ * @summary Create
+ */
+export const statementCreate = async (statementCreateBody: StatementCreate, options?: RequestInit): Promise<statementCreateResponse> => {
+
+  const res = await fetch(getStatementCreateUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(statementCreateBody)
+  }
+)
+
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+
+  const data: statementCreateResponse['data'] = body ? JSON.parse(body) : {}
+  return { data, status: res.status, headers: res.headers } as statementCreateResponse
+}
+
+
+
+export type statementPendingItemListResponse200 = {
+  data: PendingStatementListResponse
+  status: 200
+}
+
+export type statementPendingItemListResponse400 = {
+  data: ErrorResponse
+  status: 400
+}
+
+export type statementPendingItemListResponse401 = {
+  data: ErrorResponse
+  status: 401
+}
+
+export type statementPendingItemListResponse403 = {
+  data: ErrorResponse
+  status: 403
+}
+
+export type statementPendingItemListResponse404 = {
+  data: ErrorResponse
+  status: 404
+}
+
+export type statementPendingItemListResponse405 = {
+  data: ErrorResponse
+  status: 405
+}
+
+export type statementPendingItemListResponse409 = {
+  data: ErrorResponse
+  status: 409
+}
+
+export type statementPendingItemListResponse422 = {
+  data: ErrorResponse
+  status: 422
+}
+
+export type statementPendingItemListResponse429 = {
+  data: ErrorResponse
+  status: 429
+}
+
+export type statementPendingItemListResponse500 = {
+  data: ErrorResponse
+  status: 500
+}
+
+export type statementPendingItemListResponseSuccess = (statementPendingItemListResponse200) & {
+  headers: Headers;
+};
+export type statementPendingItemListResponseError = (statementPendingItemListResponse400 | statementPendingItemListResponse401 | statementPendingItemListResponse403 | statementPendingItemListResponse404 | statementPendingItemListResponse405 | statementPendingItemListResponse409 | statementPendingItemListResponse422 | statementPendingItemListResponse429 | statementPendingItemListResponse500) & {
+  headers: Headers;
+};
+
+export type statementPendingItemListResponse = (statementPendingItemListResponseSuccess | statementPendingItemListResponseError)
+
+export const getStatementPendingItemListUrl = (params?: StatementPendingItemListParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `${import.meta.env.VITE_API_ORIGIN || ''}/api/v1/statements/pending-items?${stringifiedParams}` : `${import.meta.env.VITE_API_ORIGIN || ''}/api/v1/statements/pending-items`
+}
+
+/**
+ * @summary Pending
+ */
+export const statementPendingItemList = async (params?: StatementPendingItemListParams, options?: RequestInit): Promise<statementPendingItemListResponse> => {
+
+  const res = await fetch(getStatementPendingItemListUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+)
+
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+
+  const data: statementPendingItemListResponse['data'] = body ? JSON.parse(body) : {}
+  return { data, status: res.status, headers: res.headers } as statementPendingItemListResponse
+}
+
+
+
+export type statementGetResponse200 = {
+  data: StatementResponse
+  status: 200
+}
+
+export type statementGetResponse400 = {
+  data: ErrorResponse
+  status: 400
+}
+
+export type statementGetResponse401 = {
+  data: ErrorResponse
+  status: 401
+}
+
+export type statementGetResponse403 = {
+  data: ErrorResponse
+  status: 403
+}
+
+export type statementGetResponse404 = {
+  data: ErrorResponse
+  status: 404
+}
+
+export type statementGetResponse405 = {
+  data: ErrorResponse
+  status: 405
+}
+
+export type statementGetResponse409 = {
+  data: ErrorResponse
+  status: 409
+}
+
+export type statementGetResponse422 = {
+  data: ErrorResponse
+  status: 422
+}
+
+export type statementGetResponse429 = {
+  data: ErrorResponse
+  status: 429
+}
+
+export type statementGetResponse500 = {
+  data: ErrorResponse
+  status: 500
+}
+
+export type statementGetResponseSuccess = (statementGetResponse200) & {
+  headers: Headers;
+};
+export type statementGetResponseError = (statementGetResponse400 | statementGetResponse401 | statementGetResponse403 | statementGetResponse404 | statementGetResponse405 | statementGetResponse409 | statementGetResponse422 | statementGetResponse429 | statementGetResponse500) & {
+  headers: Headers;
+};
+
+export type statementGetResponse = (statementGetResponseSuccess | statementGetResponseError)
+
+export const getStatementGetUrl = (statementId: string,) => {
+
+
+
+
+  return `${import.meta.env.VITE_API_ORIGIN || ''}/api/v1/statements/${statementId}`
+}
+
+/**
+ * @summary Detail
+ */
+export const statementGet = async (statementId: string, options?: RequestInit): Promise<statementGetResponse> => {
+
+  const res = await fetch(getStatementGetUrl(statementId),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+)
+
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+
+  const data: statementGetResponse['data'] = body ? JSON.parse(body) : {}
+  return { data, status: res.status, headers: res.headers } as statementGetResponse
+}
+
+
+
+export type statementCancelResponse200 = {
+  data: StatementResponse
+  status: 200
+}
+
+export type statementCancelResponse400 = {
+  data: ErrorResponse
+  status: 400
+}
+
+export type statementCancelResponse401 = {
+  data: ErrorResponse
+  status: 401
+}
+
+export type statementCancelResponse403 = {
+  data: ErrorResponse
+  status: 403
+}
+
+export type statementCancelResponse404 = {
+  data: ErrorResponse
+  status: 404
+}
+
+export type statementCancelResponse405 = {
+  data: ErrorResponse
+  status: 405
+}
+
+export type statementCancelResponse409 = {
+  data: ErrorResponse
+  status: 409
+}
+
+export type statementCancelResponse422 = {
+  data: ErrorResponse
+  status: 422
+}
+
+export type statementCancelResponse429 = {
+  data: ErrorResponse
+  status: 429
+}
+
+export type statementCancelResponse500 = {
+  data: ErrorResponse
+  status: 500
+}
+
+export type statementCancelResponseSuccess = (statementCancelResponse200) & {
+  headers: Headers;
+};
+export type statementCancelResponseError = (statementCancelResponse400 | statementCancelResponse401 | statementCancelResponse403 | statementCancelResponse404 | statementCancelResponse405 | statementCancelResponse409 | statementCancelResponse422 | statementCancelResponse429 | statementCancelResponse500) & {
+  headers: Headers;
+};
+
+export type statementCancelResponse = (statementCancelResponseSuccess | statementCancelResponseError)
+
+export const getStatementCancelUrl = (statementId: string,) => {
+
+
+
+
+  return `${import.meta.env.VITE_API_ORIGIN || ''}/api/v1/statements/${statementId}/cancel`
+}
+
+/**
+ * @summary Cancel
+ */
+export const statementCancel = async (statementId: string,
+    statementCancelBody: StatementCancel, options?: RequestInit): Promise<statementCancelResponse> => {
+
+  const res = await fetch(getStatementCancelUrl(statementId),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(statementCancelBody)
+  }
+)
+
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+
+  const data: statementCancelResponse['data'] = body ? JSON.parse(body) : {}
+  return { data, status: res.status, headers: res.headers } as statementCancelResponse
+}
+
+
+
+export type statementIssueResponse200 = {
+  data: StatementResponse
+  status: 200
+}
+
+export type statementIssueResponse400 = {
+  data: ErrorResponse
+  status: 400
+}
+
+export type statementIssueResponse401 = {
+  data: ErrorResponse
+  status: 401
+}
+
+export type statementIssueResponse403 = {
+  data: ErrorResponse
+  status: 403
+}
+
+export type statementIssueResponse404 = {
+  data: ErrorResponse
+  status: 404
+}
+
+export type statementIssueResponse405 = {
+  data: ErrorResponse
+  status: 405
+}
+
+export type statementIssueResponse409 = {
+  data: ErrorResponse
+  status: 409
+}
+
+export type statementIssueResponse422 = {
+  data: ErrorResponse
+  status: 422
+}
+
+export type statementIssueResponse429 = {
+  data: ErrorResponse
+  status: 429
+}
+
+export type statementIssueResponse500 = {
+  data: ErrorResponse
+  status: 500
+}
+
+export type statementIssueResponseSuccess = (statementIssueResponse200) & {
+  headers: Headers;
+};
+export type statementIssueResponseError = (statementIssueResponse400 | statementIssueResponse401 | statementIssueResponse403 | statementIssueResponse404 | statementIssueResponse405 | statementIssueResponse409 | statementIssueResponse422 | statementIssueResponse429 | statementIssueResponse500) & {
+  headers: Headers;
+};
+
+export type statementIssueResponse = (statementIssueResponseSuccess | statementIssueResponseError)
+
+export const getStatementIssueUrl = (statementId: string,) => {
+
+
+
+
+  return `${import.meta.env.VITE_API_ORIGIN || ''}/api/v1/statements/${statementId}/issue`
+}
+
+/**
+ * @summary Issue
+ */
+export const statementIssue = async (statementId: string,
+    statementCommand: StatementCommand, options?: RequestInit): Promise<statementIssueResponse> => {
+
+  const res = await fetch(getStatementIssueUrl(statementId),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(statementCommand)
+  }
+)
+
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+
+  const data: statementIssueResponse['data'] = body ? JSON.parse(body) : {}
+  return { data, status: res.status, headers: res.headers } as statementIssueResponse
 }
 
 

@@ -88,8 +88,8 @@ export function StatementTaxDefaultsForm({
           </Field>
         </div>
         <div className="organization-settings-warning">
-          <StatusLabel tone="warning">正式對帳功能驗收前不計算金額</StatusLabel>
-          <p>此處先保存公司偏好；計算方法與去識別金額案例經公司確認後，才會由正式對帳單功能讀取。</p>
+          <StatusLabel tone="warning">只影響新建且明確啟用計稅的對帳單</StatusLabel>
+          <p>已發行文件保留原稅率與取整快照，不會因這裡修改而回算；公司實際案例與印表機仍待 UAT。</p>
         </div>
         {errorMessage ? <p className="company-profile-message company-profile-message--error" role="alert">{errorMessage}</p> : null}
         {isSuccess ? <p className="company-profile-message" role="status">公司預設設定已存檔，並已寫入操作稽核。</p> : null}

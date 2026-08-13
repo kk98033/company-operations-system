@@ -11,6 +11,10 @@ API_DESCRIPTION = "公司內部報價、工單、生產、出貨與帳務系統 
 API_VERSION = "0.1.0"
 API_TAGS = [
     {
+        "name": "billing",
+        "description": "目前公司的對帳、請款狀態、收款分配與帳齡。",
+    },
+    {
         "name": "cases",
         "description": "目前公司的生產案件分組與報價轉工單。",
     },

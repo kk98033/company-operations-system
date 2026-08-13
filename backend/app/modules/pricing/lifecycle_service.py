@@ -160,6 +160,24 @@ def cancel_pricing(
             return pricing_response(session, document)
         if document.status != "confirmed":
             raise PricingStateError
+        from app.modules.billing.models import StatementItem
+
+        billed = session.scalar(
+            select(StatementItem.id)
+            .where(
+                StatementItem.organization_id == scope.organization_id,
+                StatementItem.source_pricing_item_id.in_(
+                    select(PricingItem.id).where(
+                        PricingItem.organization_id == scope.organization_id,
+                        PricingItem.pricing_document_id == document.id,
+                    )
+                ),
+                StatementItem.is_active.is_(True),
+            )
+            .limit(1)
+        )
+        if billed is not None:
+            raise PricingStateError
         if document.version != payload.expected_version:
             raise PricingConflictError
         now = datetime.now(UTC)

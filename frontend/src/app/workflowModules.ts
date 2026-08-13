@@ -74,7 +74,7 @@ export const workflowModules = [
     id: 'statements', path: '/statements', icon: '請', label: '請款／對帳', phase: 'Phase 8',
     description: '依客戶與期間彙整已計價項目，保存稅額、取整與文件快照。',
     responsibilities: ['待請款項目選取', '稅額與取整快照', '對帳單列印與取消'],
-    input: '已確認計價', output: '應收帳款', requirementIds: ['BILL-001', 'BILL-002', 'BILL-004'],
+    input: '已確認計價', output: '應收帳款', requirementIds: ['BILL-001', 'BILL-002', 'BILL-003', 'BILL-004'],
   },
   {
     id: 'receipts', path: '/receipts', icon: '收', label: '收款管理', phase: 'Phase 8',

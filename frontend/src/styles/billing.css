@@ -1,0 +1,18 @@
+.billing-page { min-width: 0; }
+.billing-actions { display: flex; align-items: center; justify-content: flex-end; gap: var(--space-4); flex-wrap: wrap; margin-top: var(--space-4); }
+.billing-tax-toggle { display: inline-flex; align-items: center; gap: var(--space-2); margin-right: auto; }
+.billing-summary { display: flex; align-items: center; gap: var(--space-4); flex-wrap: wrap; padding: var(--space-3); border: 1px solid var(--color-border); background: var(--color-surface-muted); }
+.billing-form-grid { display: grid; grid-template-columns: minmax(15rem, 2fr) repeat(3, minmax(8rem, 1fr)); gap: var(--space-4); align-items: end; }
+.statement-print-toolbar { display: flex; justify-content: flex-end; gap: var(--space-3); width: 210mm; margin: var(--space-4) auto; }
+.statement-print { width: 210mm; min-height: 277mm; margin: 0 auto; padding: 12mm; color: #111; background: #fff; font-family: Arial, "Noto Sans TC", sans-serif; }
+.statement-print header { border-bottom: 2px solid #111; }
+.statement-print h1, .statement-print h2 { text-align: center; margin: 0 0 3mm; }
+.statement-print dl { display: grid; grid-template-columns: 1fr 1fr; gap: 2mm 8mm; }
+.statement-print dl div { display: flex; gap: 3mm; }
+.statement-print dt { font-weight: 700; }
+.statement-print dd { margin: 0; }
+.statement-print table { width: 100%; border-collapse: collapse; margin-top: 5mm; }
+.statement-print th, .statement-print td { border: 1px solid #111; padding: 2mm; text-align: left; }
+.statement-print footer { display: flex; justify-content: flex-end; gap: 10mm; margin-top: 5mm; }
+@media (max-width: 736px) { .billing-form-grid { grid-template-columns: 1fr; } .billing-actions { justify-content: stretch; } .billing-actions .ui-button { width: 100%; } }
+@media print { body { background: #fff; } body > * { visibility: hidden; } .statement-print, .statement-print * { visibility: visible; } .statement-print-toolbar { display: none; } .statement-print { position: absolute; inset: 0; width: 100%; padding: 8mm; } @page { size: A4 portrait; margin: 0; } }

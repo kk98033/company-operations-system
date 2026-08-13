@@ -74,6 +74,12 @@ def setup_company(engine: Engine, suffix: str):
         "pricing.confirm",
         "pricing.cancel",
         "price_default.update",
+        "statement.read",
+        "statement.issue",
+        "statement.cancel",
+        "receipt.read",
+        "receipt.record",
+        "receipt.reverse",
     )
     client = make_auth_client(engine)
     login = client.post(

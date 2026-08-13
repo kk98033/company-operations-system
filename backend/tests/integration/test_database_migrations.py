@@ -73,18 +73,16 @@ PRODUCTION_TABLES = [
 ]
 SHIPMENT_TABLES = ["shipment_items", "shipments"]
 PRICING_TABLES = ["price_history", "pricing_documents", "pricing_items"]
+BILLING_TABLES = ["receipt_allocations", "receipts", "statement_items", "statements"]
 MASTER_DATA_TABLES = ["paper_mills", "paper_types", "process_definitions", "vendors"]
-
 AUTHORIZATION_TABLES = [
     "organization_member_roles",
     "permissions",
     "role_permissions",
     "roles",
 ]
-
 AUDIT_TABLES = ["audit_logs"]
 LOGIN_SECURITY_TABLES = ["login_security_events", "login_throttle_states"]
-
 
 def test_schema_upgrade_downgrade_upgrade_round_trip(
     monkeypatch: pytest.MonkeyPatch,
@@ -98,7 +96,7 @@ def test_schema_upgrade_downgrade_upgrade_round_trip(
     assert REGISTERED_MODELS
 
     command.upgrade(config, "head")
-    assert _current_revision() == "0021_pricing"
+    assert _current_revision() == "0023_billing_invariants"
     assert _table_names() == [
         "alembic_version",
         *sorted(
@@ -116,6 +114,7 @@ def test_schema_upgrade_downgrade_upgrade_round_trip(
                 *PRODUCTION_TABLES,
                 *SHIPMENT_TABLES,
                 *PRICING_TABLES,
+                *BILLING_TABLES,
                 *MASTER_DATA_TABLES,
             ]
         ),
@@ -128,7 +127,7 @@ def test_schema_upgrade_downgrade_upgrade_round_trip(
     assert _table_names() == ["alembic_version"]
 
     command.upgrade(config, "head")
-    assert _current_revision() == "0021_pricing"
+    assert _current_revision() == "0023_billing_invariants"
     assert _table_names() == [
         "alembic_version",
         *sorted(
@@ -146,6 +145,7 @@ def test_schema_upgrade_downgrade_upgrade_round_trip(
                 *PRODUCTION_TABLES,
                 *SHIPMENT_TABLES,
                 *PRICING_TABLES,
+                *BILLING_TABLES,
                 *MASTER_DATA_TABLES,
             ]
         ),
@@ -198,7 +198,7 @@ def test_identity_downgrade_preserves_existing_import_foundation(
         resources.dispose()
 
     command.upgrade(config, "head")
-    assert _current_revision() == "0021_pricing"
+    assert _current_revision() == "0023_billing_invariants"
     command.check(config)
 
     resources = create_database_resources(settings)

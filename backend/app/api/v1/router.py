@@ -8,6 +8,7 @@ from app.api.v1.health import build_health_router
 from app.core.readiness import ReadinessCheck
 from app.modules.audit.api import build_audit_router
 from app.modules.auth.api import build_auth_router
+from app.modules.billing import build_billing_router
 from app.modules.customers.api import build_customer_router
 from app.modules.customers.work_item_api import build_work_item_router
 from app.modules.master_data import build_master_data_router
@@ -33,4 +34,5 @@ def build_v1_router(readiness_checks: Sequence[ReadinessCheck]) -> APIRouter:
     router.include_router(build_production_router())
     router.include_router(build_shipment_router())
     router.include_router(build_pricing_router())
+    router.include_router(build_billing_router())
     return router

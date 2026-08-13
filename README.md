@@ -55,13 +55,13 @@
 | 項目 | 目前狀態 |
 |---|---|
 | 最後更新日期 | 2026-08-13 |
-| 計畫版本 | v1.22（Phase 7 Slice 7.1～7.9 全部完成） |
-| 架構版本 | v1.23（計價、來源唯一、價格歷史與預設更新同步） |
-| 目前階段 | Phase 7 出貨計價工程完成（9／9）；下一階段為 Phase 8 請款、對帳與收款 |
-| 目前切片 | Phase 7 收尾：待計價、唯一基礎計價、明確備品收費、額外明細、價格記憶、取消／重開及 Import I-5.1 dry-run 已完成 |
-| 實作完成度 | Phase 0：完成；Import I-0：3／3；Phase 1：9／9；Phase 2：10／10；Phase 3：8／8；Phase 4：18／18；Phase 5：12／12；Phase 6：10／10；Phase 7：9／9；下一階段為 Phase 8 帳務 |
+| 計畫版本 | v1.23（Phase 8 Slice 8.1～8.10 全部完成） |
+| 架構版本 | v1.24（對帳、收款分配、沖銷與帳齡同步） |
+| 目前階段 | Phase 8 請款、對帳與收款工程完成（10／10）；下一階段為 Phase 9 工作台與整合查詢 |
+| 目前切片 | Phase 8 收尾：單一對帳單、可選計稅快照、部分收款、跨對帳單分配、沖銷、帳齡及 Import I-6.1 dry-run 已完成 |
+| 實作完成度 | Phase 0：完成；Import I-0：3／3；Phase 1：9／9；Phase 2：10／10；Phase 3：8／8；Phase 4：18／18；Phase 5：12／12；Phase 6：10／10；Phase 7：9／9；Phase 8：10／10；下一階段為 Phase 9 查詢整合 |
 | 規劃文件完成度 | 100% |
-| 最新中型進度備份 | 本次提交後建立 Git tag `checkpoint-phase-7` 與專案外 bundle |
+| 最新中型進度備份 | 本次提交後建立 Git tag `checkpoint-phase-8` 與專案外 bundle |
 | 正式遠端 Git 備份 | 尚未設定；R-11 維持 Open，正式部署前必須建立私人 repository |
 
 ### 已完成
@@ -122,18 +122,19 @@
 - 完成 Phase 5 Slice 5.1～5.12：`0018_production_inventory`＋`0019_phase5_invariants` 新增 append-only 製程、完工、沖銷、庫存調整與庫存流水；13 道製程使用合法 transition，只有運送完成後的獨立最終核定才同交易入庫，資料庫 trigger 也拒絕錯誤運送來源與負庫存。React `/production` 與 `/inventory` 已接正式 API；重送與並行只產生一筆入庫。Import I-3.1 已對 `merchandise` 1,451 筆做 aggregate-only dry-run；舊 `subpoenaid` 是 8 碼日期型參考，無一筆直接命中 11 碼工單號，故未 apply、未猜關聯。
 - 完成 Phase 6 Slice 6.1～6.10：新增 `0020_shipments`、`SHP-YYYYMM-SSS`、草稿／確認／取消生命週期與正式出貨頁。正式量和備品量分欄且各自產生負向流水；一般庫存不足拒絕，只有專用權限、有效運送完成事件、真實完工量與原因才可同交易補登入庫後出貨。取消以正向流水沖銷出貨，但不反轉真實完工。A4 出貨單保留確認快照；Import I-4.1 對 14,303 主檔／31,162 明細完成 aggregate-only dry-run，未猜測大量無法直接連結的舊鍵且未 apply。
 - 完成 Phase 7 Slice 7.1～7.9：新增 `0021_pricing`、`PRC-YYYYMMDD-SSS`、待計價與計價單正式頁。每筆出貨明細只有一筆基礎計價，數量只取正式出貨量；備品收費、版費與刀模費必須明確新增。價格建議顯示來源與日期，只套用本次不會改預設；具權限且另行勾選才更新預設。確認、取消、重開與來源出貨取消阻擋均保留稽核。Import I-5.1 對 30,314 個舊計價主檔與 43,464 筆明細完成 aggregate-only dry-run，未 apply。
+- 完成 Phase 8 Slice 8.1～8.10：新增 `0022_billing`、`0023_billing_invariants`、`STM-YYYYMM-SSS`、`RCT-YYYYMMDD-SSS`、正式對帳／收款／帳齡 API 與 React 頁面。只接受已確認計價且同客戶來源，一筆計價明細不可重複納入有效對帳單；計稅預設關閉，啟用時保存稅率、取整與金額快照。收款可分配同客戶多張對帳單，資料庫會鎖定來源並拒絕超額或直接改寫帳務明細；部分／完成狀態由有效分配重算，沖銷保留原收款並恢復未收餘額。Import I-6.1 已完成 aggregate-only dry-run，因舊表關聯與負值語意未定而未 apply。
 
 ### 進行中
 
-- Phase 0～Phase 6 工程已完成；公司資料、客戶、主檔、報價、案件、工單、生產、庫存與出貨已形成可操作垂直流程。舊資料目前只有 dry-run，尚未正式 apply；報價／工單／出貨 A4 仍需公司實際印表機簽認不截字。
-- 生產、庫存、出貨與計價已接正式 API／資料表；對帳與收款仍是後續 Phase。
+- Phase 0～Phase 8 工程已完成；公司資料、客戶、主檔、報價、案件、工單、生產、庫存、出貨、計價、對帳與收款已形成可操作垂直流程。舊資料目前只有 dry-run，尚未正式 apply；報價／工單／出貨／對帳 A4 仍需公司實際印表機簽認不截字。
+- 生產、庫存、出貨、計價、對帳、部分收款、沖銷與帳齡已接正式 API／資料表；工作台與跨模組搜尋留在 Phase 9。
 - 介面正式方向已定案；`/style-preview` 只保留為歷史比較與 ADR-010 決策證據，不是正式業務頁。
 - 公司 P0 已確認 10／10。正式 migration、API 與舊客戶資料 apply 仍只會在對應 Phase／Import Slice 通過測試後逐批建立，不因 Gate 通過而提前寫入。
 - `import_staging_records` 目前只是 raw／normalized 通用 envelope；客戶 typed mapping、dry-run、apply、個資 access／retention 與錯誤訊息遮罩留在 I-1.x，不得提前把 JSONB 當正式業務模型。
 
 ### 接下來要做
 
-1. 下一個垂直批次進入 Phase 8：建立單一對帳單、請款狀態、預設關閉的可選計稅與部分收款。
+1. 下一個垂直批次進入 Phase 9：建立可追溯的工作台摘要、全站搜尋、客戶 360 與安全 CSV 匯出。
 2. 回查 `quote.subpoenaid`、`merchandise.subpoenaid` 與工單父鍵；現有匯出無可靠直接關聯，在取得舊程式 join 或可核對匯出前不得 apply。
 3. 舊資料 apply 前同時處理 `cust` 轉碼替代字元及 `wpa` 的 189 筆孤兒／6 筆缺客戶代號；修復後重跑相同 dry-run，不能跳過公司抽查。
 4. 以公司實際印表機驗收報價 A4 橫向及工單 A4 直向；程式端欄位、列印 CSS、隱藏操作、快照與圖片測試已完成。

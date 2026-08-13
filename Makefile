@@ -14,7 +14,7 @@ COMPOSE_PARSE_ENV = POSTGRES_PASSWORD=company-system-compose-parse-only
 	seed-test-identity import-customers-dry-run import-master-data-dry-run \
 	import-work-items-dry-run import-quotations-dry-run \
 	import-work-orders-dry-run import-inventory-dry-run \
-	import-pricing-dry-run
+	import-shipments-dry-run import-pricing-dry-run import-billing-dry-run
 
 bootstrap:
 	PYTHON_BIN=$(PYTHON) ./scripts/bootstrap.sh
@@ -133,6 +133,11 @@ import-pricing-dry-run:
 	$(PYTHON) scripts/legacy_pricing_dry_run.py \
 		--source-dir "$(LEGACY_SOURCE_DIR)" \
 		--output-file "artifacts/import/pricing/sal_dry_run.json"
+
+import-billing-dry-run:
+	$(PYTHON) scripts/legacy_billing_dry_run.py \
+		--source-dir "$(LEGACY_SOURCE_DIR)" \
+		--output-file "artifacts/import/billing/rec_income_dry_run.json"
 
 backend-test:
 	cd backend && .venv/bin/python -m pytest -m "not database_integration"

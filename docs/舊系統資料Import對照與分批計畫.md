@@ -221,7 +221,7 @@ P0-04 新版「基礎計價只取正式量」不回溯改寫舊金額。舊備�
 | I-3.1 | DONE（未 apply） | `merchandise` 1,451 筆 aggregate-only dry-run | 數量皆可解析且餘額皆為正；8 碼 `subpoenaid` 對 11 碼工單號直接命中 0，日期前綴候選不可當正式關聯 |
 | I-4.1 | DONE（未 apply） | `subp_sale`＋`subp_sale2` aggregate-only dry-run | 14,303 主檔／31,162 明細；5 筆缺主檔鍵、31,152 筆明細主鍵未直接命中、工單只直接命中 8 筆；不得猜測關聯 |
 | I-5.1 | 已完成 aggregate-only dry-run，未 apply | `sal`＋`sal2` | 來源出貨、防重複、金額總計；異常舊金額、文字替代字元與關聯差異先隔離 |
-| I-6.1 | Phase 8 billing 完成 | `rec`、`income`、`lsm`、`rece` | 客戶／月份、稅額、已收／未收核對 |
+| I-6.1 | DONE（未 apply） | `rec`、`income`、`lsm`、`rece` aggregate-only dry-run | `rec` 378、`income` 16、`lsm` 353、`rece` 43 筆；部分關聯可直接核對，但存在負值、期初與舊表語意差異，正式 mapping 前不得 apply |
 | I-7.1 | Phase 10 | 不限年份全模組整合 dry-run，含只讀封存與例外清單 | 零未解高風險錯誤，所有來源列皆有去向 |
 | I-7.2 | Phase 10 | 第二次完全重跑 | idempotent，不新增重複資料 |
 | I-8.1 | Phase 12 | 最終差異匯入 | 公司簽認筆數、數量、金額 |
@@ -231,6 +231,8 @@ I-2.1 已於 2026-08-13 完成 aggregate-only dry-run：目前 CSV 讀得 `subpo
 I-3.1 已於 2026-08-13 完成 aggregate-only dry-run：`merchandise` 讀得 1,451 筆，`finishnumber - delivernumber - sparenumber` 全部可解析且目前均為正值；來源包含 5,804 個 NUL bytes，dry-run 只在記憶體移除並保留原檔 SHA-256。`merchandise.subpoenaid` 為 8 碼日期型參考，對 11 碼 `subpoena.id` 直接命中 0；日期前綴雖有候選但可能一對多，禁止據此 apply。報告不含客戶、品名或逐列值，且 `apply_performed=false`。
 
 I-4.1 已於 2026-08-13 完成 aggregate-only dry-run：`subp_sale` 讀得 14,303 筆主檔、`subp_sale2` 讀得 31,162 筆明細，正式出貨與備品數量欄全部可解析且沒有負數。舊明細有 5 筆缺 `deliverid`、31,152 筆非空 `deliverid` 無法直接命中本次主檔，`subpoenaid` 也只有 8 筆直接命中匯出的工單 ID；因此 `apply_performed=false`，不以列序、日期或客戶／品名相似度猜關聯。報告只保存 aggregate 與來源雜湊，不含客戶、品名、地址、備註或逐列內容。
+
+I-6.1 已於 2026-08-13 完成 aggregate-only dry-run：`rec`／`income`／`lsm`／`rece` 分別讀得 378／16／353／43 筆。`income` 對 `rec` 客戶月份鍵直接命中 12、未命中 1；`lsm` 命中 353，`rece` 直接命中 0。來源另有負值與期初餘額語意差異，故 `apply_performed=false`。報告只保存表級筆數、金額 aggregate、來源雜湊與關聯統計，不輸出客戶名稱或逐列帳款。
 
 每個 Import Slice 都是小切片，必須各自測試、更新進度及 commit；不能把全部 Import 寫成一個超大腳本。
 

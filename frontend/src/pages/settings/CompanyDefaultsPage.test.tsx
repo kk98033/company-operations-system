@@ -29,7 +29,7 @@ const settings = {
   ],
   quotation_print_layout_version: 'gmail-a4-landscape-v1',
   statement_tax: {
-    calculation_status: 'pending_phase_8_uat',
+    calculation_status: 'active_company_uat_pending',
     enabled: false,
     rounding_decimal_places: null,
     rounding_scope: null,
@@ -44,7 +44,7 @@ afterEach(() => {
   document.cookie = 'company_system_csrf=; Max-Age=0; Path=/'
 })
 
-it('集中呈現固定單號與列印契約，並可保存對帳計稅草稿', async () => {
+it('集中呈現固定單號與列印契約，並可保存對帳計稅預設', async () => {
   const user = userEvent.setup()
   document.cookie = 'company_system_csrf=synthetic-csrf; Path=/'
   const fetchMock = vi.fn<typeof fetch>().mockImplementation(async (_input, init) => {
@@ -53,7 +53,7 @@ it('集中呈現固定單號與列印契約，並可保存對帳計稅草稿', a
       return Response.json({
         ...settings,
         statement_tax: {
-          calculation_status: 'pending_phase_8_uat',
+          calculation_status: 'active_company_uat_pending',
           enabled: body.statement_tax_default_enabled,
           rounding_decimal_places: body.statement_rounding_decimal_places,
           rounding_scope: body.statement_rounding_scope,
@@ -74,6 +74,7 @@ it('集中呈現固定單號與列印契約，並可保存對帳計稅草稿', a
   expect(screen.getByRole('row', { name: /報價單 A4 橫向/ })).toBeInTheDocument()
   expect(screen.getByRole('row', { name: /對帳單 A4 待公司樣張確認/ }))
     .toBeInTheDocument()
+  expect(screen.getByText(/只影響新建且明確啟用計稅/)).toBeInTheDocument()
   const navigation = screen.getByRole('navigation', { name: '主要導覽' })
   expect(within(navigation).getByRole('link', { name: '文件與帳務預設' }))
     .toHaveAttribute('aria-current', 'page')
