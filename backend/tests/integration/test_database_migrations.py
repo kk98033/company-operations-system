@@ -71,6 +71,7 @@ ORGANIZATION_SETTINGS_TABLES = ["organization_settings"]
 CUSTOMER_TABLES = ["customers"]
 CUSTOMER_WORK_ITEM_TABLES = ["customer_work_items"]
 QUOTATION_TABLES = ["document_sequences", "quotation_items", "quotations"]
+WORK_ORDER_TABLES = ["production_cases", "work_order_attachments", "work_orders"]
 MASTER_DATA_TABLES = ["paper_mills", "paper_types", "process_definitions", "vendors"]
 
 AUTHORIZATION_TABLES = [
@@ -96,7 +97,7 @@ def test_schema_upgrade_downgrade_upgrade_round_trip(
     assert REGISTERED_MODELS
 
     command.upgrade(config, "head")
-    assert _current_revision() == "0015_quotations"
+    assert _current_revision() == "0017_work_orders"
     assert _table_names() == [
         "alembic_version",
         *sorted(
@@ -110,6 +111,7 @@ def test_schema_upgrade_downgrade_upgrade_round_trip(
                 *CUSTOMER_TABLES,
                 *CUSTOMER_WORK_ITEM_TABLES,
                 *QUOTATION_TABLES,
+                *WORK_ORDER_TABLES,
                 *MASTER_DATA_TABLES,
             ]
         ),
@@ -122,7 +124,7 @@ def test_schema_upgrade_downgrade_upgrade_round_trip(
     assert _table_names() == ["alembic_version"]
 
     command.upgrade(config, "head")
-    assert _current_revision() == "0015_quotations"
+    assert _current_revision() == "0017_work_orders"
     assert _table_names() == [
         "alembic_version",
         *sorted(
@@ -136,6 +138,7 @@ def test_schema_upgrade_downgrade_upgrade_round_trip(
                 *CUSTOMER_TABLES,
                 *CUSTOMER_WORK_ITEM_TABLES,
                 *QUOTATION_TABLES,
+                *WORK_ORDER_TABLES,
                 *MASTER_DATA_TABLES,
             ]
         ),
@@ -188,7 +191,7 @@ def test_identity_downgrade_preserves_existing_import_foundation(
         resources.dispose()
 
     command.upgrade(config, "head")
-    assert _current_revision() == "0015_quotations"
+    assert _current_revision() == "0017_work_orders"
     command.check(config)
 
     resources = create_database_resources(settings)

@@ -13,7 +13,10 @@ const developmentNavigation = [
 ] as const
 
 export function AppLayout() {
-  const [isCollapsed, setIsCollapsed] = useState(false)
+  const [isCollapsed, setIsCollapsed] = useState(
+    () => typeof window !== 'undefined'
+      && window.matchMedia?.('(max-width: 46rem)').matches === true,
+  )
   const navigate = useNavigate()
   const queryClient = useQueryClient()
   const session = useAuthenticatedSession()
@@ -47,7 +50,19 @@ export function AppLayout() {
           </div>
         </div>
 
-        <nav className="sidebar__nav" aria-label="主要導覽">
+        <nav
+          className="sidebar__nav"
+          aria-label="主要導覽"
+          onClick={(event) => {
+            if (
+              event.target instanceof Element
+              && event.target.closest('a')
+              && window.matchMedia?.('(max-width: 46rem)').matches
+            ) {
+              setIsCollapsed(true)
+            }
+          }}
+        >
           <p className="sidebar__section-label">工作區</p>
           <Link
             activeOptions={{ exact: true }}

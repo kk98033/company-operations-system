@@ -32,6 +32,7 @@ from app.modules.organizations.models import (
     OrganizationSettings,
 )
 from app.modules.quotations.models import DocumentSequence, Quotation, QuotationItem
+from app.modules.work_orders.models import ProductionCase, WorkOrder, WorkOrderAttachment
 from tests.integration.database_settings import load_database_test_settings
 
 BACKEND_ROOT = Path(__file__).resolve().parents[2]
@@ -71,6 +72,9 @@ def identity_engine(migrated_engine: Engine) -> Generator[Engine, None, None]:
             connection.execute(RolePermission.__table__.delete())
             connection.execute(Role.__table__.delete())
             connection.execute(Permission.__table__.delete())
+            connection.execute(WorkOrderAttachment.__table__.delete())
+            connection.execute(WorkOrder.__table__.delete())
+            connection.execute(ProductionCase.__table__.delete())
             connection.execute(QuotationItem.__table__.delete())
             connection.execute(Quotation.__table__.delete())
             connection.execute(DocumentSequence.__table__.delete())

@@ -12,7 +12,8 @@ COMPOSE_PARSE_ENV = POSTGRES_PASSWORD=company-system-compose-parse-only
 	import-profile import-profile-test backend-test backend-check frontend-test \
 	frontend-lint frontend-build frontend-audit frontend-check backend-build \
 	seed-test-identity import-customers-dry-run import-master-data-dry-run \
-	import-work-items-dry-run import-quotations-dry-run
+	import-work-items-dry-run import-quotations-dry-run \
+	import-work-orders-dry-run
 
 bootstrap:
 	PYTHON_BIN=$(PYTHON) ./scripts/bootstrap.sh
@@ -111,6 +112,11 @@ import-quotations-dry-run:
 	$(PYTHON) scripts/legacy_quotation_dry_run.py \
 		--source-dir "$(LEGACY_SOURCE_DIR)" \
 		--output-file "artifacts/import/quotations/b_replay_dry_run.json"
+
+import-work-orders-dry-run:
+	$(PYTHON) scripts/legacy_work_order_dry_run.py \
+		--source-dir "$(LEGACY_SOURCE_DIR)" \
+		--output-file "artifacts/import/work-orders/subpoena_quote_dry_run.json"
 
 backend-test:
 	cd backend && .venv/bin/python -m pytest -m "not database_integration"

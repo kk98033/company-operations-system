@@ -1,88 +1,28 @@
 import { Field, Section, StatusLabel } from '../../ui/UiPatterns'
+import type { ProcessDraft } from './workOrderDraft'
 
-const processNames = [
-  '美工', '輸出', '製版', '打樣', '印刷', '上光', '裱紙',
-  '模具', '軋型', '加工', '糊邊', '運送', '其他',
-] as const
+type Props = { processes: ProcessDraft[]; editable: boolean; onChange: (index: number, field: keyof ProcessDraft, value: string) => void }
 
-function ProcessRow({ name }: { name: (typeof processNames)[number] }) {
-  return (
-    <fieldset className="work-order-process-row">
-      <legend>{name}</legend>
-      <Field label="協力廠">
-        <input list="demo-process-vendors" placeholder="搜尋協力廠" />
-      </Field>
-      {name === '製版' || name === '糊邊' ? (
-        <Field label="製程說明">
-          <input placeholder={`輸入${name}規格或交接事項`} />
-        </Field>
-      ) : null}
-      {name === '製版' ? (
-        <div className="work-order-plate-options">
-          <fieldset className="work-order-process-option-group">
-            <legend>製版類型</legend>
-            <div className="work-order-process-options">
-              {['新版', '舊版'].map((option) => (
-                <label key={option}>
-                  <input name="plate-version" type="radio" />
-                  <span>{option}</span>
-                </label>
-              ))}
-            </div>
-          </fieldset>
-          <fieldset className="work-order-process-option-group">
-            <legend>輪轉方向</legend>
-            <div className="work-order-process-options">
-              {['天地輪轉', '左右輪轉'].map((option) => (
-                <label key={option}>
-                  <input name="plate-rotation" type="radio" />
-                  <span>{option}</span>
-                </label>
-              ))}
-            </div>
-          </fieldset>
-        </div>
-      ) : null}
-      {name === '上光' ? (
-        <Field label="上光種類"><input placeholder="輸入或選擇上光種類" /></Field>
-      ) : null}
-      {name === '軋型' ? (
-        <div className="work-order-process-extras">
-          <Field label="刀模號碼"><input /></Field>
-          <Field label="模數"><input inputMode="numeric" /></Field>
-        </div>
-      ) : null}
-      {name === '糊邊' ? (
-        <div className="work-order-process-options" role="group" aria-label="糊邊包裝方式">
-          {['裝箱', '裝袋'].map((option) => (
-            <label key={option}><input name="packing-option" type="radio" /><span>{option}</span></label>
-          ))}
-        </div>
-      ) : null}
-      {name !== '製版' && name !== '糊邊' ? (
-        <Field label="製程說明">
-          <input placeholder={`輸入${name}規格或交接事項`} />
-        </Field>
-      ) : null}
-    </fieldset>
-  )
+function ProcessRow({ process, index, editable, onChange }: { process: ProcessDraft; index: number; editable: boolean; onChange: Props['onChange'] }) {
+  const input = (field: keyof ProcessDraft) => ({ disabled: !editable, onChange: (event: React.ChangeEvent<HTMLInputElement>) => onChange(index, field, event.target.value), value: process[field] })
+  return <fieldset className="work-order-process-row"><legend>{process.name}</legend>
+    <Field label="協力廠"><input {...input('vendor')} placeholder="搜尋或輸入協力廠" /></Field>
+    {process.code === 'plate' || process.code === 'gluing' ? <Field label="製程說明"><input {...input('content')} /></Field> : null}
+    {process.code === 'plate' ? <div className="work-order-plate-options">
+      <fieldset className="work-order-process-option-group"><legend>製版類型</legend><div className="work-order-process-options">{[['new','新版'],['existing','舊版']].map(([value,label]) => <label key={value}><input checked={process.plate_version === value} disabled={!editable} name={`plate-version-${index}`} onChange={() => onChange(index, 'plate_version', value)} type="radio" /><span>{label}</span></label>)}</div></fieldset>
+      <fieldset className="work-order-process-option-group"><legend>輪轉方向</legend><div className="work-order-process-options">{[['top_bottom','天地輪轉'],['left_right','左右輪轉']].map(([value,label]) => <label key={value}><input checked={process.plate_rotation === value} disabled={!editable} name={`plate-rotation-${index}`} onChange={() => onChange(index, 'plate_rotation', value)} type="radio" /><span>{label}</span></label>)}</div></fieldset>
+    </div> : null}
+    {process.code === 'coating' ? <Field label="上光種類"><input {...input('coating_type')} /></Field> : null}
+    {process.code === 'die_cutting' ? <div className="work-order-process-extras"><Field label="刀模號碼"><input {...input('die_number')} /></Field><Field label="模數"><input {...input('die_count')} min="0" type="number" /></Field></div> : null}
+    {process.code === 'gluing' ? <div className="work-order-process-options" role="group" aria-label="糊邊包裝方式">{[['box','裝箱'],['bag','裝袋']].map(([value,label]) => <label key={value}><input checked={process.packing === value} disabled={!editable} name={`packing-${index}`} onChange={() => onChange(index, 'packing', value)} type="radio" /><span>{label}</span></label>)}</div> : null}
+    {process.code !== 'plate' && process.code !== 'gluing' ? <Field label="製程說明"><input {...input('content')} /></Field> : null}
+  </fieldset>
 }
 
-export function ProcessPlanningSection() {
-  return (
-    <div className="work-order-prototype__anchor" id="work-order-process" tabIndex={-1}>
-      <Section
-        title="製程規劃"
-        description="本區保存工單預定製程；開始、完成、重開及最終完工仍由後續生產管理追蹤。"
-        actions={<StatusLabel tone="success">製程欄位依公司附件確認</StatusLabel>}
-      >
-        <datalist id="demo-process-vendors">
-          <option value="範例協力廠（假資料）" />
-        </datalist>
-        <div className="work-order-process-list">
-          {processNames.map((name) => <ProcessRow key={name} name={name} />)}
-        </div>
-      </Section>
-    </div>
-  )
+export function ProcessPlanningSection({ processes, editable, onChange }: Props) {
+  return <div className="work-order-prototype__anchor" id="work-order-process" tabIndex={-1}>
+    <Section title="製程規劃" description="建檔固定保存公司稿 13 道順序；開始、完成與重開留給生產管理。" actions={<StatusLabel tone="success">13 道建檔製程</StatusLabel>}>
+      <div className="work-order-process-list">{processes.map((process, index) => <ProcessRow editable={editable} index={index} key={process.code} onChange={onChange} process={process} />)}</div>
+    </Section>
+  </div>
 }

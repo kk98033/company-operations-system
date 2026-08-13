@@ -167,6 +167,56 @@
   text-align: center;
 }
 
+.work-order-attachment-list {
+  display: grid;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.work-order-attachment-list li {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  gap: var(--space-2);
+  align-items: center;
+  border-bottom: 1px solid var(--color-border);
+  padding-block: var(--space-2);
+}
+
+.ui-button.is-disabled { opacity: 0.55; cursor: not-allowed; }
+
+.work-order-print-page { background: #dfe4e8; min-height: 100vh; padding: 24px; }
+.work-order-print-actions { display: flex; justify-content: flex-end; gap: 8px; max-width: 210mm; margin: 0 auto 12px; }
+.work-order-print-sheet { box-sizing: border-box; width: 210mm; min-height: 297mm; margin: 0 auto; padding: 10mm; background: white; color: #111; font-size: 10pt; }
+.work-order-print-sheet header { display: flex; justify-content: space-between; border-bottom: 2px solid #111; padding-bottom: 6px; }
+.work-order-print-sheet header h1 { margin: 0 0 4px; font-size: 19pt; }
+.work-order-print-sheet header p { margin: 2px 0; }
+.work-order-print-sheet header strong { font-size: 18pt; letter-spacing: 0.3em; }
+.work-order-print-meta { display: grid; grid-template-columns: 2fr 1fr; border: 1px solid #111; border-top: 0; }
+.work-order-print-meta > div { padding: 4px 6px; border-bottom: 1px solid #777; }
+.work-order-print-meta .wide { grid-column: 1; }
+.work-order-print-sheet section { break-inside: avoid; }
+.work-order-print-sheet h2 { margin: 8px 0 4px; border-bottom: 1px solid #111; font-size: 12pt; }
+.work-order-print-sheet table { width: 100%; border-collapse: collapse; }
+.work-order-print-sheet th, .work-order-print-sheet td { border: 1px solid #555; padding: 3px 4px; text-align: left; vertical-align: top; }
+.work-order-print-spec > div { padding: 4px; border: 1px solid #777; border-top: 0; }
+.work-order-print-sheet footer { margin-top: 8px; border: 1px solid #111; padding: 6px; min-height: 32mm; }
+.work-order-print-attachments > div { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6mm; }
+.work-order-print-attachments figure { break-inside: avoid; margin: 0; }
+.work-order-print-attachments img { display: block; width: 100%; max-height: 90mm; object-fit: contain; border: 1px solid #555; }
+.work-order-print-attachments figcaption { margin-top: 2mm; font-size: 9pt; overflow-wrap: anywhere; }
+
+@media print {
+  @page { size: A4 portrait; margin: 0; }
+  body { background: white !important; }
+  body > * { visibility: hidden; }
+  .work-order-print-page, .work-order-print-page * { visibility: visible; }
+  .work-order-print-page { position: absolute; inset: 0; padding: 0; background: white; }
+  .work-order-print-actions { display: none !important; }
+  .work-order-print-sheet { width: 210mm; min-height: 297mm; margin: 0; box-shadow: none; }
+}
+
 .work-order-prototype__footer > div {
   flex-wrap: wrap;
   justify-content: flex-end;

@@ -1,61 +1,30 @@
+import type { CustomerListResponse } from '../../api/generated/company-system'
 import { Field, Section, StatusLabel } from '../../ui/UiPatterns'
+import type { WorkOrderDraft } from './workOrderDraft'
 
-export function WorkOrderBasicSection() {
-  return (
-    <div className="work-order-prototype__anchor" id="work-order-basic" tabIndex={-1}>
-      <Section
-        title="客戶與訂單資料"
-        description="選取客編後帶入客戶資料；一張工單只對應一個主要品項並隸屬一個案件。工單號格式為 WO-YYYYMMDD-SSS，實際必填規則將在功能啟用前逐欄驗收。"
-        actions={<StatusLabel tone="success">一工單一主要品項已確認</StatusLabel>}
-      >
-        <div className="work-order-prototype__basic-grid">
-          <Field label="客編">
-            <input placeholder="輸入代號或名稱查詢" />
-          </Field>
-          <Field label="客名">
-            <input placeholder="選取客編後帶入" readOnly />
-          </Field>
-          <Field label="客戶單號">
-            <input />
-          </Field>
-          <Field label="電話">
-            <input placeholder="選取客編後帶入" readOnly />
-          </Field>
-          <Field label="聯絡人">
-            <input placeholder="選取客編後帶入" readOnly />
-          </Field>
-          <Field label="地址">
-            <input placeholder="選取客編後帶入" readOnly />
-          </Field>
-          <Field label="工作單號" hint="正式格式：WO-YYYYMMDD-SSS">
-            <input placeholder="存檔時產生" readOnly />
-          </Field>
-          <Field label="訂購日期">
-            <input type="date" />
-          </Field>
-          <Field label="交貨日期">
-            <input type="date" />
-          </Field>
-          <Field label="品名">
-            <textarea rows={2} />
-          </Field>
-          <Field label="訂單數量">
-            <input inputMode="numeric" />
-          </Field>
-          <Field label="訂單內容／規格補充">
-            <textarea placeholder="例如：交貨正負量或包裝說明" rows={2} />
-          </Field>
-          <Field label="單價" hint="顯示至小數點後兩位">
-            <input inputMode="decimal" placeholder="0.00" />
-          </Field>
-          <Field label="版費">
-            <input inputMode="decimal" placeholder="0.00" />
-          </Field>
-          <Field label="刀模費">
-            <input inputMode="decimal" placeholder="0.00" />
-          </Field>
-        </div>
-      </Section>
-    </div>
-  )
+type Props = { draft: WorkOrderDraft; editable: boolean; customers?: CustomerListResponse; documentNumber?: string; onChange: (field: keyof WorkOrderDraft, value: string) => void }
+
+export function WorkOrderBasicSection({ draft, editable, customers, documentNumber, onChange }: Props) {
+  const field = (name: keyof WorkOrderDraft) => ({ disabled: !editable, onChange: (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => onChange(name, event.target.value), value: String(draft[name]) })
+  return <div className="work-order-prototype__anchor" id="work-order-basic" tabIndex={-1}>
+    <Section title="客戶與訂單資料" description="選取客編後帶入客戶資料；一張工單只對應一個主要品項並隸屬一個案件。" actions={<StatusLabel tone="success">一工單一主要品項</StatusLabel>}>
+      <div className="work-order-prototype__basic-grid">
+        <Field label="客編／客戶"><select {...field('customer_id')}><option value="">請選擇客戶</option>{customers?.items.map((customer) => <option key={customer.id} value={customer.id}>{customer.code} {customer.name}</option>)}</select></Field>
+        <Field label="客名"><input readOnly value={customers?.items.find((item) => item.id === draft.customer_id)?.name ?? ''} /></Field>
+        <Field label="客戶單號"><input {...field('customer_order_number')} /></Field>
+        <Field label="電話"><input readOnly value={customers?.items.find((item) => item.id === draft.customer_id)?.phone ?? ''} /></Field>
+        <Field label="聯絡人"><input readOnly value={customers?.items.find((item) => item.id === draft.customer_id)?.contact_name ?? ''} /></Field>
+        <Field label="地址"><input readOnly value={customers?.items.find((item) => item.id === draft.customer_id)?.address ?? ''} /></Field>
+        <Field label="工作單號" hint="WO-YYYYMMDD-SSS"><input readOnly value={documentNumber ?? '存檔後自動產生'} /></Field>
+        <Field label="訂購日期"><input {...field('order_date')} type="date" /></Field>
+        <Field label="交貨日期"><input {...field('delivery_date')} type="date" /></Field>
+        <Field label="品名"><textarea {...field('product_name')} rows={2} /></Field>
+        <Field label="訂單數量"><input {...field('order_quantity')} inputMode="decimal" min="0.0001" step="0.0001" type="number" /></Field>
+        <Field label="訂單內容／規格補充"><textarea {...field('specification')} rows={2} /></Field>
+        <Field label="單價" hint="小數點後兩位"><input {...field('unit_price')} inputMode="decimal" min="0" step="0.01" type="number" /></Field>
+        <Field label="版費"><input {...field('plate_fee')} inputMode="decimal" min="0" step="0.01" type="number" /></Field>
+        <Field label="刀模費"><input {...field('die_fee')} inputMode="decimal" min="0" step="0.01" type="number" /></Field>
+      </div>
+    </Section>
+  </div>
 }

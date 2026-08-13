@@ -28,6 +28,7 @@ from app.modules.organizations.models import (
     OrganizationSettings,
 )
 from app.modules.quotations.models import DocumentSequence, Quotation, QuotationItem
+from app.modules.work_orders.models import ProductionCase, WorkOrder, WorkOrderAttachment
 
 REGISTERED_MODELS = (
     ImportError,
@@ -42,6 +43,9 @@ REGISTERED_MODELS = (
     DocumentSequence,
     Quotation,
     QuotationItem,
+    ProductionCase,
+    WorkOrder,
+    WorkOrderAttachment,
     Vendor,
     PaperType,
     PaperMill,

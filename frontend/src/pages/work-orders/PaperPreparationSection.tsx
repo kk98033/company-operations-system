@@ -1,58 +1,23 @@
 import { Field, Section, StatusLabel } from '../../ui/UiPatterns'
+import type { PaperDraft } from './workOrderDraft'
 
-const paperGroups = [
-  { id: 'face', label: '面紙', millLabel: '廠別' },
-  { id: 'back', label: '底紙', millLabel: '廠別' },
-  { id: 'flute', label: '浪紙', millLabel: '尺寸' },
-] as const
+const labels = { face: '面紙', back: '底紙', flute: '浪紙' } as const
+type Props = { papers: PaperDraft[]; editable: boolean; onChange: (index: number, field: keyof PaperDraft, value: string) => void }
 
-function PaperGroup({
-  id,
-  label,
-  millLabel,
-}: (typeof paperGroups)[number]) {
-  return (
-    <fieldset className="work-order-paper-group">
-      <legend>{label}</legend>
-      <Field label="供應商">
-        <input list="demo-paper-vendors" placeholder="搜尋供應商" />
-      </Field>
-      <Field label="紙質">
-        <input placeholder="輸入或選擇紙質" />
-      </Field>
-      <Field label={millLabel}>
-        <input aria-label={`${label}${millLabel}`} />
-      </Field>
-      {id !== 'flute' ? (
-        <Field label="尺寸">
-          <input placeholder="例如：31 × 43 吋" />
-        </Field>
-      ) : null}
-      <Field label="數量">
-        <input inputMode="numeric" placeholder="0" />
-      </Field>
-      <Field label={`${label}備註`}>
-        <textarea placeholder="紙張方向、特殊規格或交接事項" rows={3} />
-      </Field>
-    </fieldset>
-  )
-}
-
-export function PaperPreparationSection() {
-  return (
-    <div className="work-order-prototype__anchor" id="work-order-paper" tabIndex={-1}>
-      <Section
-        title="備紙"
-        description="面紙、底紙與浪紙同頁並列；供應商與紙質將由主檔搜尋，不另建裁紙設定頁。依公司新稿，面紙／底紙有廠別，浪紙沒有廠別；舊浪紙廠別只讀保留。"
-        actions={<StatusLabel tone="success">備紙欄位依公司新稿</StatusLabel>}
-      >
-        <datalist id="demo-paper-vendors">
-          <option value="範例紙行（假資料）" />
-        </datalist>
-        <div className="work-order-paper-grid">
-          {paperGroups.map((group) => <PaperGroup key={group.id} {...group} />)}
-        </div>
-      </Section>
-    </div>
-  )
+export function PaperPreparationSection({ papers, editable, onChange }: Props) {
+  return <div className="work-order-prototype__anchor" id="work-order-paper" tabIndex={-1}>
+    <Section title="備紙" description="面紙、底紙有廠別；浪紙依公司新稿不設廠別。" actions={<StatusLabel tone="success">公司稿三紙結構</StatusLabel>}>
+      <div className="work-order-paper-grid">{papers.map((paper, index) => {
+        const input = (field: keyof PaperDraft) => ({ disabled: !editable, onChange: (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => onChange(index, field, event.target.value), value: paper[field] })
+        return <fieldset className="work-order-paper-group" key={paper.type}><legend>{labels[paper.type]}</legend>
+          <Field label="供應商"><input {...input('vendor')} placeholder="搜尋或輸入供應商" /></Field>
+          <Field label="紙質"><input {...input('paper')} /></Field>
+          {paper.type !== 'flute' ? <Field label="廠別"><input {...input('mill')} /></Field> : null}
+          <Field label="尺寸"><input {...input('size')} /></Field>
+          <Field label="數量"><input {...input('quantity')} inputMode="decimal" min="0" type="number" /></Field>
+          <Field label={`${labels[paper.type]}備註`}><textarea {...input('note')} rows={3} /></Field>
+        </fieldset>
+      })}</div>
+    </Section>
+  </div>
 }

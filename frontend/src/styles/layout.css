@@ -322,6 +322,10 @@
     overflow: visible;
   }
 
+  .app-shell--collapsed .sidebar {
+    display: none;
+  }
+
   .sidebar__brand,
   .sidebar__footer,
   .sidebar__section-label,
@@ -364,11 +368,15 @@
     padding-inline: var(--space-4);
   }
 
-  .topbar__sidebar-toggle,
   .topbar__account-copy,
   .topbar__avatar,
   .topbar__logout-error {
     display: none;
+  }
+
+  .topbar__sidebar-toggle {
+    display: inline-flex;
+    visibility: visible;
   }
 
   .topbar__account {

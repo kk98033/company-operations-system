@@ -10,7 +10,7 @@ import { AuthenticatedBoundary } from '../auth/AuthenticatedBoundary'
 import { HomePage } from '../pages/HomePage'
 import { LoginPage } from '../pages/LoginPage'
 import { AuditLogPage } from '../pages/audit/AuditLogPage'
-import { CasePrototypePage } from '../pages/cases/CasePrototypePage'
+import { CaseDetailPage, CasePrototypePage } from '../pages/cases/CasePrototypePage'
 import { CustomerCreatePage } from '../pages/customers/CustomerCreatePage'
 import { CustomerEditPage } from '../pages/customers/CustomerEditPage'
 import { CustomerListPage } from '../pages/customers/CustomerListPage'
@@ -26,7 +26,8 @@ import { RouteErrorPage } from '../pages/RouteErrorPage'
 import { StylePreviewPage } from '../pages/StylePreviewPage'
 import { UiPatternsPage } from '../pages/UiPatternsPage'
 import { WorkOrderListPrototypePage } from '../pages/work-orders/WorkOrderListPrototypePage'
-import { WorkOrderPrototypePage } from '../pages/work-orders/WorkOrderPrototypePage'
+import { WorkOrderEditPage, WorkOrderNewPage } from '../pages/work-orders/WorkOrderPrototypePage'
+import { WorkOrderPrintPage } from '../pages/work-orders/WorkOrderPrintPage'
 import { workflowModules } from './workflowModules'
 
 const rootRoute = createRootRoute({
@@ -99,14 +100,32 @@ const workflowRoutes = workflowModules.map((module) => createRoute({
     : module.id === 'quotations'
       ? QuotationListPage
     : module.id === 'cases'
-      ? () => <CasePrototypePage module={module} />
+      ? CasePrototypePage
     : () => <ModulePrototypePage module={module} />,
 }))
 
 const workOrderNewRoute = createRoute({
   getParentRoute: () => authenticatedRoute,
   path: '/work-orders/new',
-  component: WorkOrderPrototypePage,
+  component: WorkOrderNewPage,
+})
+
+const workOrderEditRoute = createRoute({
+  getParentRoute: () => authenticatedRoute,
+  path: '/work-orders/$workOrderId',
+  component: WorkOrderEditPage,
+})
+
+const workOrderPrintRoute = createRoute({
+  getParentRoute: () => authenticatedRoute,
+  path: '/work-orders/$workOrderId/print',
+  component: WorkOrderPrintPage,
+})
+
+const caseDetailRoute = createRoute({
+  getParentRoute: () => authenticatedRoute,
+  path: '/cases/$caseId',
+  component: CaseDetailPage,
 })
 
 const customerNewRoute = createRoute({
@@ -150,6 +169,9 @@ const routeTree = rootRoute.addChildren([
     quotationEditRoute,
     quotationPrintRoute,
     workOrderNewRoute,
+    workOrderEditRoute,
+    workOrderPrintRoute,
+    caseDetailRoute,
     auditLogsRoute,
     companyProfileRoute,
     companyDefaultsRoute,

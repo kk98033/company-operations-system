@@ -48,7 +48,7 @@ describe('登入與 Cookie Session 流程', () => {
 
     await renderApp(['/cases'], { session: null })
 
-    expect(await screen.findByRole('heading', { level: 1, name: '案件管理' }))
+    expect(await screen.findByRole('heading', { level: 1, name: '沒有案件權限' }))
       .toBeInTheDocument()
     expect(screen.getByText('測試操作員')).toBeInTheDocument()
     expect(fetchMock).toHaveBeenCalledTimes(1)

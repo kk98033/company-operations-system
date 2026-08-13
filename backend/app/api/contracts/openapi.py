@@ -11,6 +11,10 @@ API_DESCRIPTION = "公司內部報價、工單、生產、出貨與帳務系統 
 API_VERSION = "0.1.0"
 API_TAGS = [
     {
+        "name": "cases",
+        "description": "目前公司的生產案件分組與報價轉工單。",
+    },
+    {
         "name": "audit",
         "description": "具權限者查詢目前公司的不可變操作紀錄。",
     },
@@ -37,6 +41,10 @@ API_TAGS = [
     {
         "name": "quotations",
         "description": "目前公司的報價建檔、確認與查詢。",
+    },
+    {
+        "name": "work-orders",
+        "description": "目前公司的單品工單建檔、確認、查詢與私人附件。",
     },
 ]
 

@@ -38,6 +38,9 @@ class QuotationItem(Base):
             ondelete="CASCADE",
         ),
         UniqueConstraint("quotation_id", "line_number", name="uq_quotation_items_line"),
+        UniqueConstraint(
+            "organization_id", "id", name="uq_quotation_items_organization_id_id"
+        ),
         Index(
             "ix_quotation_items_organization_quotation",
             "organization_id",

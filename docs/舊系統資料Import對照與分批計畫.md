@@ -129,7 +129,7 @@ PowerBuilder 報價模組沒有找到 `subpoena` 或工單視窗呼叫，也沒�
 | 舊表 | 關聯 | 新資料 | 注意事項 |
 |---|---|---|---|
 | `subpoena` | `id`／`idbuffer` | `production_cases`、`work_orders`、materials、print specs | 無可靠群組鍵時每張舊工單建立一個 `legacy_single_work_order` 案件，再匯主工單、紙材、印刷、價格、製版與備註 |
-| `quote` | `subpoenaid` → `subpoena.id` | `work_order_processes`、process history | 這個 `quote` 是製程內容，不可誤匯成新版 `quotations` |
+| `quote` | 原設想 `subpoenaid` → `subpoena.id`，但 I-2.1 dry-run 現有匯出 0／1,451 可直接相連 | `work_order_processes`、process history | 這個 `quote` 是製程內容，不可誤匯成新版 `quotations`；取得可靠父鍵前全部列 orphan，不猜關聯 |
 
 重要：舊表名稱 `quote` 容易被誤認為報價單，但從欄位與舊程式關聯可確認它保存設計、製版、曬版、印刷、上光、裱紙、刀模、裁切、運送等工單製程資料。新版報價功能要用新的 `quotations`／`quotation_items`，不可直接把舊 `quote` 當報價。
 
@@ -216,7 +216,7 @@ P0-04 新版「基礎計價只取正式量」不回溯改寫舊金額。舊備�
 | I-1.2 | DONE（未 apply） | `fact`、paper、gloss、paste aggregate-only dry-run | 筆數與重複統計已產生；mapping／停用仍須簽認 |
 | I-1.3 | DONE（未 apply） | `wpa` 9,831 筆全量 aggregate-only dry-run | 189 筆孤兒、6 筆缺客戶代號、1 筆缺名稱待處理 |
 | I-1.4 | DONE（未 apply） | `b_replay1`＋`b_replay2` aggregate-only dry-run | 4 主檔／10 明細；3 筆明細缺 `br_no`、其餘 7 筆也無法對上 4 個主檔號，正式匯入前須回查來源；金額格式 10／10 可解析，不臆造工單關係 |
-| I-2.1 | Phase 4 work order 完成 | `subpoena`＋`quote` 現行工單 | 50 筆試匯＋公司抽樣 |
+| I-2.1 | DONE（未 apply） | `subpoena`＋`quote` 現行工單 aggregate-only dry-run | 1,451 筆製程父鍵全數未命中，取得可靠 join 前不得試匯 |
 | I-2.2 | Phase 4 history 完成 | `subpoena_his`＋`quote_his` | 現行／歷史去重、狀態及數量 |
 | I-3.1 | Phase 5 inventory 完成 | `merchandise` | 每工單完工／出貨／備品／餘額核對 |
 | I-4.1 | Phase 6 shipment 完成 | `subp_sale`＋`subp_sale2` | 主明細、工單來源、數量及 orphan |
@@ -225,6 +225,8 @@ P0-04 新版「基礎計價只取正式量」不回溯改寫舊金額。舊備�
 | I-7.1 | Phase 10 | 不限年份全模組整合 dry-run，含只讀封存與例外清單 | 零未解高風險錯誤，所有來源列皆有去向 |
 | I-7.2 | Phase 10 | 第二次完全重跑 | idempotent，不新增重複資料 |
 | I-8.1 | Phase 12 | 最終差異匯入 | 公司簽認筆數、數量、金額 |
+
+I-2.1 已於 2026-08-13 完成 aggregate-only dry-run：目前 CSV 讀得 `subpoena` 1,431 筆、`quote` 1,451 筆；`quote.subpoenaid` 對 `subpoena.id`、`idbuffer`、`ordernumber`、`orderid` 的直接命中皆為 0。報告沒有輸出客戶、品名或製程內容，且 `apply_performed=false`。下一步必須回查舊程式實際 join／另一版匯出或請公司提供可核對樣本，不能以列序或相似文字臆造父子關係。
 
 每個 Import Slice 都是小切片，必須各自測試、更新進度及 commit；不能把全部 Import 寫成一個超大腳本。
 
