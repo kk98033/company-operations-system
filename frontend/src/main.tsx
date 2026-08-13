@@ -27,6 +27,7 @@ import './styles/production.css'
 import './styles/shipments.css'
 import './styles/pricing.css'
 import './styles/billing.css'
+import './styles/document-exports.css'
 // 歷史比較頁是正式 UI 之外的唯一例外，必須最後載入且不可供 feature 使用。
 import './styles/style-preview.css'
 

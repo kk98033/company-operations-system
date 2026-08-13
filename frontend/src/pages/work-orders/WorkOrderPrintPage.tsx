@@ -4,6 +4,7 @@ import { attachmentQueryKey, getWorkOrder, listAttachments, workOrderQueryKey } 
 import { getApiErrorMessage } from '../../api/errorMessage'
 import { useHasCapability } from '../../auth/capabilities'
 import { SystemState } from '../../ui/UiPatterns'
+import { DocumentPdfButton } from '../document-exports/DocumentPdfButton'
 
 const printCodes = ['plate','proof','printing','coating','mounting','die_cutting','finishing','gluing','other']
 const checked = (value: boolean) => value ? '☑' : '☐'
@@ -18,7 +19,7 @@ export function WorkOrderPrintPage() {
   const item = query.data; const organization = item.organization_snapshot; const customer = item.customer_snapshot; const print = item.print_specification ?? {}; const front = print.front ?? {}; const back = print.back ?? {}
   const papers = Object.fromEntries(item.papers.map((paper) => [paper.type, paper]))
   const processes = item.processes.filter((process) => printCodes.includes(process.code))
-  return <div className="work-order-print-page"><div className="work-order-print-actions"><button className="ui-button ui-button--secondary" onClick={() => void navigate({ to: '/work-orders/$workOrderId', params: { workOrderId } })} type="button">返回工單</button><button className="ui-button ui-button--primary" onClick={() => window.print()} type="button">列印 A4 直向</button></div>
+  return <div className="work-order-print-page"><div className="work-order-print-actions"><button className="ui-button ui-button--secondary" onClick={() => void navigate({ to: '/work-orders/$workOrderId', params: { workOrderId } })} type="button">返回工單</button><button className="ui-button ui-button--secondary" onClick={() => window.print()} type="button">列印 A4 直向</button><DocumentPdfButton documentId={workOrderId} documentType="work_order" /></div>
     <article className="work-order-print-sheet"><header><div><h1>{String(organization.name ?? '')}</h1><p>{String(organization.phone ?? '')} | {String(organization.fax ?? '')} | {String(organization.email ?? '')}</p><p>{String(organization.address ?? '')}</p></div><strong>工 作 單</strong></header>
       <section className="work-order-print-meta"><div>客戶：{String(customer.code ?? '')} {String(customer.name ?? '')}</div><div>工單號：{item.document_number}</div><div>客戶單號：{item.customer_order_number ?? '—'}</div><div>訂購日期：{item.order_date}</div><div>電話：{String(customer.phone ?? '—')}</div><div>交貨日期：{item.delivery_date ?? '—'}</div><div className="wide">品名：{item.product_name}</div><div>數量：{item.order_quantity}</div></section>
       <section><h2>備紙</h2><table><thead><tr><th>類型</th><th>供應商</th><th>紙質</th><th>廠別</th><th>尺寸</th><th>數量</th><th>備註</th></tr></thead><tbody>{[['face','面紙'],['back','底紙'],['flute','浪紙']].map(([code,label]) => { const paper = papers[code]; return <tr key={code}><th>{label}</th><td>{paper?.vendor ?? ''}</td><td>{paper?.paper ?? ''}</td><td>{paper?.mill ?? ''}</td><td>{paper?.size ?? ''}</td><td>{paper?.quantity ?? ''}</td><td>{paper?.note ?? ''}</td></tr> })}</tbody></table></section>

@@ -473,6 +473,31 @@ export interface CustomerUpdate {
   tax_identifier?: string | null;
 }
 
+export type DocumentExportResponseDocumentType = typeof DocumentExportResponseDocumentType[keyof typeof DocumentExportResponseDocumentType];
+
+
+export const DocumentExportResponseDocumentType = {
+  quotation: 'quotation',
+  work_order: 'work_order',
+  shipment: 'shipment',
+  statement: 'statement',
+} as const;
+
+export interface DocumentExportResponse {
+  byte_size: number;
+  content_type: 'application/pdf';
+  created_at: string;
+  document_id: string;
+  document_number: string;
+  document_type: DocumentExportResponseDocumentType;
+  document_version: string;
+  download_url: string;
+  filename: string;
+  id: string;
+  sha256: string;
+  template_version: string;
+}
+
 export type DocumentNumberPolicyResponseResetPeriod = typeof DocumentNumberPolicyResponseResetPeriod[keyof typeof DocumentNumberPolicyResponseResetPeriod];
 
 
@@ -3944,6 +3969,187 @@ export const customerWorkItemStatusUpdate = async (customerId: string,
 
   const data: customerWorkItemStatusUpdateResponse['data'] = body ? JSON.parse(body) : {}
   return { data, status: res.status, headers: res.headers } as customerWorkItemStatusUpdateResponse
+}
+
+
+
+export type documentPdfExportCreateResponse201 = {
+  data: DocumentExportResponse
+  status: 201
+}
+
+export type documentPdfExportCreateResponse400 = {
+  data: ErrorResponse
+  status: 400
+}
+
+export type documentPdfExportCreateResponse401 = {
+  data: ErrorResponse
+  status: 401
+}
+
+export type documentPdfExportCreateResponse403 = {
+  data: ErrorResponse
+  status: 403
+}
+
+export type documentPdfExportCreateResponse404 = {
+  data: ErrorResponse
+  status: 404
+}
+
+export type documentPdfExportCreateResponse405 = {
+  data: ErrorResponse
+  status: 405
+}
+
+export type documentPdfExportCreateResponse409 = {
+  data: ErrorResponse
+  status: 409
+}
+
+export type documentPdfExportCreateResponse422 = {
+  data: ErrorResponse
+  status: 422
+}
+
+export type documentPdfExportCreateResponse429 = {
+  data: ErrorResponse
+  status: 429
+}
+
+export type documentPdfExportCreateResponse500 = {
+  data: ErrorResponse
+  status: 500
+}
+
+export type documentPdfExportCreateResponseSuccess = (documentPdfExportCreateResponse201) & {
+  headers: Headers;
+};
+export type documentPdfExportCreateResponseError = (documentPdfExportCreateResponse400 | documentPdfExportCreateResponse401 | documentPdfExportCreateResponse403 | documentPdfExportCreateResponse404 | documentPdfExportCreateResponse405 | documentPdfExportCreateResponse409 | documentPdfExportCreateResponse422 | documentPdfExportCreateResponse429 | documentPdfExportCreateResponse500) & {
+  headers: Headers;
+};
+
+export type documentPdfExportCreateResponse = (documentPdfExportCreateResponseSuccess | documentPdfExportCreateResponseError)
+
+export const getDocumentPdfExportCreateUrl = (documentType: 'quotation' | 'work_order' | 'shipment' | 'statement',
+    documentId: string,) => {
+
+
+
+
+  return `${import.meta.env.VITE_API_ORIGIN || ''}/api/v1/document-exports/${documentType}/${documentId}`
+}
+
+/**
+ * @summary Create Pdf
+ */
+export const documentPdfExportCreate = async (documentType: 'quotation' | 'work_order' | 'shipment' | 'statement',
+    documentId: string, options?: RequestInit): Promise<documentPdfExportCreateResponse> => {
+
+  const res = await fetch(getDocumentPdfExportCreateUrl(documentType,documentId),
+  {
+    ...options,
+    method: 'POST'
+
+
+  }
+)
+
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+
+  const data: documentPdfExportCreateResponse['data'] = body ? JSON.parse(body) : {}
+  return { data, status: res.status, headers: res.headers } as documentPdfExportCreateResponse
+}
+
+
+
+export type documentPdfExportDownloadResponse200 = {
+  data: Blob
+  status: 200
+}
+
+export type documentPdfExportDownloadResponse400 = {
+  data: ErrorResponse
+  status: 400
+}
+
+export type documentPdfExportDownloadResponse401 = {
+  data: ErrorResponse
+  status: 401
+}
+
+export type documentPdfExportDownloadResponse403 = {
+  data: ErrorResponse
+  status: 403
+}
+
+export type documentPdfExportDownloadResponse404 = {
+  data: ErrorResponse
+  status: 404
+}
+
+export type documentPdfExportDownloadResponse405 = {
+  data: ErrorResponse
+  status: 405
+}
+
+export type documentPdfExportDownloadResponse409 = {
+  data: ErrorResponse
+  status: 409
+}
+
+export type documentPdfExportDownloadResponse422 = {
+  data: ErrorResponse
+  status: 422
+}
+
+export type documentPdfExportDownloadResponse429 = {
+  data: ErrorResponse
+  status: 429
+}
+
+export type documentPdfExportDownloadResponse500 = {
+  data: ErrorResponse
+  status: 500
+}
+
+export type documentPdfExportDownloadResponseSuccess = (documentPdfExportDownloadResponse200) & {
+  headers: Headers;
+};
+export type documentPdfExportDownloadResponseError = (documentPdfExportDownloadResponse400 | documentPdfExportDownloadResponse401 | documentPdfExportDownloadResponse403 | documentPdfExportDownloadResponse404 | documentPdfExportDownloadResponse405 | documentPdfExportDownloadResponse409 | documentPdfExportDownloadResponse422 | documentPdfExportDownloadResponse429 | documentPdfExportDownloadResponse500) & {
+  headers: Headers;
+};
+
+export type documentPdfExportDownloadResponse = (documentPdfExportDownloadResponseSuccess | documentPdfExportDownloadResponseError)
+
+export const getDocumentPdfExportDownloadUrl = (exportId: string,) => {
+
+
+
+
+  return `${import.meta.env.VITE_API_ORIGIN || ''}/api/v1/document-exports/${exportId}/content`
+}
+
+/**
+ * @summary Download Pdf
+ */
+export const documentPdfExportDownload = async (exportId: string, options?: RequestInit): Promise<documentPdfExportDownloadResponse> => {
+
+  const res = await fetch(getDocumentPdfExportDownloadUrl(exportId),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+)
+
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.blob();
+  const data: documentPdfExportDownloadResponse['data'] = body as documentPdfExportDownloadResponse['data']
+  return { data, status: res.status, headers: res.headers } as documentPdfExportDownloadResponse
 }
 
 

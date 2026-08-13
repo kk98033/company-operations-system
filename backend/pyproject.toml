@@ -15,6 +15,7 @@ dependencies = [
     "pydantic>=2.10,<3.0",
     "psycopg[binary]>=3.3.4,<3.4",
     "python-dotenv>=1.0,<2.0",
+    "reportlab>=4.4,<5.0",
     "sqlalchemy>=2.0.51,<2.1",
     "uvicorn[standard]>=0.34,<1.0",
 ]
@@ -29,6 +30,9 @@ dev = [
 
 [tool.setuptools.packages.find]
 include = ["app*"]
+
+[tool.setuptools.package-data]
+"app.modules.document_exports" = ["assets/*.ttf", "assets/OFL.txt"]
 
 [tool.pytest.ini_options]
 addopts = "-q --strict-config --strict-markers"

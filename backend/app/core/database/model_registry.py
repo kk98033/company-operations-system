@@ -15,6 +15,7 @@ from app.modules.authorization.models import (
 )
 from app.modules.billing.models import Receipt, ReceiptAllocation, Statement, StatementItem
 from app.modules.customers.models import Customer, CustomerWorkItem
+from app.modules.document_exports.models import DocumentExport
 from app.modules.imports.models import (
     ImportError,
     ImportRun,
@@ -67,6 +68,7 @@ REGISTERED_MODELS = (
     StatementItem,
     Receipt,
     ReceiptAllocation,
+    DocumentExport,
     PriceHistory,
     Vendor,
     PaperType,

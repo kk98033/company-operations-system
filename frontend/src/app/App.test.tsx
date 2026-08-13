@@ -29,7 +29,7 @@ describe('應用程式骨架', () => {
     expect(decisionKpi).not.toBeNull()
     expect(within(decisionKpi as HTMLElement).getByText('10 / 10')).toBeInTheDocument()
     expect(within(decisionKpi as HTMLElement).getByText('公司已確認')).toBeInTheDocument()
-    expect(screen.getByText(/開工決策 10／10 已確認/)).toBeInTheDocument()
+    expect(screen.getByText(/Phase 2～8 已接上正式 API 與資料庫/)).toBeInTheDocument()
   })
 
   it('可收合與展開正式側邊欄', async () => {

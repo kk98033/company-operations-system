@@ -11,6 +11,10 @@ API_DESCRIPTION = "公司內部報價、工單、生產、出貨與帳務系統 
 API_VERSION = "0.1.0"
 API_TAGS = [
     {
+        "name": "document-exports",
+        "description": "建立、保存並下載具雜湊的公司文件 PDF。",
+    },
+    {
         "name": "billing",
         "description": "目前公司的對帳、請款狀態、收款分配與帳齡。",
     },

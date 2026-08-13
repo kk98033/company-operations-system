@@ -84,6 +84,7 @@ AUTHORIZATION_TABLES = [
 AUDIT_TABLES = ["audit_logs"]
 LOGIN_SECURITY_TABLES = ["login_security_events", "login_throttle_states"]
 
+
 def test_schema_upgrade_downgrade_upgrade_round_trip(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
@@ -96,7 +97,7 @@ def test_schema_upgrade_downgrade_upgrade_round_trip(
     assert REGISTERED_MODELS
 
     command.upgrade(config, "head")
-    assert _current_revision() == "0023_billing_invariants"
+    assert _current_revision() == "0024_document_exports"
     assert _table_names() == [
         "alembic_version",
         *sorted(
@@ -115,19 +116,19 @@ def test_schema_upgrade_downgrade_upgrade_round_trip(
                 *SHIPMENT_TABLES,
                 *PRICING_TABLES,
                 *BILLING_TABLES,
+                "document_exports",
                 *MASTER_DATA_TABLES,
             ]
         ),
     ]
 
     command.check(config)
-
     command.downgrade(config, "base")
     assert _current_revision() is None
     assert _table_names() == ["alembic_version"]
 
     command.upgrade(config, "head")
-    assert _current_revision() == "0023_billing_invariants"
+    assert _current_revision() == "0024_document_exports"
     assert _table_names() == [
         "alembic_version",
         *sorted(
@@ -146,6 +147,7 @@ def test_schema_upgrade_downgrade_upgrade_round_trip(
                 *SHIPMENT_TABLES,
                 *PRICING_TABLES,
                 *BILLING_TABLES,
+                "document_exports",
                 *MASTER_DATA_TABLES,
             ]
         ),
@@ -198,9 +200,7 @@ def test_identity_downgrade_preserves_existing_import_foundation(
         resources.dispose()
 
     command.upgrade(config, "head")
-    assert _current_revision() == "0023_billing_invariants"
-    command.check(config)
-
+    assert _current_revision() == "0024_document_exports"; command.check(config)  # noqa: E702
     resources = create_database_resources(settings)
     try:
         with resources.engine.begin() as connection:

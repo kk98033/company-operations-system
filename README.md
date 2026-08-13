@@ -55,16 +55,18 @@
 | 項目 | 目前狀態 |
 |---|---|
 | 最後更新日期 | 2026-08-13 |
-| 計畫版本 | v1.23（Phase 8 Slice 8.1～8.10 全部完成） |
-| 架構版本 | v1.24（對帳、收款分配、沖銷與帳齡同步） |
-| 目前階段 | Phase 8 請款、對帳與收款工程完成（10／10）；下一階段為 Phase 9 工作台與整合查詢 |
-| 目前切片 | Phase 8 收尾：單一對帳單、可選計稅快照、部分收款、跨對帳單分配、沖銷、帳齡及 Import I-6.1 dry-run 已完成 |
+| 計畫版本 | v1.24（Phase 8 後補強正式 PDF 匯出） |
+| 架構版本 | v1.25（不可變 PDF、雜湊、公司隔離下載） |
+| 目前階段 | Phase 8 與 PDF 匯出補強完成；下一階段為 Phase 9 工作台與整合查詢 |
+| 目前切片 | PDF-EXPORT-001：報價、工單、出貨單、對帳單可由伺服器產生、保存版本及 SHA-256 後下載 |
 | 實作完成度 | Phase 0：完成；Import I-0：3／3；Phase 1：9／9；Phase 2：10／10；Phase 3：8／8；Phase 4：18／18；Phase 5：12／12；Phase 6：10／10；Phase 7：9／9；Phase 8：10／10；下一階段為 Phase 9 查詢整合 |
 | 規劃文件完成度 | 100% |
-| 最新中型進度備份 | 本次提交後建立 Git tag `checkpoint-phase-8` 與專案外 bundle |
+| 最新中型進度備份 | 本次提交後建立 Git tag `checkpoint-document-pdf-export-v1` 與專案外 bundle |
 | 正式遠端 Git 備份 | 尚未設定；R-11 維持 Open，正式部署前必須建立私人 repository |
 
 ### 已完成
+
+- 完成 PDF-EXPORT-001：四種正式單據的 print route 同時提供「下載 PDF」；後端按文件版本與模板版本產生不可變 PDF、保存內容與 SHA-256、以公司及 capability 隔離下載並留下 audit。報價使用 A4 橫向，公司工單使用 A4 直向固定 9 道列印製程並納入有效附件圖；已嵌入 OFL 授權 Noto Sans TC，避免 Linux 伺服器缺中文字。
 
 - 讀取公司流程影片、操作圖片及 Private & Shared 流程說明。
 - 解析舊 PowerBuilder 系統的視窗、DataWindow、功能關聯與資料表。

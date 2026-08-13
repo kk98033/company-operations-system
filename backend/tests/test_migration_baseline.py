@@ -44,6 +44,7 @@ def test_base_metadata_contains_import_and_identity_foundation_tables() -> None:
         "statement_items",
         "receipts",
         "receipt_allocations",
+        "document_exports",
         "paper_mills",
         "paper_types",
         "process_definitions",

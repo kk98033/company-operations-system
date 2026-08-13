@@ -1,0 +1,17 @@
+.document-pdf-action {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.document-pdf-action__status {
+  color: var(--color-success-600);
+  font-size: var(--font-size-sm);
+  white-space: nowrap;
+}
+
+@media print {
+  .document-pdf-action {
+    display: none;
+  }
+}

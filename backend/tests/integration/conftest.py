@@ -74,7 +74,7 @@ def identity_engine(migrated_engine: Engine) -> Generator[Engine, None, None]:
             connection.execute(Permission.__table__.delete())
             connection.execute(
                 text(
-                    "TRUNCATE TABLE receipt_allocations, receipts, statement_items, statements, "
+                    "TRUNCATE TABLE document_exports, receipt_allocations, receipts, statement_items, statements, "
                     "price_history, pricing_items, pricing_documents, "
                     "inventory_ledger, shipment_items, shipments, inventory_adjustments, "
                     "final_completion_entries, process_events"
