@@ -35,6 +35,8 @@ def test_base_metadata_contains_import_and_identity_foundation_tables() -> None:
         "final_completion_entries",
         "inventory_adjustments",
         "inventory_ledger",
+        "shipments",
+        "shipment_items",
         "paper_mills",
         "paper_types",
         "process_definitions",

@@ -123,6 +123,11 @@ import-inventory-dry-run:
 		--source-dir "$(LEGACY_SOURCE_DIR)" \
 		--output-file "artifacts/import/inventory/merchandise_dry_run.json"
 
+import-shipments-dry-run:
+	$(PYTHON) scripts/legacy_shipment_dry_run.py \
+		--source-dir "$(LEGACY_SOURCE_DIR)" \
+		--output-file "artifacts/import/shipments/subp_sale_dry_run.json"
+
 backend-test:
 	cd backend && .venv/bin/python -m pytest -m "not database_integration"
 

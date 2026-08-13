@@ -60,35 +60,32 @@ export interface AuthenticatedUserResponse {
   login_name: string;
 }
 
-export interface CaseCreate {
-  case_date: string;
+export interface AvailableShipmentItem {
+  /** @pattern ^(?!^[-+.]*$)[+-]?0*\d*\.?\d*$ */
+  available_quantity: string;
   customer_id: string;
-  notes?: string | null;
+  customer_name: string;
+  customer_order_number: string | null;
+  document_number: string;
+  /** @pattern ^(?!^[-+.]*$)[+-]?0*\d*\.?\d*$ */
+  order_quantity: string;
+  product_name: string;
+  specification: string | null;
+  work_order_id: string;
 }
 
-export type CaseStatus = typeof CaseStatus[keyof typeof CaseStatus];
+export type ShipmentStatus = typeof ShipmentStatus[keyof typeof ShipmentStatus];
 
 
-export const CaseStatus = {
+export const ShipmentStatus = {
   draft: 'draft',
-  active: 'active',
-  void: 'void',
+  confirmed: 'confirmed',
+  cancelled: 'cancelled',
 } as const;
 
-export interface CaseFilters {
+export interface ShipmentFilters {
   keyword: string | null;
-  status: CaseStatus | null;
-}
-
-export interface CaseSummary {
-  case_date: string;
-  case_number: string;
-  confirmed_count: number;
-  customer_name: string;
-  id: string;
-  status: CaseStatus;
-  updated_at: string;
-  work_order_count: number;
+  status: ShipmentStatus | null;
 }
 
 /**
@@ -130,6 +127,48 @@ export const SortDirection = {
 export interface SortMeta {
   direction: SortDirection;
   field: string;
+}
+
+export interface ListResponseMetaShipmentFilters {
+  filters: ShipmentFilters;
+  pagination: PaginationMeta;
+  sort: SortMeta;
+}
+
+export interface AvailableShipmentListResponse {
+  items: AvailableShipmentItem[];
+  meta: ListResponseMetaShipmentFilters;
+}
+
+export interface CaseCreate {
+  case_date: string;
+  customer_id: string;
+  notes?: string | null;
+}
+
+export type CaseStatus = typeof CaseStatus[keyof typeof CaseStatus];
+
+
+export const CaseStatus = {
+  draft: 'draft',
+  active: 'active',
+  void: 'void',
+} as const;
+
+export interface CaseFilters {
+  keyword: string | null;
+  status: CaseStatus | null;
+}
+
+export interface CaseSummary {
+  case_date: string;
+  case_number: string;
+  confirmed_count: number;
+  customer_name: string;
+  id: string;
+  status: CaseStatus;
+  updated_at: string;
+  work_order_count: number;
 }
 
 export interface ListResponseMetaCaseFilters {
@@ -280,6 +319,16 @@ export interface CatalogUpdate {
      * @maximum 9999
      */
   sort_order?: number;
+}
+
+export interface CompletionDuringShipment {
+  quantity: number | string;
+  /**
+     * @minLength 1
+     * @maxLength 1000
+     */
+  reason: string;
+  work_order_id: string;
 }
 
 export interface ConfirmRequest {
@@ -491,6 +540,7 @@ export interface InventoryLedgerResponse {
   /** @pattern ^(?!^[-+.]*$)[+-]?0*\d*\.?\d*$ */
   quantity: string;
   reason: string;
+  shipment_item_id: string | null;
   work_order_id: string;
 }
 
@@ -1054,6 +1104,115 @@ export interface ReversalCreate {
   reason: string;
 }
 
+export interface ShipmentCancel {
+  /** @exclusiveMinimum 0 */
+  expected_version: number;
+  idempotency_key: string;
+  /**
+     * @minLength 1
+     * @maxLength 1000
+     */
+  reason: string;
+}
+
+export interface ShipmentConfirm {
+  /** @maxItems 100 */
+  completions?: CompletionDuringShipment[];
+  /** @exclusiveMinimum 0 */
+  expected_version: number;
+  idempotency_key: string;
+}
+
+export interface ShipmentItemInput {
+  delivered_quantity: number | string;
+  spare_quantity?: number | string;
+  work_order_id: string;
+}
+
+export interface ShipmentDraftCreate {
+  customer_id: string;
+  delivery_address?: string | null;
+  idempotency_key: string;
+  /**
+     * @minItems 1
+     * @maxItems 100
+     */
+  items: ShipmentItemInput[];
+  notes?: string | null;
+  shipment_date: string;
+}
+
+export interface ShipmentDraftUpdate {
+  delivery_address?: string | null;
+  /** @exclusiveMinimum 0 */
+  expected_version: number;
+  /**
+     * @minItems 1
+     * @maxItems 100
+     */
+  items: ShipmentItemInput[];
+  notes?: string | null;
+  shipment_date: string;
+}
+
+export interface ShipmentItemResponse {
+  available_quantity_snapshot: string | null;
+  cumulative_delivered_snapshot: string | null;
+  customer_order_number: string | null;
+  /** @pattern ^(?!^[-+.]*$)[+-]?0*\d*\.?\d*$ */
+  delivered_quantity: string;
+  id: string;
+  /** @pattern ^(?!^[-+.]*$)[+-]?0*\d*\.?\d*$ */
+  inventory_consumed_quantity: string;
+  line_no: number;
+  product_name: string;
+  /** @pattern ^(?!^[-+.]*$)[+-]?0*\d*\.?\d*$ */
+  spare_quantity: string;
+  specification: string | null;
+  work_order_document_number: string;
+  work_order_id: string;
+}
+
+export interface ShipmentSummary {
+  created_at: string;
+  customer_name: string;
+  /** @pattern ^(?!^[-+.]*$)[+-]?0*\d*\.?\d*$ */
+  delivered_quantity: string;
+  document_number: string;
+  id: string;
+  legacy_document_number: string | null;
+  line_count: number;
+  shipment_date: string;
+  /** @pattern ^(?!^[-+.]*$)[+-]?0*\d*\.?\d*$ */
+  spare_quantity: string;
+  status: ShipmentStatus;
+}
+
+export interface ShipmentListResponse {
+  items: ShipmentSummary[];
+  meta: ListResponseMetaShipmentFilters;
+}
+
+export interface ShipmentResponse {
+  cancel_reason: string | null;
+  cancelled_at: string | null;
+  confirmed_at: string | null;
+  created_at: string;
+  customer_id: string;
+  customer_name: string;
+  delivery_address: string | null;
+  document_number: string;
+  id: string;
+  items: ShipmentItemResponse[];
+  legacy_document_number: string | null;
+  notes: string | null;
+  shipment_date: string;
+  status: ShipmentStatus;
+  updated_at: string;
+  version: number;
+  warnings?: string[];
+}
+
 export type VendorCategory = typeof VendorCategory[keyof typeof VendorCategory];
 
 
@@ -1465,6 +1624,36 @@ export type QuotationListParams = {
 status?: QuotationStatus | null;
 date_from?: string | null;
 date_to?: string | null;
+/**
+ * @minimum 1
+ * @maximum 1000000
+ */
+page?: number;
+/**
+ * @minimum 1
+ * @maximum 100
+ */
+page_size?: number;
+keyword?: string | null;
+};
+
+export type ShipmentListParams = {
+status?: ShipmentStatus | null;
+/**
+ * @minimum 1
+ * @maximum 1000000
+ */
+page?: number;
+/**
+ * @minimum 1
+ * @maximum 100
+ */
+page_size?: number;
+keyword?: string | null;
+};
+
+export type ShipmentAvailableItemListParams = {
+customer_id: string;
 /**
  * @minimum 1
  * @maximum 1000000
@@ -6115,6 +6304,653 @@ export const quotationVoid = async (quotationId: string,
 
   const data: quotationVoidResponse['data'] = body ? JSON.parse(body) : {}
   return { data, status: res.status, headers: res.headers } as quotationVoidResponse
+}
+
+
+
+export type shipmentListResponse200 = {
+  data: ShipmentListResponse
+  status: 200
+}
+
+export type shipmentListResponse400 = {
+  data: ErrorResponse
+  status: 400
+}
+
+export type shipmentListResponse401 = {
+  data: ErrorResponse
+  status: 401
+}
+
+export type shipmentListResponse403 = {
+  data: ErrorResponse
+  status: 403
+}
+
+export type shipmentListResponse404 = {
+  data: ErrorResponse
+  status: 404
+}
+
+export type shipmentListResponse405 = {
+  data: ErrorResponse
+  status: 405
+}
+
+export type shipmentListResponse409 = {
+  data: ErrorResponse
+  status: 409
+}
+
+export type shipmentListResponse422 = {
+  data: ErrorResponse
+  status: 422
+}
+
+export type shipmentListResponse429 = {
+  data: ErrorResponse
+  status: 429
+}
+
+export type shipmentListResponse500 = {
+  data: ErrorResponse
+  status: 500
+}
+
+export type shipmentListResponseSuccess = (shipmentListResponse200) & {
+  headers: Headers;
+};
+export type shipmentListResponseError = (shipmentListResponse400 | shipmentListResponse401 | shipmentListResponse403 | shipmentListResponse404 | shipmentListResponse405 | shipmentListResponse409 | shipmentListResponse422 | shipmentListResponse429 | shipmentListResponse500) & {
+  headers: Headers;
+};
+
+export type shipmentListResponse = (shipmentListResponseSuccess | shipmentListResponseError)
+
+export const getShipmentListUrl = (params?: ShipmentListParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `${import.meta.env.VITE_API_ORIGIN || ''}/api/v1/shipments?${stringifiedParams}` : `${import.meta.env.VITE_API_ORIGIN || ''}/api/v1/shipments`
+}
+
+/**
+ * @summary Shipment List
+ */
+export const shipmentList = async (params?: ShipmentListParams, options?: RequestInit): Promise<shipmentListResponse> => {
+
+  const res = await fetch(getShipmentListUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+)
+
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+
+  const data: shipmentListResponse['data'] = body ? JSON.parse(body) : {}
+  return { data, status: res.status, headers: res.headers } as shipmentListResponse
+}
+
+
+
+export type shipmentCreateResponse201 = {
+  data: ShipmentResponse
+  status: 201
+}
+
+export type shipmentCreateResponse400 = {
+  data: ErrorResponse
+  status: 400
+}
+
+export type shipmentCreateResponse401 = {
+  data: ErrorResponse
+  status: 401
+}
+
+export type shipmentCreateResponse403 = {
+  data: ErrorResponse
+  status: 403
+}
+
+export type shipmentCreateResponse404 = {
+  data: ErrorResponse
+  status: 404
+}
+
+export type shipmentCreateResponse405 = {
+  data: ErrorResponse
+  status: 405
+}
+
+export type shipmentCreateResponse409 = {
+  data: ErrorResponse
+  status: 409
+}
+
+export type shipmentCreateResponse422 = {
+  data: ErrorResponse
+  status: 422
+}
+
+export type shipmentCreateResponse429 = {
+  data: ErrorResponse
+  status: 429
+}
+
+export type shipmentCreateResponse500 = {
+  data: ErrorResponse
+  status: 500
+}
+
+export type shipmentCreateResponseSuccess = (shipmentCreateResponse201) & {
+  headers: Headers;
+};
+export type shipmentCreateResponseError = (shipmentCreateResponse400 | shipmentCreateResponse401 | shipmentCreateResponse403 | shipmentCreateResponse404 | shipmentCreateResponse405 | shipmentCreateResponse409 | shipmentCreateResponse422 | shipmentCreateResponse429 | shipmentCreateResponse500) & {
+  headers: Headers;
+};
+
+export type shipmentCreateResponse = (shipmentCreateResponseSuccess | shipmentCreateResponseError)
+
+export const getShipmentCreateUrl = () => {
+
+
+
+
+  return `${import.meta.env.VITE_API_ORIGIN || ''}/api/v1/shipments`
+}
+
+/**
+ * @summary Shipment Create
+ */
+export const shipmentCreate = async (shipmentDraftCreate: ShipmentDraftCreate, options?: RequestInit): Promise<shipmentCreateResponse> => {
+
+  const res = await fetch(getShipmentCreateUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(shipmentDraftCreate)
+  }
+)
+
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+
+  const data: shipmentCreateResponse['data'] = body ? JSON.parse(body) : {}
+  return { data, status: res.status, headers: res.headers } as shipmentCreateResponse
+}
+
+
+
+export type shipmentAvailableItemListResponse200 = {
+  data: AvailableShipmentListResponse
+  status: 200
+}
+
+export type shipmentAvailableItemListResponse400 = {
+  data: ErrorResponse
+  status: 400
+}
+
+export type shipmentAvailableItemListResponse401 = {
+  data: ErrorResponse
+  status: 401
+}
+
+export type shipmentAvailableItemListResponse403 = {
+  data: ErrorResponse
+  status: 403
+}
+
+export type shipmentAvailableItemListResponse404 = {
+  data: ErrorResponse
+  status: 404
+}
+
+export type shipmentAvailableItemListResponse405 = {
+  data: ErrorResponse
+  status: 405
+}
+
+export type shipmentAvailableItemListResponse409 = {
+  data: ErrorResponse
+  status: 409
+}
+
+export type shipmentAvailableItemListResponse422 = {
+  data: ErrorResponse
+  status: 422
+}
+
+export type shipmentAvailableItemListResponse429 = {
+  data: ErrorResponse
+  status: 429
+}
+
+export type shipmentAvailableItemListResponse500 = {
+  data: ErrorResponse
+  status: 500
+}
+
+export type shipmentAvailableItemListResponseSuccess = (shipmentAvailableItemListResponse200) & {
+  headers: Headers;
+};
+export type shipmentAvailableItemListResponseError = (shipmentAvailableItemListResponse400 | shipmentAvailableItemListResponse401 | shipmentAvailableItemListResponse403 | shipmentAvailableItemListResponse404 | shipmentAvailableItemListResponse405 | shipmentAvailableItemListResponse409 | shipmentAvailableItemListResponse422 | shipmentAvailableItemListResponse429 | shipmentAvailableItemListResponse500) & {
+  headers: Headers;
+};
+
+export type shipmentAvailableItemListResponse = (shipmentAvailableItemListResponseSuccess | shipmentAvailableItemListResponseError)
+
+export const getShipmentAvailableItemListUrl = (params: ShipmentAvailableItemListParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `${import.meta.env.VITE_API_ORIGIN || ''}/api/v1/shipments/available-items?${stringifiedParams}` : `${import.meta.env.VITE_API_ORIGIN || ''}/api/v1/shipments/available-items`
+}
+
+/**
+ * @summary Available Item List
+ */
+export const shipmentAvailableItemList = async (params: ShipmentAvailableItemListParams, options?: RequestInit): Promise<shipmentAvailableItemListResponse> => {
+
+  const res = await fetch(getShipmentAvailableItemListUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+)
+
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+
+  const data: shipmentAvailableItemListResponse['data'] = body ? JSON.parse(body) : {}
+  return { data, status: res.status, headers: res.headers } as shipmentAvailableItemListResponse
+}
+
+
+
+export type shipmentGetResponse200 = {
+  data: ShipmentResponse
+  status: 200
+}
+
+export type shipmentGetResponse400 = {
+  data: ErrorResponse
+  status: 400
+}
+
+export type shipmentGetResponse401 = {
+  data: ErrorResponse
+  status: 401
+}
+
+export type shipmentGetResponse403 = {
+  data: ErrorResponse
+  status: 403
+}
+
+export type shipmentGetResponse404 = {
+  data: ErrorResponse
+  status: 404
+}
+
+export type shipmentGetResponse405 = {
+  data: ErrorResponse
+  status: 405
+}
+
+export type shipmentGetResponse409 = {
+  data: ErrorResponse
+  status: 409
+}
+
+export type shipmentGetResponse422 = {
+  data: ErrorResponse
+  status: 422
+}
+
+export type shipmentGetResponse429 = {
+  data: ErrorResponse
+  status: 429
+}
+
+export type shipmentGetResponse500 = {
+  data: ErrorResponse
+  status: 500
+}
+
+export type shipmentGetResponseSuccess = (shipmentGetResponse200) & {
+  headers: Headers;
+};
+export type shipmentGetResponseError = (shipmentGetResponse400 | shipmentGetResponse401 | shipmentGetResponse403 | shipmentGetResponse404 | shipmentGetResponse405 | shipmentGetResponse409 | shipmentGetResponse422 | shipmentGetResponse429 | shipmentGetResponse500) & {
+  headers: Headers;
+};
+
+export type shipmentGetResponse = (shipmentGetResponseSuccess | shipmentGetResponseError)
+
+export const getShipmentGetUrl = (shipmentId: string,) => {
+
+
+
+
+  return `${import.meta.env.VITE_API_ORIGIN || ''}/api/v1/shipments/${shipmentId}`
+}
+
+/**
+ * @summary Shipment Get
+ */
+export const shipmentGet = async (shipmentId: string, options?: RequestInit): Promise<shipmentGetResponse> => {
+
+  const res = await fetch(getShipmentGetUrl(shipmentId),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+)
+
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+
+  const data: shipmentGetResponse['data'] = body ? JSON.parse(body) : {}
+  return { data, status: res.status, headers: res.headers } as shipmentGetResponse
+}
+
+
+
+export type shipmentUpdateResponse200 = {
+  data: ShipmentResponse
+  status: 200
+}
+
+export type shipmentUpdateResponse400 = {
+  data: ErrorResponse
+  status: 400
+}
+
+export type shipmentUpdateResponse401 = {
+  data: ErrorResponse
+  status: 401
+}
+
+export type shipmentUpdateResponse403 = {
+  data: ErrorResponse
+  status: 403
+}
+
+export type shipmentUpdateResponse404 = {
+  data: ErrorResponse
+  status: 404
+}
+
+export type shipmentUpdateResponse405 = {
+  data: ErrorResponse
+  status: 405
+}
+
+export type shipmentUpdateResponse409 = {
+  data: ErrorResponse
+  status: 409
+}
+
+export type shipmentUpdateResponse422 = {
+  data: ErrorResponse
+  status: 422
+}
+
+export type shipmentUpdateResponse429 = {
+  data: ErrorResponse
+  status: 429
+}
+
+export type shipmentUpdateResponse500 = {
+  data: ErrorResponse
+  status: 500
+}
+
+export type shipmentUpdateResponseSuccess = (shipmentUpdateResponse200) & {
+  headers: Headers;
+};
+export type shipmentUpdateResponseError = (shipmentUpdateResponse400 | shipmentUpdateResponse401 | shipmentUpdateResponse403 | shipmentUpdateResponse404 | shipmentUpdateResponse405 | shipmentUpdateResponse409 | shipmentUpdateResponse422 | shipmentUpdateResponse429 | shipmentUpdateResponse500) & {
+  headers: Headers;
+};
+
+export type shipmentUpdateResponse = (shipmentUpdateResponseSuccess | shipmentUpdateResponseError)
+
+export const getShipmentUpdateUrl = (shipmentId: string,) => {
+
+
+
+
+  return `${import.meta.env.VITE_API_ORIGIN || ''}/api/v1/shipments/${shipmentId}`
+}
+
+/**
+ * @summary Shipment Update
+ */
+export const shipmentUpdate = async (shipmentId: string,
+    shipmentDraftUpdate: ShipmentDraftUpdate, options?: RequestInit): Promise<shipmentUpdateResponse> => {
+
+  const res = await fetch(getShipmentUpdateUrl(shipmentId),
+  {
+    ...options,
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(shipmentDraftUpdate)
+  }
+)
+
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+
+  const data: shipmentUpdateResponse['data'] = body ? JSON.parse(body) : {}
+  return { data, status: res.status, headers: res.headers } as shipmentUpdateResponse
+}
+
+
+
+export type shipmentCancelResponse200 = {
+  data: ShipmentResponse
+  status: 200
+}
+
+export type shipmentCancelResponse400 = {
+  data: ErrorResponse
+  status: 400
+}
+
+export type shipmentCancelResponse401 = {
+  data: ErrorResponse
+  status: 401
+}
+
+export type shipmentCancelResponse403 = {
+  data: ErrorResponse
+  status: 403
+}
+
+export type shipmentCancelResponse404 = {
+  data: ErrorResponse
+  status: 404
+}
+
+export type shipmentCancelResponse405 = {
+  data: ErrorResponse
+  status: 405
+}
+
+export type shipmentCancelResponse409 = {
+  data: ErrorResponse
+  status: 409
+}
+
+export type shipmentCancelResponse422 = {
+  data: ErrorResponse
+  status: 422
+}
+
+export type shipmentCancelResponse429 = {
+  data: ErrorResponse
+  status: 429
+}
+
+export type shipmentCancelResponse500 = {
+  data: ErrorResponse
+  status: 500
+}
+
+export type shipmentCancelResponseSuccess = (shipmentCancelResponse200) & {
+  headers: Headers;
+};
+export type shipmentCancelResponseError = (shipmentCancelResponse400 | shipmentCancelResponse401 | shipmentCancelResponse403 | shipmentCancelResponse404 | shipmentCancelResponse405 | shipmentCancelResponse409 | shipmentCancelResponse422 | shipmentCancelResponse429 | shipmentCancelResponse500) & {
+  headers: Headers;
+};
+
+export type shipmentCancelResponse = (shipmentCancelResponseSuccess | shipmentCancelResponseError)
+
+export const getShipmentCancelUrl = (shipmentId: string,) => {
+
+
+
+
+  return `${import.meta.env.VITE_API_ORIGIN || ''}/api/v1/shipments/${shipmentId}/cancel`
+}
+
+/**
+ * @summary Shipment Cancel
+ */
+export const shipmentCancel = async (shipmentId: string,
+    shipmentCancelBody: ShipmentCancel, options?: RequestInit): Promise<shipmentCancelResponse> => {
+
+  const res = await fetch(getShipmentCancelUrl(shipmentId),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(shipmentCancelBody)
+  }
+)
+
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+
+  const data: shipmentCancelResponse['data'] = body ? JSON.parse(body) : {}
+  return { data, status: res.status, headers: res.headers } as shipmentCancelResponse
+}
+
+
+
+export type shipmentConfirmResponse200 = {
+  data: ShipmentResponse
+  status: 200
+}
+
+export type shipmentConfirmResponse400 = {
+  data: ErrorResponse
+  status: 400
+}
+
+export type shipmentConfirmResponse401 = {
+  data: ErrorResponse
+  status: 401
+}
+
+export type shipmentConfirmResponse403 = {
+  data: ErrorResponse
+  status: 403
+}
+
+export type shipmentConfirmResponse404 = {
+  data: ErrorResponse
+  status: 404
+}
+
+export type shipmentConfirmResponse405 = {
+  data: ErrorResponse
+  status: 405
+}
+
+export type shipmentConfirmResponse409 = {
+  data: ErrorResponse
+  status: 409
+}
+
+export type shipmentConfirmResponse422 = {
+  data: ErrorResponse
+  status: 422
+}
+
+export type shipmentConfirmResponse429 = {
+  data: ErrorResponse
+  status: 429
+}
+
+export type shipmentConfirmResponse500 = {
+  data: ErrorResponse
+  status: 500
+}
+
+export type shipmentConfirmResponseSuccess = (shipmentConfirmResponse200) & {
+  headers: Headers;
+};
+export type shipmentConfirmResponseError = (shipmentConfirmResponse400 | shipmentConfirmResponse401 | shipmentConfirmResponse403 | shipmentConfirmResponse404 | shipmentConfirmResponse405 | shipmentConfirmResponse409 | shipmentConfirmResponse422 | shipmentConfirmResponse429 | shipmentConfirmResponse500) & {
+  headers: Headers;
+};
+
+export type shipmentConfirmResponse = (shipmentConfirmResponseSuccess | shipmentConfirmResponseError)
+
+export const getShipmentConfirmUrl = (shipmentId: string,) => {
+
+
+
+
+  return `${import.meta.env.VITE_API_ORIGIN || ''}/api/v1/shipments/${shipmentId}/confirm`
+}
+
+/**
+ * @summary Shipment Confirm
+ */
+export const shipmentConfirm = async (shipmentId: string,
+    shipmentConfirmBody: ShipmentConfirm, options?: RequestInit): Promise<shipmentConfirmResponse> => {
+
+  const res = await fetch(getShipmentConfirmUrl(shipmentId),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(shipmentConfirmBody)
+  }
+)
+
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+
+  const data: shipmentConfirmResponse['data'] = body ? JSON.parse(body) : {}
+  return { data, status: res.status, headers: res.headers } as shipmentConfirmResponse
 }
 
 

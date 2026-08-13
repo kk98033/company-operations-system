@@ -1,0 +1,26 @@
+.shipment-page { min-width: 0; max-width: 100%; }
+.shipment-page .ui-table-frame { min-width: 0; max-width: 100%; margin: 0; }
+.shipment-page .ui-data-table th small, .shipment-page .ui-data-table td small { display: block; margin-top: .25rem; color: var(--color-text-muted); font-weight: 400; }
+.shipment-header-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-4); }
+.shipment-page-actions { display: flex; justify-content: flex-end; padding: var(--space-4) 0; border-top: 1px solid var(--color-border-strong); }
+.shipment-summary { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); border: 1px solid var(--color-border); }
+.shipment-summary > div { display: grid; gap: var(--space-2); padding: var(--space-4); border-right: 1px solid var(--color-border); }
+.shipment-summary > div:last-child { border-right: 0; }
+.shipment-summary span:first-child { color: var(--color-text-muted); font-size: var(--font-size-sm); }
+.shipment-completion-grid { display: grid; gap: var(--space-3); }
+.shipment-completion-row { display: grid; grid-template-columns: minmax(14rem, 1fr) repeat(2, minmax(12rem, 1fr)); align-items: end; gap: var(--space-4); padding-block: var(--space-3); border-bottom: 1px solid var(--color-border); }
+.shipment-cancel-form { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: end; gap: var(--space-4); }
+.shipment-print-shell { background: #d9dde3; min-height: 100vh; padding: 1.5rem; }
+.shipment-print-toolbar { display: flex; justify-content: center; gap: .75rem; margin-bottom: 1rem; }
+.shipment-print-page { width: 210mm; min-height: 297mm; margin: auto; padding: 15mm; background: #fff; color: #111; }
+.shipment-print-page header { border-bottom: 2px solid #111; }
+.shipment-print-page header > p { margin: 0; text-align: center; letter-spacing: .5em; }
+.shipment-print-page h1 { text-align: center; font-size: 1.4rem; }
+.shipment-print-page dl { display: grid; grid-template-columns: 1fr 1fr; gap: .5rem 2rem; }
+.shipment-print-page dl div { display: flex; gap: .75rem; }
+.shipment-print-page table { width: 100%; margin-top: 1rem; border-collapse: collapse; }
+.shipment-print-page th, .shipment-print-page td { padding: .5rem; border: 1px solid #444; text-align: left; }
+.shipment-print-page footer > div { display: flex; justify-content: space-between; margin-top: 3rem; }
+@media (max-width: 64rem) { .shipment-summary { grid-template-columns: repeat(2, minmax(0, 1fr)); } .shipment-completion-row { grid-template-columns: 1fr; } }
+@media (max-width: 46rem) { .shipment-header-grid, .shipment-summary, .shipment-cancel-form { grid-template-columns: 1fr; } .shipment-summary > div { border-right: 0; border-bottom: 1px solid var(--color-border); } .shipment-page-actions { justify-content: stretch; } .shipment-page-actions .ui-button { width: 100%; } }
+@media print { .shipment-print-shell { padding: 0; background: #fff; } .shipment-print-toolbar { display: none; } .shipment-print-page { width: auto; min-height: auto; padding: 10mm; } }

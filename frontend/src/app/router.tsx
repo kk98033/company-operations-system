@@ -21,6 +21,10 @@ import { ProductionListPage } from '../pages/production/ProductionListPage'
 import { QuotationEditPage, QuotationNewPage } from '../pages/quotations/QuotationEditorPage'
 import { QuotationListPage } from '../pages/quotations/QuotationListPage'
 import { QuotationPrintPage } from '../pages/quotations/QuotationPrintPage'
+import { ShipmentDetailPage } from '../pages/shipments/ShipmentDetailPage'
+import { ShipmentEditorPage } from '../pages/shipments/ShipmentEditorPage'
+import { ShipmentListPage } from '../pages/shipments/ShipmentListPage'
+import { ShipmentPrintPage } from '../pages/shipments/ShipmentPrintPage'
 import { CompanyProfilePage } from '../pages/settings/CompanyProfilePage'
 import { CompanyDefaultsPage } from '../pages/settings/CompanyDefaultsPage'
 import { ModulePrototypePage } from '../pages/ModulePrototypePage'
@@ -108,6 +112,8 @@ const workflowRoutes = workflowModules.map((module) => createRoute({
       ? ProductionListPage
     : module.id === 'inventory'
       ? InventoryPage
+    : module.id === 'shipments'
+      ? ShipmentListPage
     : () => <ModulePrototypePage module={module} />,
 }))
 
@@ -139,6 +145,24 @@ const productionDetailRoute = createRoute({
   getParentRoute: () => authenticatedRoute,
   path: '/production/work-orders/$workOrderId',
   component: ProductionDetailPage,
+})
+
+const shipmentNewRoute = createRoute({
+  getParentRoute: () => authenticatedRoute,
+  path: '/shipments/new',
+  component: ShipmentEditorPage,
+})
+
+const shipmentDetailRoute = createRoute({
+  getParentRoute: () => authenticatedRoute,
+  path: '/shipments/$shipmentId',
+  component: ShipmentDetailPage,
+})
+
+const shipmentPrintRoute = createRoute({
+  getParentRoute: () => authenticatedRoute,
+  path: '/shipments/$shipmentId/print',
+  component: ShipmentPrintPage,
 })
 
 const customerNewRoute = createRoute({
@@ -186,6 +210,9 @@ const routeTree = rootRoute.addChildren([
     workOrderPrintRoute,
     caseDetailRoute,
     productionDetailRoute,
+    shipmentNewRoute,
+    shipmentDetailRoute,
+    shipmentPrintRoute,
     auditLogsRoute,
     companyProfileRoute,
     companyDefaultsRoute,

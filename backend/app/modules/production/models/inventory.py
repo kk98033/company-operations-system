@@ -70,11 +70,11 @@ class InventoryLedgerEntry(Base):
     __table_args__ = (
         CheckConstraint("quantity <> 0", name="ck_inventory_ledger_nonzero"),
         CheckConstraint(
-            "event_type IN ('final_completion','completion_reversal','manual_adjustment')",
+            "event_type IN ('final_completion','completion_reversal','manual_adjustment','shipment_delivered','shipment_spare','shipment_reversal_delivered','shipment_reversal_spare')",
             name="ck_inventory_ledger_type",
         ),
         CheckConstraint(
-            "(final_completion_entry_id IS NOT NULL)::int + (inventory_adjustment_id IS NOT NULL)::int = 1",
+            "(final_completion_entry_id IS NOT NULL)::int + (inventory_adjustment_id IS NOT NULL)::int + (shipment_item_id IS NOT NULL)::int = 1",
             name="ck_inventory_ledger_one_source",
         ),
         ForeignKeyConstraint(
@@ -95,11 +95,20 @@ class InventoryLedgerEntry(Base):
             name="fk_inventory_ledger_adjustment_scope",
             ondelete="RESTRICT",
         ),
+        ForeignKeyConstraint(
+            ["organization_id", "shipment_item_id"],
+            ["shipment_items.organization_id", "shipment_items.id"],
+            name="fk_inventory_ledger_shipment_item_scope",
+            ondelete="RESTRICT",
+        ),
         UniqueConstraint(
             "organization_id", "final_completion_entry_id", name="uq_inventory_ledger_completion"
         ),
         UniqueConstraint(
             "organization_id", "inventory_adjustment_id", name="uq_inventory_ledger_adjustment"
+        ),
+        UniqueConstraint(
+            "organization_id", "shipment_item_id", "event_type", name="uq_inventory_ledger_shipment_event"
         ),
         Index(
             "ix_inventory_ledger_order_created",
@@ -117,6 +126,7 @@ class InventoryLedgerEntry(Base):
     quantity: Mapped[Decimal] = mapped_column(Numeric(14, 4))
     final_completion_entry_id: Mapped[UUID | None]
     inventory_adjustment_id: Mapped[UUID | None]
+    shipment_item_id: Mapped[UUID | None]
     reason: Mapped[str] = mapped_column(Text)
     occurred_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())

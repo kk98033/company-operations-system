@@ -130,6 +130,7 @@ class InventoryLedgerResponse(BaseModel):
     reason: str
     final_completion_entry_id: UUID | None
     inventory_adjustment_id: UUID | None
+    shipment_item_id: UUID | None
     occurred_at: datetime
     created_at: datetime
 

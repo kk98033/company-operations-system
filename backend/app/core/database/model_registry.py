@@ -34,6 +34,7 @@ from app.modules.production.models import (
     ProcessEvent,
 )
 from app.modules.quotations.models import DocumentSequence, Quotation, QuotationItem
+from app.modules.shipments.models import Shipment, ShipmentItem
 from app.modules.work_orders.models import ProductionCase, WorkOrder, WorkOrderAttachment
 
 REGISTERED_MODELS = (
@@ -56,6 +57,8 @@ REGISTERED_MODELS = (
     FinalCompletionEntry,
     InventoryAdjustment,
     InventoryLedgerEntry,
+    Shipment,
+    ShipmentItem,
     Vendor,
     PaperType,
     PaperMill,

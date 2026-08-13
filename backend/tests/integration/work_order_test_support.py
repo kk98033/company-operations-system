@@ -64,6 +64,11 @@ def setup_company(engine: Engine, suffix: str):
         "production.complete",
         "inventory.read",
         "inventory.adjust",
+        "shipment.read",
+        "shipment.create",
+        "shipment.confirm",
+        "shipment.cancel",
+        "shipment.complete_and_confirm",
     )
     client = make_auth_client(engine)
     login = client.post(

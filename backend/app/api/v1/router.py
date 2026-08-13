@@ -14,6 +14,7 @@ from app.modules.master_data import build_master_data_router
 from app.modules.organizations.api import build_organization_router
 from app.modules.production import build_production_router
 from app.modules.quotations import build_quotation_router
+from app.modules.shipments import build_shipment_router
 from app.modules.work_orders import build_work_order_router
 
 
@@ -29,4 +30,5 @@ def build_v1_router(readiness_checks: Sequence[ReadinessCheck]) -> APIRouter:
     router.include_router(build_quotation_router())
     router.include_router(build_work_order_router())
     router.include_router(build_production_router())
+    router.include_router(build_shipment_router())
     return router
