@@ -16,6 +16,8 @@ import { CustomerEditPage } from '../pages/customers/CustomerEditPage'
 import { CustomerListPage } from '../pages/customers/CustomerListPage'
 import { MasterDataPage } from '../pages/master-data/MasterDataPage'
 import { InventoryPage } from '../pages/inventory/InventoryPage'
+import { CustomerOverviewPage } from '../pages/operations/CustomerOverviewPage'
+import { SearchPage } from '../pages/operations/SearchPage'
 import { ProductionDetailPage } from '../pages/production/ProductionDetailPage'
 import { ProductionListPage } from '../pages/production/ProductionListPage'
 import { PricingDetailPage } from '../pages/pricing/PricingDetailPage'
@@ -198,6 +200,18 @@ const customerEditRoute = createRoute({
   component: CustomerEditPage,
 })
 
+const customerOverviewRoute = createRoute({
+  getParentRoute: () => authenticatedRoute,
+  path: '/customers/$customerId/overview',
+  component: CustomerOverviewPage,
+})
+
+const searchRoute = createRoute({
+  getParentRoute: () => authenticatedRoute,
+  path: '/search',
+  component: SearchPage,
+})
+
 const quotationNewRoute = createRoute({
   getParentRoute: () => authenticatedRoute,
   path: '/quotations/new',
@@ -223,6 +237,8 @@ const routeTree = rootRoute.addChildren([
     ...workflowRoutes,
     customerNewRoute,
     customerEditRoute,
+    customerOverviewRoute,
+    searchRoute,
     quotationNewRoute,
     quotationEditRoute,
     quotationPrintRoute,

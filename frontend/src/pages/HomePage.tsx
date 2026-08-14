@@ -1,40 +1,34 @@
-import { Link } from '@tanstack/react-router'
+import { useQuery } from '@tanstack/react-query'
+import { useNavigate } from '@tanstack/react-router'
 
-import { workflowModules } from '../app/workflowModules'
+import { getDashboard } from '../api/operations'
+import { getApiErrorMessage } from '../api/errorMessage'
 import { ApiConnectionStatus } from '../app/ApiConnectionStatus'
-import { KpiStrip, PageHeader, Section, StatusLabel } from '../ui/UiPatterns'
+import { KpiStrip, PageHeader, Section } from '../ui/UiPatterns'
 
 export function HomePage() {
+  const navigate = useNavigate()
+  const query = useQuery({ queryKey: ['operations', 'dashboard'], queryFn: () => getDashboard() })
   return (
     <div className="ui-pattern-stack">
       <PageHeader
         eyebrow="COMPANY SYSTEM / OVERVIEW"
         title="首頁"
-        description="核心交易已完成到對帳與收款，並支援四種正式文件 PDF；目前尚未匯入公司正式業務資料。"
-        actions={[]}
+        description="依目前登入公司的權限彙整交期、生產、待出貨、待計價與未收帳款。"
+        actions={[{ label: '整合搜尋', tone: 'primary', onClick: () => void navigate({ to: '/search' }) }]}
       />
-      <KpiStrip
-        label="工程基準狀態"
-        items={[
-          { label: '目前階段', value: 'Phase 8', hint: 'PDF 匯出補強已完成', tone: 'success' },
-          { label: '正式業務資料', value: '0', hint: '依規定尚未匯入' },
-          { label: '主模組路由', value: String(workflowModules.length), hint: '客戶一路到收款', tone: 'success' },
-          { label: '開工決策', value: '10 / 10', hint: '公司已確認', tone: 'success' },
-        ]}
-      />
+      {query.isPending ? <p>正在載入營運總覽…</p> : null}
+      {query.isError ? <Section title="營運總覽暫時無法載入"><p className="ui-inline-error" role="alert">{getApiErrorMessage(query.error)}</p><button className="ui-button ui-button--primary" onClick={() => void query.refetch()} type="button">重新載入</button></Section> : null}
+      {query.data ? <KpiStrip label={`營運指標（${query.data.as_of}）`} items={query.data.cards.map((card) => ({ label: card.label, value: card.value, hint: card.unit, tone: card.tone === 'neutral' ? 'default' : card.tone }))} /> : null}
       <div className="ui-two-column">
-        <Section title="目前成果" description="正式功能已依公司流程逐階段接上 API、資料庫與權限。">
+        <Section title="每日工作入口" description="指標會依目前權限顯示；點選模組處理對應工作。">
           <ul className="check-list">
-            <li>React、TanStack Router 與 TanStack Query</li>
-            <li>平面工業 ERP 殼層與 Design Tokens</li>
-            <li>總覽、清單、表單與詳細資料共用版型及 axe 基線</li>
-            <li>客戶、報價、案件、工單、生產、庫存、出貨、計價、對帳與收款</li>
-            <li>報價、工單、出貨單與對帳單的不可變 PDF 匯出</li>
+            <li>先查看到期工單與生產進度</li><li>處理已入庫、等待出貨的品項</li><li>完成待計價、對帳與未收帳款追蹤</li><li>用整合搜尋直接找到客戶或單據</li>
           </ul>
-          <Link className="ui-button ui-button--primary ui-section-link" to="/customers">從客戶管理開始</Link>
+          <button className="ui-button ui-button--primary ui-section-link" onClick={() => void navigate({ to: '/search' })} type="button">開啟整合搜尋</button>
+          {query.data?.cards.length ? <div className="ui-task-summary">{query.data.cards.map((card) => <a className="ui-button ui-button--secondary" href={card.target_path} key={card.key}><span>{card.label}</span><strong>{card.value} {card.unit}</strong></a>)}</div> : null}
         </Section>
-        <Section title="實作狀態" description="後續業務功能將依小切片實作、驗證與 Git 備份。">
-          <div className="ui-status-summary"><StatusLabel tone="success">核心交易已可操作</StatusLabel><strong>Phase 8 與 PDF 匯出完成</strong><p>Phase 2～8 已接上正式 API 與資料庫；公司真實資料匯入、工作台整合查詢及正式部署仍依後續 Phase 執行。</p></div>
+        <Section title="系統連線" description="此處只顯示目前服務狀態，不顯示工程階段術語。">
           <ApiConnectionStatus />
         </Section>
       </div>

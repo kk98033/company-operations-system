@@ -359,6 +359,29 @@ export interface CurrentSessionResponse {
   user: AuthenticatedUserResponse;
 }
 
+export type CustomerActivityEntityType = typeof CustomerActivityEntityType[keyof typeof CustomerActivityEntityType];
+
+
+export const CustomerActivityEntityType = {
+  quotation: 'quotation',
+  case: 'case',
+  work_order: 'work_order',
+  shipment: 'shipment',
+  pricing: 'pricing',
+  statement: 'statement',
+  receipt: 'receipt',
+} as const;
+
+export interface CustomerActivity {
+  activity_date: string;
+  document_number: string;
+  entity_id: string;
+  entity_type: CustomerActivityEntityType;
+  status: string;
+  summary: string;
+  target_path: string;
+}
+
 export interface CustomerCreate {
   address?: string | null;
   city?: string | null;
@@ -433,6 +456,19 @@ export interface CustomerListResponse {
   meta: ListResponseMetaCustomerFilterSummary;
 }
 
+export type CustomerOverviewResponseCounts = {[key: string]: number};
+
+export interface CustomerOverviewResponse {
+  counts: CustomerOverviewResponseCounts;
+  customer_code: string;
+  customer_id: string;
+  customer_name: string;
+  customer_status: string;
+  outstanding_amount?: string | null;
+  /** @maxItems 30 */
+  recent_activity: CustomerActivity[];
+}
+
 export type CustomerSortField = typeof CustomerSortField[keyof typeof CustomerSortField];
 
 
@@ -471,6 +507,31 @@ export interface CustomerUpdate {
   postal_code?: string | null;
   short_name?: string | null;
   tax_identifier?: string | null;
+}
+
+export type DashboardCardTone = typeof DashboardCardTone[keyof typeof DashboardCardTone];
+
+
+export const DashboardCardTone = {
+  neutral: 'neutral',
+  warning: 'warning',
+  danger: 'danger',
+  success: 'success',
+} as const;
+
+export interface DashboardCard {
+  key: string;
+  label: string;
+  target_path: string;
+  tone?: DashboardCardTone;
+  unit: string;
+  /** @pattern ^(?!^[-+.]*$)[+-]?0*\d*\.?\d*$ */
+  value: string;
+}
+
+export interface DashboardResponse {
+  as_of: string;
+  cards: DashboardCard[];
 }
 
 export type DocumentExportResponseDocumentType = typeof DocumentExportResponseDocumentType[keyof typeof DocumentExportResponseDocumentType];
@@ -1446,6 +1507,35 @@ export interface ReversalCreate {
   reason: string;
 }
 
+export type SearchResultEntityType = typeof SearchResultEntityType[keyof typeof SearchResultEntityType];
+
+
+export const SearchResultEntityType = {
+  customer: 'customer',
+  quotation: 'quotation',
+  case: 'case',
+  work_order: 'work_order',
+  shipment: 'shipment',
+  pricing: 'pricing',
+  statement: 'statement',
+  receipt: 'receipt',
+} as const;
+
+export interface SearchResult {
+  entity_id: string;
+  entity_type: SearchResultEntityType;
+  primary_text: string;
+  secondary_text?: string | null;
+  status?: string | null;
+  target_path: string;
+}
+
+export interface SearchResponse {
+  items: SearchResult[];
+  keyword: string;
+  truncated: boolean;
+}
+
 export interface ShipmentCancel {
   /** @exclusiveMinimum 0 */
   expected_version: number;
@@ -2068,6 +2158,23 @@ keyword?: string | null;
 
 export type ProcessDefinitionListParams = {
 status?: MasterStatus | null;
+};
+
+export type OperationsDashboardParams = {
+as_of?: string | null;
+};
+
+export type OperationsSearchParams = {
+/**
+ * @minLength 2
+ * @maxLength 100
+ */
+keyword: string;
+/**
+ * @minimum 1
+ * @maximum 50
+ */
+limit?: number;
 };
 
 export type PriceSuggestionListParams = {
@@ -5541,6 +5648,380 @@ export const processDefinitionStatusUpdate = async (itemId: string,
 
   const data: processDefinitionStatusUpdateResponse['data'] = body ? JSON.parse(body) : {}
   return { data, status: res.status, headers: res.headers } as processDefinitionStatusUpdateResponse
+}
+
+
+
+export type operationsCustomerOverviewResponse200 = {
+  data: CustomerOverviewResponse
+  status: 200
+}
+
+export type operationsCustomerOverviewResponse400 = {
+  data: ErrorResponse
+  status: 400
+}
+
+export type operationsCustomerOverviewResponse401 = {
+  data: ErrorResponse
+  status: 401
+}
+
+export type operationsCustomerOverviewResponse403 = {
+  data: ErrorResponse
+  status: 403
+}
+
+export type operationsCustomerOverviewResponse404 = {
+  data: ErrorResponse
+  status: 404
+}
+
+export type operationsCustomerOverviewResponse405 = {
+  data: ErrorResponse
+  status: 405
+}
+
+export type operationsCustomerOverviewResponse409 = {
+  data: ErrorResponse
+  status: 409
+}
+
+export type operationsCustomerOverviewResponse422 = {
+  data: ErrorResponse
+  status: 422
+}
+
+export type operationsCustomerOverviewResponse429 = {
+  data: ErrorResponse
+  status: 429
+}
+
+export type operationsCustomerOverviewResponse500 = {
+  data: ErrorResponse
+  status: 500
+}
+
+export type operationsCustomerOverviewResponseSuccess = (operationsCustomerOverviewResponse200) & {
+  headers: Headers;
+};
+export type operationsCustomerOverviewResponseError = (operationsCustomerOverviewResponse400 | operationsCustomerOverviewResponse401 | operationsCustomerOverviewResponse403 | operationsCustomerOverviewResponse404 | operationsCustomerOverviewResponse405 | operationsCustomerOverviewResponse409 | operationsCustomerOverviewResponse422 | operationsCustomerOverviewResponse429 | operationsCustomerOverviewResponse500) & {
+  headers: Headers;
+};
+
+export type operationsCustomerOverviewResponse = (operationsCustomerOverviewResponseSuccess | operationsCustomerOverviewResponseError)
+
+export const getOperationsCustomerOverviewUrl = (customerId: string,) => {
+
+
+
+
+  return `${import.meta.env.VITE_API_ORIGIN || ''}/api/v1/operations/customers/${customerId}`
+}
+
+/**
+ * @summary Customer Overview
+ */
+export const operationsCustomerOverview = async (customerId: string, options?: RequestInit): Promise<operationsCustomerOverviewResponse> => {
+
+  const res = await fetch(getOperationsCustomerOverviewUrl(customerId),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+)
+
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+
+  const data: operationsCustomerOverviewResponse['data'] = body ? JSON.parse(body) : {}
+  return { data, status: res.status, headers: res.headers } as operationsCustomerOverviewResponse
+}
+
+
+
+export type operationsDashboardResponse200 = {
+  data: DashboardResponse
+  status: 200
+}
+
+export type operationsDashboardResponse400 = {
+  data: ErrorResponse
+  status: 400
+}
+
+export type operationsDashboardResponse401 = {
+  data: ErrorResponse
+  status: 401
+}
+
+export type operationsDashboardResponse403 = {
+  data: ErrorResponse
+  status: 403
+}
+
+export type operationsDashboardResponse404 = {
+  data: ErrorResponse
+  status: 404
+}
+
+export type operationsDashboardResponse405 = {
+  data: ErrorResponse
+  status: 405
+}
+
+export type operationsDashboardResponse409 = {
+  data: ErrorResponse
+  status: 409
+}
+
+export type operationsDashboardResponse422 = {
+  data: ErrorResponse
+  status: 422
+}
+
+export type operationsDashboardResponse429 = {
+  data: ErrorResponse
+  status: 429
+}
+
+export type operationsDashboardResponse500 = {
+  data: ErrorResponse
+  status: 500
+}
+
+export type operationsDashboardResponseSuccess = (operationsDashboardResponse200) & {
+  headers: Headers;
+};
+export type operationsDashboardResponseError = (operationsDashboardResponse400 | operationsDashboardResponse401 | operationsDashboardResponse403 | operationsDashboardResponse404 | operationsDashboardResponse405 | operationsDashboardResponse409 | operationsDashboardResponse422 | operationsDashboardResponse429 | operationsDashboardResponse500) & {
+  headers: Headers;
+};
+
+export type operationsDashboardResponse = (operationsDashboardResponseSuccess | operationsDashboardResponseError)
+
+export const getOperationsDashboardUrl = (params?: OperationsDashboardParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `${import.meta.env.VITE_API_ORIGIN || ''}/api/v1/operations/dashboard?${stringifiedParams}` : `${import.meta.env.VITE_API_ORIGIN || ''}/api/v1/operations/dashboard`
+}
+
+/**
+ * @summary Dashboard
+ */
+export const operationsDashboard = async (params?: OperationsDashboardParams, options?: RequestInit): Promise<operationsDashboardResponse> => {
+
+  const res = await fetch(getOperationsDashboardUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+)
+
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+
+  const data: operationsDashboardResponse['data'] = body ? JSON.parse(body) : {}
+  return { data, status: res.status, headers: res.headers } as operationsDashboardResponse
+}
+
+
+
+export type operationsExportCsvResponse200 = {
+  data: void
+  status: 200
+}
+
+export type operationsExportCsvResponse400 = {
+  data: ErrorResponse
+  status: 400
+}
+
+export type operationsExportCsvResponse401 = {
+  data: ErrorResponse
+  status: 401
+}
+
+export type operationsExportCsvResponse403 = {
+  data: ErrorResponse
+  status: 403
+}
+
+export type operationsExportCsvResponse404 = {
+  data: ErrorResponse
+  status: 404
+}
+
+export type operationsExportCsvResponse405 = {
+  data: ErrorResponse
+  status: 405
+}
+
+export type operationsExportCsvResponse409 = {
+  data: ErrorResponse
+  status: 409
+}
+
+export type operationsExportCsvResponse422 = {
+  data: ErrorResponse
+  status: 422
+}
+
+export type operationsExportCsvResponse429 = {
+  data: ErrorResponse
+  status: 429
+}
+
+export type operationsExportCsvResponse500 = {
+  data: ErrorResponse
+  status: 500
+}
+
+export type operationsExportCsvResponseSuccess = (operationsExportCsvResponse200) & {
+  headers: Headers;
+};
+export type operationsExportCsvResponseError = (operationsExportCsvResponse400 | operationsExportCsvResponse401 | operationsExportCsvResponse403 | operationsExportCsvResponse404 | operationsExportCsvResponse405 | operationsExportCsvResponse409 | operationsExportCsvResponse422 | operationsExportCsvResponse429 | operationsExportCsvResponse500) & {
+  headers: Headers;
+};
+
+export type operationsExportCsvResponse = (operationsExportCsvResponseSuccess | operationsExportCsvResponseError)
+
+export const getOperationsExportCsvUrl = (dataset: 'customers' | 'work-orders' | 'shipments' | 'statements',) => {
+
+
+
+
+  return `${import.meta.env.VITE_API_ORIGIN || ''}/api/v1/operations/exports/${dataset}.csv`
+}
+
+/**
+ * @summary Export Csv
+ */
+export const operationsExportCsv = async (dataset: 'customers' | 'work-orders' | 'shipments' | 'statements', options?: RequestInit): Promise<operationsExportCsvResponse> => {
+
+  const res = await fetch(getOperationsExportCsvUrl(dataset),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+)
+
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+
+  const data: operationsExportCsvResponse['data'] = body ? JSON.parse(body) : undefined
+  return { data, status: res.status, headers: res.headers } as operationsExportCsvResponse
+}
+
+
+
+export type operationsSearchResponse200 = {
+  data: SearchResponse
+  status: 200
+}
+
+export type operationsSearchResponse400 = {
+  data: ErrorResponse
+  status: 400
+}
+
+export type operationsSearchResponse401 = {
+  data: ErrorResponse
+  status: 401
+}
+
+export type operationsSearchResponse403 = {
+  data: ErrorResponse
+  status: 403
+}
+
+export type operationsSearchResponse404 = {
+  data: ErrorResponse
+  status: 404
+}
+
+export type operationsSearchResponse405 = {
+  data: ErrorResponse
+  status: 405
+}
+
+export type operationsSearchResponse409 = {
+  data: ErrorResponse
+  status: 409
+}
+
+export type operationsSearchResponse422 = {
+  data: ErrorResponse
+  status: 422
+}
+
+export type operationsSearchResponse429 = {
+  data: ErrorResponse
+  status: 429
+}
+
+export type operationsSearchResponse500 = {
+  data: ErrorResponse
+  status: 500
+}
+
+export type operationsSearchResponseSuccess = (operationsSearchResponse200) & {
+  headers: Headers;
+};
+export type operationsSearchResponseError = (operationsSearchResponse400 | operationsSearchResponse401 | operationsSearchResponse403 | operationsSearchResponse404 | operationsSearchResponse405 | operationsSearchResponse409 | operationsSearchResponse422 | operationsSearchResponse429 | operationsSearchResponse500) & {
+  headers: Headers;
+};
+
+export type operationsSearchResponse = (operationsSearchResponseSuccess | operationsSearchResponseError)
+
+export const getOperationsSearchUrl = (params: OperationsSearchParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `${import.meta.env.VITE_API_ORIGIN || ''}/api/v1/operations/search?${stringifiedParams}` : `${import.meta.env.VITE_API_ORIGIN || ''}/api/v1/operations/search`
+}
+
+/**
+ * @summary Search
+ */
+export const operationsSearch = async (params: OperationsSearchParams, options?: RequestInit): Promise<operationsSearchResponse> => {
+
+  const res = await fetch(getOperationsSearchUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+)
+
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+
+  const data: operationsSearchResponse['data'] = body ? JSON.parse(body) : {}
+  return { data, status: res.status, headers: res.headers } as operationsSearchResponse
 }
 
 

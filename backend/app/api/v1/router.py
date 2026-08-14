@@ -13,6 +13,7 @@ from app.modules.customers.api import build_customer_router
 from app.modules.customers.work_item_api import build_work_item_router
 from app.modules.document_exports import build_document_export_router
 from app.modules.master_data import build_master_data_router
+from app.modules.operations import build_operations_router
 from app.modules.organizations.api import build_organization_router
 from app.modules.pricing import build_pricing_router
 from app.modules.production import build_production_router
@@ -37,4 +38,5 @@ def build_v1_router(readiness_checks: Sequence[ReadinessCheck]) -> APIRouter:
     router.include_router(build_pricing_router())
     router.include_router(build_billing_router())
     router.include_router(build_document_export_router())
+    router.include_router(build_operations_router())
     return router

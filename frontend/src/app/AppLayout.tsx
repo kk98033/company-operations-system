@@ -73,6 +73,9 @@ export function AppLayout() {
             <span className="sidebar__link-icon" aria-hidden="true">▦</span>
             <span className="sidebar__link-label">首頁</span>
           </Link>
+          <Link activeOptions={{ exact: true }} activeProps={{ className: 'sidebar__link--active' }} className="sidebar__link" to="/search">
+            <span className="sidebar__link-icon" aria-hidden="true">搜</span><span className="sidebar__link-label">整合搜尋</span>
+          </Link>
 
           <p className="sidebar__section-label sidebar__section-label--modules">核心流程</p>
           {workflowModules.map((item) => (

@@ -1,4 +1,4 @@
-import { screen, within } from '@testing-library/react'
+import { screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { useQueryClient } from '@tanstack/react-query'
 import { render } from '@testing-library/react'
@@ -25,11 +25,8 @@ describe('應用程式骨架', () => {
       'page',
     )
     expect(screen.getByText('本機開發')).toBeInTheDocument()
-    const decisionKpi = screen.getByText('開工決策').closest('article')
-    expect(decisionKpi).not.toBeNull()
-    expect(within(decisionKpi as HTMLElement).getByText('10 / 10')).toBeInTheDocument()
-    expect(within(decisionKpi as HTMLElement).getByText('公司已確認')).toBeInTheDocument()
-    expect(screen.getByText(/Phase 2～8 已接上正式 API 與資料庫/)).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: '整合搜尋' })).toBeInTheDocument()
+    expect(screen.getByText('正在載入營運總覽…')).toBeInTheDocument()
   })
 
   it('可收合與展開正式側邊欄', async () => {
@@ -57,6 +54,9 @@ describe('應用程式骨架', () => {
 
     await user.tab()
     expect(screen.getByRole('link', { name: '首頁' })).toHaveFocus()
+
+    await user.tab()
+    expect(screen.getByRole('link', { name: '整合搜尋' })).toHaveFocus()
 
     for (const module of workflowModules) {
       await user.tab()

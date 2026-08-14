@@ -6,6 +6,7 @@ import { CUSTOMER_LIST_QUERY_KEY, listCustomers } from '../../api/customers'
 import { getApiErrorMessage } from '../../api/errorMessage'
 import { useHasCapability } from '../../auth/capabilities'
 import { DataTableFrame, Field, FilterBar, PageHeader, StatusLabel, SystemState } from '../../ui/UiPatterns'
+import { CsvExportButton } from '../../ui/CsvExportButton'
 
 export function CustomerListPage() {
   const navigate = useNavigate()
@@ -34,6 +35,7 @@ export function CustomerListPage() {
         description="依客戶代號、名稱或簡稱查詢目前公司的客戶主檔。"
         actions={canManage ? [{ label: '新增客戶', tone: 'primary', onClick: () => void navigate({ to: '/customers/new' }) }] : []}
       />
+      <div className="ui-page-tools"><CsvExportButton dataset="customers" /></div>
       <form onSubmit={search}>
         <FilterBar>
           <Field label="關鍵字"><input onChange={(event) => setKeywordInput(event.target.value)} placeholder="代號、名稱或簡稱" value={keywordInput} /></Field>
@@ -52,7 +54,7 @@ export function CustomerListPage() {
                 <tr key={customer.id}>
                   <th scope="row">{customer.code}</th><td>{customer.name}</td><td>{customer.short_name || '—'}</td><td>{customer.contact_name || '—'}</td><td>{customer.phone || '—'}</td>
                   <td><StatusLabel tone={customer.status === 'active' ? 'success' : 'neutral'}>{customer.status === 'active' ? '使用中' : '已停用'}</StatusLabel></td>
-                  <td><button className="ui-button ui-button--secondary" onClick={() => void navigate({ to: '/customers/$customerId', params: { customerId: customer.id } })} type="button">{canManage ? '編輯' : '查看'}</button></td>
+                  <td><button className="ui-button ui-button--secondary" onClick={() => void navigate({ to: '/customers/$customerId', params: { customerId: customer.id } })} type="button">{canManage ? '編輯' : '查看'}</button><button className="ui-button ui-button--secondary" onClick={() => void navigate({ to: '/customers/$customerId/overview', params: { customerId: customer.id } })} type="button">360 總覽</button></td>
                 </tr>
               ))}
             </tbody>

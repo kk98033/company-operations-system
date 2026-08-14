@@ -54,17 +54,19 @@
 
 | 項目 | 目前狀態 |
 |---|---|
-| 最後更新日期 | 2026-08-13 |
-| 計畫版本 | v1.24（Phase 8 後補強正式 PDF 匯出） |
-| 架構版本 | v1.25（不可變 PDF、雜湊、公司隔離下載） |
-| 目前階段 | Phase 8 與 PDF 匯出補強完成；下一階段為 Phase 9 工作台與整合查詢 |
-| 目前切片 | PDF-EXPORT-001：報價、工單、出貨單、對帳單可由伺服器產生、保存版本及 SHA-256 後下載 |
-| 實作完成度 | Phase 0：完成；Import I-0：3／3；Phase 1：9／9；Phase 2：10／10；Phase 3：8／8；Phase 4：18／18；Phase 5：12／12；Phase 6：10／10；Phase 7：9／9；Phase 8：10／10；下一階段為 Phase 9 查詢整合 |
+| 最後更新日期 | 2026-08-15 |
+| 計畫版本 | v1.25（Phase 9 工作台與整合查詢完成） |
+| 架構版本 | v1.26（權限感知 operations read model 與安全 CSV） |
+| 目前階段 | Phase 9 完成；下一階段為 Phase 10 全量 Import 整合 |
+| 目前切片 | PHASE9-OPERATIONS-COMPLETE-001：營運首頁、整合搜尋、客戶 360、安全 CSV 與效能基線 |
+| 實作完成度 | Phase 0：完成；Import I-0：3／3；Phase 1：9／9；Phase 2：10／10；Phase 3：8／8；Phase 4：18／18；Phase 5：12／12；Phase 6：10／10；Phase 7：9／9；Phase 8：10／10；Phase 9：6／6 |
 | 規劃文件完成度 | 100% |
-| 最新中型進度備份 | 本次提交後建立 Git tag `checkpoint-document-pdf-export-v1` 與專案外 bundle |
+| 最新中型進度備份 | 本次提交後建立 Git tag `checkpoint-phase-9` 與專案外 bundle |
 | 正式遠端 Git 備份 | 尚未設定；R-11 維持 Open，正式部署前必須建立私人 repository |
 
 ### 已完成
+
+- 完成 Phase 9：首頁改為正式營運工作台；跨模組搜尋與客戶 360 只顯示目前帳號有權讀取的資料且固定在登入公司；客戶、工單、出貨與對帳提供安全 CSV，使用 UTF-8 BOM、固定欄位、公式注入中和與一萬筆上限。
 
 - 完成 PDF-EXPORT-001：四種正式單據的 print route 同時提供「下載 PDF」；後端按文件版本與模板版本產生不可變 PDF、保存內容與 SHA-256、以公司及 capability 隔離下載並留下 audit。報價使用 A4 橫向，公司工單使用 A4 直向固定 9 道列印製程並納入有效附件圖；已嵌入 OFL 授權 Noto Sans TC，避免 Linux 伺服器缺中文字。
 
@@ -128,15 +130,15 @@
 
 ### 進行中
 
-- Phase 0～Phase 8 工程已完成；公司資料、客戶、主檔、報價、案件、工單、生產、庫存、出貨、計價、對帳與收款已形成可操作垂直流程。舊資料目前只有 dry-run，尚未正式 apply；報價／工單／出貨／對帳 A4 仍需公司實際印表機簽認不截字。
-- 生產、庫存、出貨、計價、對帳、部分收款、沖銷與帳齡已接正式 API／資料表；工作台與跨模組搜尋留在 Phase 9。
+- Phase 0～Phase 9 工程已完成；公司資料、客戶、主檔、報價、案件、工單、生產、庫存、出貨、計價、對帳、收款及營運工作台已形成可操作垂直流程。舊資料目前只有 dry-run，尚未正式 apply；報價／工單／出貨／對帳 A4 仍需公司實際印表機簽認不截字。
+- 生產到帳務已接正式 API／資料表；首頁工作台、跨模組搜尋、客戶 360 與安全 CSV 已接正式 read model，下一階段集中處理全量 Import。
 - 介面正式方向已定案；`/style-preview` 只保留為歷史比較與 ADR-010 決策證據，不是正式業務頁。
 - 公司 P0 已確認 10／10。正式 migration、API 與舊客戶資料 apply 仍只會在對應 Phase／Import Slice 通過測試後逐批建立，不因 Gate 通過而提前寫入。
 - `import_staging_records` 目前只是 raw／normalized 通用 envelope；客戶 typed mapping、dry-run、apply、個資 access／retention 與錯誤訊息遮罩留在 I-1.x，不得提前把 JSONB 當正式業務模型。
 
 ### 接下來要做
 
-1. 下一個垂直批次進入 Phase 9：建立可追溯的工作台摘要、全站搜尋、客戶 360 與安全 CSV 匯出。
+1. 下一個垂直批次進入 Phase 10：全模組舊資料 dry-run、關聯核對、冪等重跑與正式移轉工具；在公司簽認 mapping 前仍不得 apply 真實資料。
 2. 回查 `quote.subpoenaid`、`merchandise.subpoenaid` 與工單父鍵；現有匯出無可靠直接關聯，在取得舊程式 join 或可核對匯出前不得 apply。
 3. 舊資料 apply 前同時處理 `cust` 轉碼替代字元及 `wpa` 的 189 筆孤兒／6 筆缺客戶代號；修復後重跑相同 dry-run，不能跳過公司抽查。
 4. 以公司實際印表機驗收報價 A4 橫向及工單 A4 直向；程式端欄位、列印 CSS、隱藏操作、快照與圖片測試已完成。
@@ -255,7 +257,7 @@ company-system/
 └─ docs/                    # 資料、測試、移轉、決策與進度文件
 ```
 
-目前 `frontend/` 與 `backend/` 已有可執行骨架，PostgreSQL 由根目錄 `compose.yaml` 啟動；`backend/app/modules/imports/` 包含 Import staging／trace infrastructure。登入、Cookie Session、公司 scope、capability、audit、登入限制、公司資料、公司預設設定與客戶管理均已完成；正式角色 mapping、舊客戶帳務欄位／Import、報價、工單、單號配發、稅額計算與帳務文件仍依後續 Slice 建立。
+目前 `frontend/` 與 `backend/` 已完成登入、公司 scope、capability、audit，以及客戶到收款的核心交易、四種正式 PDF 與 Phase 9 operations read model；PostgreSQL 由根目錄 `compose.yaml` 啟動。正式角色 mapping、舊資料全量 Import、部署、備份還原與公司印表機 UAT 仍依後續 Phase 執行。
 
 ## 8. 完成定義
 

@@ -5,6 +5,7 @@ import { listWorkOrders, WORK_ORDER_LIST_QUERY_KEY } from '../../api/workOrders'
 import { getApiErrorMessage } from '../../api/errorMessage'
 import { useHasCapability } from '../../auth/capabilities'
 import { DataTableFrame, Field, FilterBar, PageHeader, StatusLabel, SystemState } from '../../ui/UiPatterns'
+import { CsvExportButton } from '../../ui/CsvExportButton'
 
 export function WorkOrderListPrototypePage() {
   const navigate = useNavigate(); const canRead = useHasCapability('work_orders.read'); const canManage = useHasCapability('work_orders.manage')
@@ -14,6 +15,7 @@ export function WorkOrderListPrototypePage() {
   const search = (event: FormEvent) => { event.preventDefault(); setKeyword(input.trim()) }
   return <div className="ui-pattern-stack work-order-list-page">
     <PageHeader eyebrow="工單管理" title="工單查詢" description="同一入口查詢現行、歷史與作廢工單；關鍵字涵蓋工單號、舊號、客戶單號、客戶、品名與備註。" actions={canManage ? [{ label: '新增工單', tone: 'primary', onClick: () => void navigate({ to: '/work-orders/new' }) }] : []} />
+    <div className="ui-page-tools"><CsvExportButton dataset="work-orders" /></div>
     <form onSubmit={search}><FilterBar><Field label="關鍵字"><input onChange={(event) => setInput(event.target.value)} placeholder="工單號、客戶單號、客戶或品名" type="search" value={input} /></Field><Field label="狀態"><select onChange={(event) => setStatus(event.target.value as typeof status)} value={status}><option value="">全部</option><option value="draft">草稿</option><option value="confirmed">已確認</option><option value="void">已作廢</option></select></Field><div className="ui-field"><span className="ui-field__label">執行</span><button className="ui-button ui-button--primary" type="submit">查詢</button></div></FilterBar></form>
     {query.isPending ? <SystemState action={<span>請稍候</span>} code="WO" description="正在讀取工單。" eyebrow="資料讀取" role="status" title="正在載入工單" /> : null}
     {query.isError ? <SystemState action={<button className="ui-button ui-button--primary" onClick={() => void query.refetch()} type="button">重新載入</button>} code="ERR" description={getApiErrorMessage(query.error)} eyebrow="資料異常" role="alert" title="無法載入工單" /> : null}
