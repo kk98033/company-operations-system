@@ -30,6 +30,48 @@
   font-weight: 700;
 }
 
+.ui-field--error input,
+.ui-field--error select,
+.ui-field--error textarea,
+.work-order-prototype--validated input:invalid,
+.work-order-prototype--validated select:invalid,
+.work-order-prototype--validated textarea:invalid,
+.quotation-page--validated input:invalid,
+.quotation-page--validated select:invalid,
+.quotation-page--validated textarea:invalid {
+  border-color: var(--color-danger-700);
+  box-shadow: inset 3px 0 0 var(--color-danger-700);
+}
+
+.ui-field__error {
+  color: var(--color-danger-700);
+  font-weight: 700;
+}
+
+.ui-validation-summary {
+  padding: var(--space-4);
+  border: 1px solid var(--color-danger-700);
+  border-left-width: 4px;
+  background: var(--color-danger-100);
+}
+
+.ui-validation-summary ul {
+  display: grid;
+  gap: var(--space-2);
+  margin: var(--space-3) 0 0;
+  padding-left: var(--space-5);
+}
+
+.ui-validation-summary button {
+  padding: 0;
+  border: 0;
+  color: var(--color-danger-700);
+  background: transparent;
+  cursor: pointer;
+  text-align: left;
+  text-decoration: underline;
+}
+
 .ui-field__label b { color: var(--color-danger-700); }
 .ui-field small { color: var(--color-ink-500); font-size: 0.68rem; font-weight: 400; }
 

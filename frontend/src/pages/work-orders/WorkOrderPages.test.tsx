@@ -83,10 +83,18 @@ it('工單建檔依公司稿在同一頁提供三紙、印刷與固定 13 道製
   expect(Array.from(form.querySelectorAll('.work-order-process-row > legend')).map((item) => item.textContent))
     .toEqual(processDefinitions.map(([, name]) => name))
   expect(within(form).getByLabelText('印刷數量')).toHaveValue(null)
-  expect(within(form).getByLabelText('訂單數量')).toHaveAttribute('step', '0.0001')
+  expect(within(form).getByLabelText(/訂單數量/)).toHaveAttribute('step', '0.0001')
   expect(within(form).getByRole('radio', { name: '新版' })).not.toBeChecked()
   expect(within(form).getByRole('radio', { name: '舊版' })).not.toBeChecked()
   expect(within(form).getAllByRole('button', { name: '存檔' })).toHaveLength(2)
+
+  const footer = form.querySelector('.work-order-prototype__footer') as HTMLElement
+  await user.click(within(footer).getByRole('button', { name: '存檔' }))
+  const validation = await screen.findByRole('alert')
+  expect(validation).toHaveTextContent('客編／客戶：此欄位為必填')
+  expect(validation).toHaveTextContent('品名：此欄位為必填')
+  expect(validation).toHaveTextContent('訂單數量：此欄位為必填')
+  expect(fetchMock.mock.calls.some(([, options]) => options?.method === 'POST')).toBe(false)
 
   await user.selectOptions(within(form).getByRole('combobox', { name: /客戶/ }), customerId)
   await user.type(within(form).getByLabelText(/品名/), '虛構彩盒')
@@ -98,6 +106,8 @@ it('工單建檔依公司稿在同一頁提供三紙、印刷與固定 13 道製
   const body = JSON.parse(String(request?.[1]?.body))
   expect(body.processes).toHaveLength(13)
   expect(body.papers.map((item: { type: string }) => item.type)).toEqual(['face', 'back', 'flute'])
+  expect(body.delivery_date).toBeNull()
+  expect(body.specification).toBeNull()
 })
 
 it('工單清單顯示價格欄位並可用關鍵字查詢', async () => {

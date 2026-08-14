@@ -25,6 +25,43 @@ export class ApiRequestError extends Error {
   }
 }
 
+type ValidationDetail = { loc: Array<string | number>; msg: string }
+
+const FIELD_LABELS: Record<string, string> = {
+  customer_id: '客戶', order_date: '訂購日期', delivery_date: '交貨日期',
+  product_name: '品名', order_quantity: '訂單數量', unit_price: '單價',
+  plate_fee: '版費', die_fee: '刀模費', papers: '備紙',
+  print_specification: '印刷規格', processes: '製程規劃', notes: '備註',
+  quotation_date: '報價日期', items: '明細', quantity: '數量',
+  name: '名稱', code: '代號', statement_date: '對帳日期',
+  receipt_date: '收款日期', shipment_date: '出貨日期',
+}
+
+function validationDetails(error: unknown): ValidationDetail[] {
+  if (!(error instanceof ApiRequestError) || error.code !== 'VALIDATION_ERROR') return []
+  if (!Array.isArray(error.details)) return []
+  return error.details.filter((item): item is ValidationDetail => {
+    if (typeof item !== 'object' || item === null) return false
+    const value = item as { loc?: unknown; msg?: unknown }
+    return Array.isArray(value.loc) && typeof value.msg === 'string'
+  })
+}
+
+function validationLabel(location: Array<string | number>) {
+  const parts = location.filter((part) => part !== 'body')
+  const index = parts.find((part) => typeof part === 'number')
+  const field = [...parts].reverse().find((part) => typeof part === 'string')
+  const label = field ? (FIELD_LABELS[field] ?? field) : '表單內容'
+  return typeof index === 'number' ? `第 ${index + 1} 筆${label}` : label
+}
+
+export function getApiValidationIssues(error: unknown) {
+  return validationDetails(error).map((detail) => ({
+    label: validationLabel(detail.loc),
+    message: detail.msg,
+  }))
+}
+
 function isApiErrorResponse(value: unknown): value is ApiErrorResponse {
   if (typeof value !== 'object' || value === null || !('error' in value)) return false
 
@@ -37,6 +74,11 @@ function isApiErrorResponse(value: unknown): value is ApiErrorResponse {
 }
 
 export function getApiErrorMessage(error: unknown): string {
+  const issues = getApiValidationIssues(error)
+  if (issues.length) {
+    const summary = issues.slice(0, 4).map((item) => `${item.label}：${item.message}`).join('；')
+    return issues.length > 4 ? `${summary}；另有 ${issues.length - 4} 項` : summary
+  }
   if (isApiErrorResponse(error)) return error.error.message.trim()
   if (error instanceof ApiRequestError) return error.message
   if (error instanceof TypeError) return NETWORK_ERROR_MESSAGE

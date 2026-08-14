@@ -65,4 +65,18 @@ describe('產生的 OpenAPI health client', () => {
     expect(getApiErrorMessage(new Error('database secret')))
       .toBe('系統暫時無法完成操作，請稍後再試。')
   })
+
+  it('欄位驗證錯誤會顯示中文欄位與位置', () => {
+    const error = new ApiRequestError({
+      code: 'VALIDATION_ERROR',
+      details: [
+        { loc: ['body', 'customer_id'], msg: '此欄位為必填', type: 'missing' },
+        { loc: ['body', 'items', 1, 'quantity'], msg: '必須大於 0', type: 'greater_than' },
+      ],
+      message: '請檢查輸入資料',
+      status: 422,
+    })
+
+    expect(getApiErrorMessage(error)).toBe('客戶：此欄位為必填；第 2 筆數量：必須大於 0')
+  })
 })
