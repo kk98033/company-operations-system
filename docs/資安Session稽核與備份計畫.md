@@ -1,18 +1,17 @@
 # 資安、Session、稽核與備份計畫
 
-> 文件版本：v1.1
+> 文件版本：v1.2
 > 日期：2026-08-21
-> 狀態：已納入正式實作計畫；Session 上限與管理 UI 已完成，完整日誌與正式備份於後續 Slice 驗收
+> 狀態：Session 上限、管理 UI、安全事件與敏感讀取 audit 已完成；access log 與正式備份於後續 Slice 驗收
 
 ## 1. 現況結論
 
 目前已完成 Argon2id、HttpOnly Cookie、SameSite、CSRF、可信 Origin、八小時 server Session、登入失敗限制、公司隔離、exact capability、Request ID、append-only 業務 audit 與敏感資料遮罩。
 
-目前 Session 政策與管理已完成，仍有三個明確缺口：
+目前 Session 政策、管理與 11.4 事件完整性已完成，仍有兩個明確缺口：
 
-1. 登入成功／失敗／Session 取代已有安全事件，遠端撤銷已有業務 audit，但登出、權限拒絕、敏感查詢與每個 HTTP request 尚未形成完整可歸責鏈。
-2. `audit_logs` 適合保存業務事實，不適合把每個 GET 都寫進同一張表；否則資料量與敏感資訊風險會失控。
-3. 資料庫、附件、列印快照與 Secret 備份目前只有設計，尚未有可執行、自動告警及乾淨環境還原證據。
+1. 登入、登出、Session 取代／撤銷、權限拒絕與五類敏感讀取已由 Request ID 關聯；每個普通 HTTP request 的 structured access log、CSRF／Origin 拒絕與 5xx／慢請求查詢仍待 11.5。
+2. 資料庫、附件、列印快照與 Secret 備份目前只有設計，尚未有可執行、自動告警及乾淨環境還原證據。
 
 ## 2. 帳號與多人登入政策
 
@@ -44,7 +43,7 @@
 
 ### 3.2 認證與資安事件（append-only）
 
-保存登入成功／失敗／受限、登出、Session 取代、遠端撤銷、帳號／角色停用、CSRF／Origin／權限拒絕、備份失敗及重要設定變更。失敗事件不可依賴已 rollback 的業務 transaction 才寫入。
+保存登入成功／失敗／受限、登出、Session 取代、遠端撤銷、帳號／角色停用、CSRF／Origin／權限拒絕、備份失敗及重要設定變更。11.4 已完成目前 API 存在的登入、登出、Session 與權限事件；帳號停用 command、CSRF／Origin 的 request 級證據及備份事件分別由後續管理 API、11.5 與 11.9～11.12 接續。失敗事件不可依賴已 rollback 的業務 transaction 才寫入。
 
 成功登入後可以保存 actor 與 Session reference；未知帳號登入失敗仍只保存 HMAC 指紋，不保存輸入帳號或密碼。來源網路只保存經正式 proxy 邊界取得的 HMAC 指紋；User-Agent 保存正規化摘要與 hash，不保存 Cookie 或 token。
 

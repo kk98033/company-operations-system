@@ -11,7 +11,7 @@ from sqlalchemy import Engine, select
 from sqlalchemy.orm import Session as OrmSession
 
 from app.modules.audit.models import AuditLog
-from app.modules.auth.models import Session
+from app.modules.auth.models import LoginSecurityEvent, Session
 from tests.integration.auth_test_support import (
     create_auth_identity,
     create_auth_member,
@@ -133,9 +133,18 @@ def test_company_manager_can_revoke_one_session_with_scoped_audit(
                 AuditLog.action == "session.revoke",
             )
         )
+        security_event = session.scalar(
+            select(LoginSecurityEvent).where(
+                LoginSecurityEvent.event_type == "session_revoked"
+            )
+        )
     assert event is not None
     assert event.entity_id == UUID(target_row["id"])
     assert event.reason == "員工要求登出遺失裝置"
+    assert security_event is not None
+    assert security_event.session_id is not None
+    assert security_event.target_type == "auth_session"
+    assert security_event.target_id == UUID(target_row["id"])
 
 
 def test_permission_cross_company_and_revoke_all_boundaries(identity_engine: Engine) -> None:
@@ -180,3 +189,20 @@ def test_permission_cross_company_and_revoke_all_boundaries(identity_engine: Eng
     )
     assert revoked_all.status_code == 204
     assert target_client.get("/api/v1/auth/session").status_code == 401
+    with OrmSession(identity_engine) as session:
+        denied_event = session.scalar(
+            select(LoginSecurityEvent).where(
+                LoginSecurityEvent.event_type == "permission_denied",
+                LoginSecurityEvent.actor_user_id == target.user_id,
+            )
+        )
+        revoked_all_event = session.scalar(
+            select(LoginSecurityEvent).where(
+                LoginSecurityEvent.event_type == "membership_sessions_revoked",
+                LoginSecurityEvent.target_id == target.membership_id,
+            )
+        )
+    assert denied_event is not None
+    assert denied_event.capability == "sessions.manage"
+    assert denied_event.request_id == UUID(denied.headers["x-request-id"])
+    assert revoked_all_event is not None

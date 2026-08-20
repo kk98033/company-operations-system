@@ -7,9 +7,10 @@ from time import perf_counter
 from uuid import uuid4
 
 import pytest
-from sqlalchemy import Engine, event
+from sqlalchemy import Engine, event, select
 from sqlalchemy.orm import Session
 
+from app.modules.audit.models import AuditLog
 from app.modules.customers.models import Customer
 from tests.integration.test_quotations_api import _payload, _setup
 
@@ -59,6 +60,12 @@ def test_search_customer_overview_and_csv_are_company_scoped(identity_engine: En
     rows = list(csv.reader(io.StringIO(exported.content.decode("utf-8-sig"))))
     formula_row = next(row for row in rows if row[0] == "FORMULA")
     assert formula_row[1] == "'=2+2"
+    with Session(identity_engine) as session:
+        export_event = session.scalar(
+            select(AuditLog).where(AuditLog.action == "operations.csv_export")
+        )
+    assert export_event is not None
+    assert export_event.after_data == {"dataset": "customers", "row_count": 2}
 
 
 def test_dashboard_only_returns_authorized_cards(identity_engine: Engine) -> None:

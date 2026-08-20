@@ -6,7 +6,7 @@ import os
 from uuid import UUID, uuid4
 
 import pytest
-from sqlalchemy import Engine, select, update
+from sqlalchemy import Engine, select, text, update
 from sqlalchemy.exc import DBAPIError, IntegrityError
 from sqlalchemy.orm import Session as OrmSession
 
@@ -118,6 +118,12 @@ def test_database_trigger_rejects_audit_mutation(
                     )
                 else:
                     session.delete(session.get(AuditLog, event_id))
+
+
+def test_database_trigger_rejects_audit_truncate(identity_engine: Engine) -> None:
+    with pytest.raises(DBAPIError):
+        with identity_engine.begin() as connection:
+            connection.execute(text("TRUNCATE TABLE audit_logs"))
 
 
 def test_actor_membership_cannot_cross_organization(

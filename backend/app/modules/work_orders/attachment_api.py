@@ -8,6 +8,7 @@ from sqlalchemy.orm import Session
 
 from app.core.database.session import get_database_session
 from app.core.request_context import require_request_id
+from app.modules.audit import record_user_audit_event
 from app.modules.auth.dependencies import require_authenticated_csrf
 from app.modules.auth.services import AuthenticatedSession
 from app.modules.authorization.dependencies import require_capability
@@ -82,6 +83,7 @@ def build_attachment_router() -> APIRouter:
     def attachment_download(
         work_order_id: UUID,
         attachment_id: UUID,
+        request: Request,
         context: Annotated[AuthenticatedSession, Depends(_order_read)],
         session: Annotated[Session, Depends(get_database_session)],
     ) -> Response:
@@ -92,6 +94,20 @@ def build_attachment_router() -> APIRouter:
                 work_order_id=work_order_id,
                 attachment_id=attachment_id,
             )
+            record_user_audit_event(
+                session,
+                scope=organization_scope(context),
+                request_id=require_request_id(request),
+                action="work_order.attachment.download",
+                entity_type="work_order_attachment",
+                entity_id=row.id,
+                after={
+                    "work_order_id": str(work_order_id),
+                    "mime_type": row.mime_type,
+                    "byte_size": row.size_bytes,
+                },
+            )
+            session.commit()
             return Response(
                 content=row.content,
                 media_type=row.mime_type,

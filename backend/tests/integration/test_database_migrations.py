@@ -97,7 +97,7 @@ def test_schema_upgrade_downgrade_upgrade_round_trip(
     assert REGISTERED_MODELS
 
     command.upgrade(config, "head")
-    assert _current_revision() == "0026_session_management"
+    assert _current_revision() == "0027_security_events"
     assert _table_names() == [
         "alembic_version",
         *sorted(
@@ -128,7 +128,7 @@ def test_schema_upgrade_downgrade_upgrade_round_trip(
     assert _table_names() == ["alembic_version"]
 
     command.upgrade(config, "head")
-    assert _current_revision() == "0026_session_management"
+    assert _current_revision() == "0027_security_events"
     assert _table_names() == [
         "alembic_version",
         *sorted(
@@ -199,7 +199,7 @@ def test_identity_downgrade_preserves_existing_import_foundation(
     finally:
         resources.dispose()
     command.upgrade(config, "head")
-    assert _current_revision() == "0026_session_management"
+    assert _current_revision() == "0027_security_events"
     command.check(config)
     resources = create_database_resources(settings)
     try:

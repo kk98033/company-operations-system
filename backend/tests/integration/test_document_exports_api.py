@@ -7,6 +7,7 @@ import pytest
 from sqlalchemy import Engine, func, select
 from sqlalchemy.orm import Session
 
+from app.modules.audit.models import AuditLog
 from app.modules.document_exports.models import DocumentExport
 from tests.integration.test_billing_api import _confirmed_pricing, _issue, _statement
 from tests.integration.test_pricing_api import _confirmed_shipment
@@ -69,6 +70,14 @@ def test_pdf_exports_cover_reference_templates_and_reuse_exact_version(
     _export(billing_client, billing_csrf, "statement", statement["id"])
     with Session(identity_engine) as session:
         assert session.scalar(select(func.count()).select_from(DocumentExport)) == 4
+        assert (
+            session.scalar(
+                select(func.count())
+                .select_from(AuditLog)
+                .where(AuditLog.action == "document.pdf_download")
+            )
+            == 4
+        )
 
 
 def test_pdf_download_is_company_scoped(identity_engine: Engine) -> None:

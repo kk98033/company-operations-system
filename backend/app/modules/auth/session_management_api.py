@@ -11,6 +11,7 @@ from sqlalchemy.orm import Session as OrmSession
 from app.core.database.session import get_database_session
 from app.core.errors import ApplicationError
 from app.core.request_context import require_request_id
+from app.modules.audit import record_user_audit_event
 from app.modules.auth.cookies import clear_auth_cookies
 from app.modules.auth.dependencies import require_authenticated_csrf, require_current_session
 from app.modules.auth.schemas import (
@@ -29,6 +30,7 @@ from app.modules.auth.services import (
     revoke_membership_sessions,
 )
 from app.modules.authorization import require_capability
+from app.modules.organizations.scope import OrganizationScope
 
 _manage_sessions = require_capability("sessions.manage")
 
@@ -96,12 +98,27 @@ def build_session_management_router() -> APIRouter:
         summary="列出目前公司尚未撤銷的登入工作階段",
     )
     def company_sessions(
+        request: Request,
         context: Annotated[AuthenticatedSession, Depends(_manage_sessions)],
         database_session: Annotated[OrmSession, Depends(get_database_session)],
         limit: Annotated[int, Query(ge=1, le=200)] = 100,
     ) -> ManagedSessionListResponse:
+        items = list_company_sessions(database_session, context=context, limit=limit)
+        record_user_audit_event(
+            database_session,
+            scope=OrganizationScope(
+                context.organization_id,
+                context.organization_member_id,
+                context.user_id,
+            ),
+            request_id=require_request_id(request),
+            action="session.list_company",
+            entity_type="auth_session",
+            after={"result_count": len(items)},
+        )
+        database_session.commit()
         return _list_response(
-            list_company_sessions(database_session, context=context, limit=limit),
+            items,
             current_session_id=context.session_id,
         )
 

@@ -55,16 +55,18 @@
 | 項目 | 目前狀態 |
 |---|---|
 | 最後更新日期 | 2026-08-21 |
-| 計畫版本 | v1.31（Phase 11.3 Session 管理與遠端撤銷已完成） |
-| 架構版本 | v1.29（公司範圍 Session 清單、撤銷與安全裝置摘要） |
-| 目前階段 | Phase 10 的 10.3 apply 被 11 類來源例外阻擋；並行執行 Phase 11 安全工作，已完成 11.2～11.3 |
-| 目前切片 | SEC-SESSION-MANAGEMENT-001：本人／公司 Session 清單與遠端撤銷已完成，下一步 11.4 事件完整性 |
-| 實作完成度 | Phase 0：完成；Import I-0：3／3；Phase 1：9／9；Phase 2：10／10；Phase 3：8／8；Phase 4：18／18；Phase 5：12／12；Phase 6：10／10；Phase 7：9／9；Phase 8：10／10；Phase 9：6／6；Phase 10：2／9；Phase 11：2／13 |
+| 計畫版本 | v1.32（Phase 11.4 事件完整性矩陣已完成） |
+| 架構版本 | v1.30（認證／權限事件與敏感讀取稽核） |
+| 目前階段 | Phase 10 的 10.3 apply 被 11 類來源例外阻擋；並行執行 Phase 11 安全工作，已完成 11.2～11.4 |
+| 目前切片 | SEC-EVENT-COMPLETENESS-001：安全事件與敏感讀取稽核已完成，下一步 11.5 structured access log |
+| 實作完成度 | Phase 0：完成；Import I-0：3／3；Phase 1：9／9；Phase 2：10／10；Phase 3：8／8；Phase 4：18／18；Phase 5：12／12；Phase 6：10／10；Phase 7：9／9；Phase 8：10／10；Phase 9：6／6；Phase 10：2／9；Phase 11：3／13 |
 | 規劃文件完成度 | 100% |
 | 最新中型進度備份 | Git tag `checkpoint-phase-9` 與專案外 bundle；Phase 11 Gate 尚未完成 |
 | 正式遠端 Git 備份 | 尚未設定；R-11 維持 Open，正式部署前必須建立私人 repository |
 
 ### 已完成
+
+- 完成 Phase 11 Slice 11.4／SEC-EVENT-COMPLETENESS-001：一般登出、遠端 Session 撤銷、全部撤銷與 capability 拒絕均保存 actor／internal Session／Request ID 安全事件；附件、正式 PDF、CSV、audit 查閱與公司 Session 清單保存最小化敏感讀取 audit。57 個 mutating API＋5 個敏感讀取由 [事件完整性矩陣](docs/事件完整性矩陣.md) 自動守門；PostgreSQL 拒絕 UPDATE、DELETE、TRUNCATE，Cookie、token、CSRF、密碼與附件內容不落事件。驗證期間發現新公告的 `nanoid <3.3.18` high advisory，已用 npm override／lockfile 固定 3.3.18，乾淨安裝後 audit 0。206 個非 DB、125 個 PostgreSQL integration 與 87 個 React 測試通過。帳號／membership 停用 command 尚未建立，未來新增時必須同交易撤銷 Session 並進矩陣；普通 request 留 11.5 structured access log。
 
 - 完成 Phase 11 Slice 11.3／SEC-SESSION-MANAGEMENT-001：所有使用者可查看自己的登入歷史；`sessions.manage` 可查看目前公司尚未撤銷且未到期的 Session，依原因撤銷單一登入或該 membership 全部登入。跨公司目標一律視為不存在，狀態停用會由既有 Session resolver 立即拒絕；未來帳號管理 command 必須重用全部撤銷 service。資料庫只新增最小化瀏覽器／平台摘要，不保存 raw User-Agent、Cookie 或 token；遠端撤銷與業務 audit 同交易保存。React `/settings/sessions` 使用 ADR-010、RWD 與 axe 基線；197 個非 DB、124 個 PostgreSQL integration 與 87 個 React 測試通過。正式角色仍須公司在 P1-02 將 `sessions.manage` 配給核准角色。
 
@@ -150,8 +152,8 @@
 
 ### 接下來要做
 
-1. 執行 Phase 11.4：補齊登入、登出、Session、權限、敏感讀取與管理操作事件，建立 completeness matrix，仍不得記錄 Cookie、token、密碼或附件內容。
-2. Phase 10 mapping 等待核對期間繼續 Phase 11.1、11.4～11.6：安全設定掃描、完整事件／access log 與正式備份方案；仍不能跳過舊資料 apply Gate。
+1. 執行 Phase 11.5：建立 structured HTTP access／application log，記錄 route template、status、duration、Request ID 與安全 actor 摘要，不記錄 query、body、Cookie、token、密碼或附件內容。
+2. Phase 10 mapping 等待核對期間繼續 Phase 11.1、11.5～11.6：安全設定掃描、access log 與正式備份方案；仍不能跳過舊資料 apply Gate。
 3. 逐類處理 Phase 10.2 的 11 類高風險例外；每一類必須有可重現修復、公司核對 mapping、唯讀封存或明確排除理由，未降為 0 前不得進入 10.3 apply。
 4. 優先回查 `quote.subpoenaid`、歷史製程、`merchandise.subpoenaid`、出貨明細與工單父鍵；現有匯出無可靠直接關聯，在取得舊程式 join 或可核對匯出前不得猜測。
 5. 同時處理 29,213 筆來源文字修復事件、`wpa` 189 筆客戶孤兒，以及 24 個尚只有 manifest 分類的 active tables；修復後必須從全新 DB 重跑相同 dry-run。

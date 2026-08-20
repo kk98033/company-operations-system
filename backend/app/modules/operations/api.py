@@ -4,15 +4,18 @@ from datetime import date
 from typing import Annotated, Literal
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, Query, Response
+from fastapi import APIRouter, Depends, Query, Request, Response
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from app.core.database.session import get_database_session
 from app.core.errors import ApplicationError
+from app.core.request_context import require_request_id
+from app.modules.audit import record_user_audit_event
 from app.modules.auth.dependencies import require_current_session
 from app.modules.auth.services import AuthenticatedSession
 from app.modules.authorization.capabilities import has_capability
+from app.modules.authorization.security import persist_permission_denial
 from app.modules.billing.models import Statement
 from app.modules.customers.models import Customer
 from app.modules.operations.common import build_operations_context
@@ -116,11 +119,18 @@ def build_operations_router() -> APIRouter:
     )
     def customer_overview(
         customer_id: UUID,
+        request: Request,
         identity: Annotated[AuthenticatedSession, Depends(require_current_session)],
         db: Annotated[Session, Depends(get_database_session)],
     ) -> CustomerOverviewResponse:
         context = build_operations_context(db, identity)
         if not context.can("customers.read"):
+            persist_permission_denial(
+                db,
+                context=identity,
+                request_id=require_request_id(request),
+                capability="customers.read",
+            )
             raise ApplicationError(
                 status_code=403, code="PERMISSION_DENIED", message="沒有執行此操作的權限"
             )
@@ -136,6 +146,7 @@ def build_operations_router() -> APIRouter:
     )
     def export_csv(
         dataset: ExportDataset,
+        request: Request,
         identity: Annotated[AuthenticatedSession, Depends(require_current_session)],
         db: Annotated[Session, Depends(get_database_session)],
     ) -> Response:
@@ -146,6 +157,12 @@ def build_operations_router() -> APIRouter:
             organization_id=identity.organization_id,
             capability=capability,
         ):
+            persist_permission_denial(
+                db,
+                context=identity,
+                request_id=require_request_id(request),
+                capability=capability,
+            )
             raise ApplicationError(
                 status_code=403, code="PERMISSION_DENIED", message="沒有執行此操作的權限"
             )
@@ -170,6 +187,15 @@ def build_operations_router() -> APIRouter:
             .limit(10000)
         ).all()
         content = render_csv(headers, (mapper(row) for row in rows))
+        record_user_audit_event(
+            db,
+            scope=build_operations_context(db, identity).scope,
+            request_id=require_request_id(request),
+            action="operations.csv_export",
+            entity_type="data_export",
+            after={"dataset": dataset, "row_count": len(rows)},
+        )
+        db.commit()
         return Response(
             content=content,
             media_type="text/csv; charset=utf-8",

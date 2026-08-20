@@ -6,6 +6,7 @@
 - `資料模型與業務規則.md`：核心關聯、數量、金額、狀態與並行。
 - `測試與驗收計畫.md`：每步驗證、E2E、列印、還原及 UAT。
 - `資安Session稽核與備份計畫.md`：個人帳號、同帳號 Session、三層日誌、3-2-1、PITR／WAL 與還原 Gate。
+- `事件完整性矩陣.md`：57 個 mutating API、5 個敏感讀取與 audit／security event 分層守門。
 - `舊資料移轉計畫.md`：亂碼、staging、mapping、核對及切換。
 - `舊系統資料Import對照與分批計畫.md`：實際舊表、初步筆數、新表 mapping、平行 Import Slice 與核對門檻。
 - `本機開發與Git備份規範.md`：commit、tag、bundle、remote 與回復。

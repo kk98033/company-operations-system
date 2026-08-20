@@ -27,6 +27,7 @@ def _context() -> AuthenticatedSession:
         display_name="Synthetic Operator",
         organization_id=uuid4(),
         organization_name="Synthetic Organization",
+        session_id=uuid4(),
     )
 
 
@@ -64,6 +65,10 @@ def test_capability_dependency_allows_exact_grant_and_denies_missing_grant(
     assert response.status_code == expected_status
     if expected_code is not None:
         assert response.json()["error"]["code"] == expected_code
+        database_session.add.assert_called_once()
+        database_session.commit.assert_called_once_with()
+    else:
+        database_session.add.assert_not_called()
     checker.assert_called_once_with(
         database_session,
         organization_member_id=context.organization_member_id,

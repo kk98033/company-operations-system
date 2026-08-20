@@ -7,10 +7,11 @@ from uuid import uuid4
 
 import pytest
 from pydantic import SecretStr
-from sqlalchemy import Engine
+from sqlalchemy import Engine, select
 from sqlalchemy.orm import Session as OrmSession
 
 from app.modules.audit import record_user_audit_event
+from app.modules.audit.models import AuditLog
 from app.modules.audit.sanitizer import REDACTED
 from app.modules.authorization.models import (
     OrganizationMemberRole,
@@ -145,3 +146,13 @@ def test_audit_api_is_permission_guarded_scoped_and_sanitized(
     denied = client_b.get("/api/v1/audit-logs")
     assert denied.status_code == 403
     assert denied.json()["error"]["code"] == "PERMISSION_DENIED"
+    with OrmSession(identity_engine) as session:
+        read_event = session.scalar(
+            select(AuditLog).where(
+                AuditLog.organization_id == identity_a.organization_id,
+                AuditLog.action == "audit.read",
+            )
+        )
+    assert read_event is not None
+    assert read_event.after_data == {"result_count": 1, "total_items": 1}
+    assert str(read_event.request_id) == response.headers["x-request-id"]

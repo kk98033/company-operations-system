@@ -166,7 +166,11 @@ def build_auth_router() -> APIRouter:
         database_session: Annotated[OrmSession, Depends(get_database_session)],
     ) -> Response:
         if raw_token is not None:
-            revoke_session(database_session, raw_token=raw_token)
+            revoke_session(
+                database_session,
+                raw_token=raw_token,
+                request_id=require_request_id(request),
+            )
         response = Response(status_code=status.HTTP_204_NO_CONTENT)
         clear_auth_cookies(response, settings=request.app.state.settings)
         return response

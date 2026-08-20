@@ -15,7 +15,7 @@ from sqlalchemy.orm import Session as OrmSession
 from app.modules.auth.cookies import CSRF_COOKIE_NAME, SESSION_COOKIE_NAME
 from app.modules.auth.csrf import derive_csrf_token
 from app.modules.auth.errors import SessionCreationError
-from app.modules.auth.models import Session, User
+from app.modules.auth.models import LoginSecurityEvent, Session, User
 from app.modules.auth.services import (
     create_login_session,
     get_active_session,
@@ -86,6 +86,11 @@ def test_logout_is_idempotent_and_invalidates_the_old_session(
         second_revoked_at = connection.scalar(select(Session.revoked_at))
     with OrmSession(identity_engine) as session:
         resolved = get_active_session(session, raw_token=raw_token)
+        logout_events = session.scalars(
+            select(LoginSecurityEvent).where(
+                LoginSecurityEvent.event_type == "logout_succeeded"
+            )
+        ).all()
 
     assert first.status_code == 204
     assert second.status_code == 204
@@ -95,6 +100,9 @@ def test_logout_is_idempotent_and_invalidates_the_old_session(
     assert first_revoked_at is not None
     assert second_revoked_at == first_revoked_at
     assert resolved is None
+    assert len(logout_events) == 1
+    assert logout_events[0].session_id == active_context.session_id
+    assert logout_events[0].credential_fingerprint is None
 
 
 def test_unknown_well_formed_token_has_the_same_logout_result(

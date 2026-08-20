@@ -8,10 +8,11 @@ from datetime import UTC, datetime
 from uuid import UUID
 
 from pydantic import SecretStr
-from sqlalchemy import select, update
+from sqlalchemy import select
 from sqlalchemy.orm import Session as OrmSession
 
 from app.modules.auth.models import Session, User
+from app.modules.auth.services.security_events import record_authenticated_security_event
 from app.modules.auth.tokens import digest_session_token, is_session_token_format
 from app.modules.organizations.models import Organization, OrganizationMember
 
@@ -76,19 +77,50 @@ def revoke_session(
     session: OrmSession,
     *,
     raw_token: SecretStr,
+    request_id: UUID | None = None,
     now: Callable[[], datetime] = lambda: datetime.now(UTC),
 ) -> None:
-    """Revoke at most once; unknown and already-revoked tokens are no-ops."""
+    """Revoke at most once and atomically record a normal logout event."""
 
     raw_value = raw_token.get_secret_value()
     if not is_session_token_format(raw_value):
         return
     with session.begin():
-        session.execute(
-            update(Session)
+        row = session.execute(
+            select(Session, OrganizationMember, User, Organization)
+            .join(
+                OrganizationMember,
+                OrganizationMember.id == Session.organization_member_id,
+            )
+            .join(User, User.id == OrganizationMember.user_id)
+            .join(Organization, Organization.id == OrganizationMember.organization_id)
             .where(
                 Session.token_digest == digest_session_token(raw_token),
                 Session.revoked_at.is_(None),
             )
-            .values(revoked_at=now())
-        )
+            .with_for_update(of=Session)
+        ).one_or_none()
+        if row is None:
+            return
+        login_session, membership, user, organization = row
+        timestamp = now()
+        login_session.revoked_at = timestamp
+        if request_id is not None:
+            record_authenticated_security_event(
+                session,
+                context=AuthenticatedSession(
+                    expires_at=login_session.expires_at,
+                    organization_member_id=membership.id,
+                    user_id=user.id,
+                    login_name=user.login_name,
+                    display_name=user.display_name,
+                    organization_id=organization.id,
+                    organization_name=organization.name,
+                    session_id=login_session.id,
+                ),
+                request_id=request_id,
+                event_type="logout_succeeded",
+                target_type="auth_session",
+                target_id=login_session.id,
+                timestamp=timestamp,
+            )

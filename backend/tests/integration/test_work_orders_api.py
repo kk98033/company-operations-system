@@ -1,12 +1,14 @@
 """PostgreSQL acceptance for production cases and work orders."""
 
 import os
-from uuid import uuid4
+from uuid import UUID, uuid4
 
 import pytest
 from pydantic import SecretStr
-from sqlalchemy import Engine
+from sqlalchemy import Engine, select
+from sqlalchemy.orm import Session
 
+from app.modules.audit.models import AuditLog
 from tests.integration.auth_test_support import create_auth_identity, make_auth_client
 from tests.integration.work_order_test_support import grant, setup_company, work_order_payload
 
@@ -78,6 +80,14 @@ def test_direct_work_order_lifecycle_snapshot_search_and_attachment(
     downloaded = client.get(f"/api/v1/work-orders/{order['id']}/attachments/{attachment['id']}")
     assert downloaded.content == content
     assert downloaded.headers["cache-control"] == "private, no-store"
+    with Session(identity_engine) as session:
+        download_event = session.scalar(
+            select(AuditLog).where(
+                AuditLog.action == "work_order.attachment.download"
+            )
+        )
+    assert download_event is not None
+    assert download_event.entity_id == UUID(attachment["id"])
     assert (
         client.delete(
             f"/api/v1/work-orders/{order['id']}/attachments/{attachment['id']}",

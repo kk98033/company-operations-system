@@ -13,6 +13,7 @@ from sqlalchemy.orm import Session as OrmSession
 
 from app.modules.audit import record_user_audit_event
 from app.modules.auth.models import Session, User
+from app.modules.auth.services.security_events import record_authenticated_security_event
 from app.modules.auth.services.session import AuthenticatedSession
 from app.modules.organizations.models import OrganizationMember
 from app.modules.organizations.scope import OrganizationScope
@@ -155,6 +156,15 @@ def revoke_managed_session(
                 before={"status": "active"},
                 after={"status": "revoked"},
             )
+            record_authenticated_security_event(
+                session,
+                context=context,
+                request_id=request_id,
+                event_type="session_revoked",
+                target_type="auth_session",
+                target_id=target.id,
+                timestamp=target.revoked_at,
+            )
         session.commit()
         return True
     except Exception:
@@ -205,6 +215,15 @@ def revoke_membership_sessions(
             reason=reason,
             before={"active_session_count": len(revoked_ids)},
             after={"active_session_count": 0},
+        )
+        record_authenticated_security_event(
+            session,
+            context=context,
+            request_id=request_id,
+            event_type="membership_sessions_revoked",
+            target_type="organization_member",
+            target_id=membership.id,
+            timestamp=timestamp,
         )
         session.commit()
         return len(revoked_ids)

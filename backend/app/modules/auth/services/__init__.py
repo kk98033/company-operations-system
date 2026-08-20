@@ -1,6 +1,7 @@
 """Authentication application services."""
 
 from app.modules.auth.services.login import LoginResult, create_login_session
+from app.modules.auth.services.security_events import record_authenticated_security_event
 from app.modules.auth.services.session import (
     AuthenticatedSession,
     get_active_session,
@@ -25,4 +26,5 @@ __all__ = [
     "revoke_managed_session",
     "revoke_membership_sessions",
     "revoke_session",
+    "record_authenticated_security_event",
 ]

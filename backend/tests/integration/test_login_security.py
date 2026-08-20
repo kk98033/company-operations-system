@@ -10,7 +10,7 @@ from uuid import uuid4
 
 import pytest
 from pydantic import SecretStr
-from sqlalchemy import Engine, func, select, update
+from sqlalchemy import Engine, func, select, text, update
 from sqlalchemy.exc import DBAPIError
 from sqlalchemy.orm import Session as OrmSession
 
@@ -289,3 +289,7 @@ def test_login_security_events_are_append_only(identity_engine: Engine) -> None:
     with pytest.raises(DBAPIError):
         with identity_engine.begin() as connection:
             connection.execute(update(LoginSecurityEvent).values(failure_count=999))
+
+    with pytest.raises(DBAPIError):
+        with identity_engine.begin() as connection:
+            connection.execute(text("TRUNCATE TABLE login_security_events"))

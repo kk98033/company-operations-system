@@ -90,7 +90,7 @@ def setup_company(engine: Engine, suffix: str):
             "password": identity.password.get_secret_value(),
         },
     )
-    assert login.status_code == 200
+    assert login.status_code == 200, login.text
     csrf = client.cookies.get("company_system_csrf")
     customer = client.post(
         "/api/v1/customers",

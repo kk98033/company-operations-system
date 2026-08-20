@@ -64,8 +64,32 @@ def identity_engine(migrated_engine: Engine) -> Generator[Engine, None, None]:
         yield migrated_engine
     finally:
         with migrated_engine.begin() as connection:
+            connection.execute(
+                text(
+                    "ALTER TABLE audit_logs DISABLE TRIGGER "
+                    "trg_audit_logs_prevent_truncate"
+                )
+            )
             connection.execute(text(f"TRUNCATE TABLE {AuditLog.__tablename__}"))
+            connection.execute(
+                text(
+                    "ALTER TABLE audit_logs ENABLE TRIGGER "
+                    "trg_audit_logs_prevent_truncate"
+                )
+            )
+            connection.execute(
+                text(
+                    "ALTER TABLE login_security_events DISABLE TRIGGER "
+                    "trg_login_security_events_prevent_truncate"
+                )
+            )
             connection.execute(text(f"TRUNCATE TABLE {LoginSecurityEvent.__tablename__}"))
+            connection.execute(
+                text(
+                    "ALTER TABLE login_security_events ENABLE TRIGGER "
+                    "trg_login_security_events_prevent_truncate"
+                )
+            )
             connection.execute(LoginThrottleState.__table__.delete())
             connection.execute(Session.__table__.delete())
             connection.execute(OrganizationMemberRole.__table__.delete())

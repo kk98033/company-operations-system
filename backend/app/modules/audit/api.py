@@ -4,11 +4,12 @@ from __future__ import annotations
 
 from typing import Annotated
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Request
 from sqlalchemy.orm import Session as OrmSession
 
 from app.api.contracts import PageParams, build_list_response
 from app.core.database.session import get_database_session
+from app.core.request_context import require_request_id
 from app.modules.audit.query import list_audit_logs
 from app.modules.audit.schemas import (
     AuditFilterParams,
@@ -16,6 +17,7 @@ from app.modules.audit.schemas import (
     AuditLogListResponse,
     AuditSortParams,
 )
+from app.modules.audit.services import record_user_audit_event
 from app.modules.auth.services import AuthenticatedSession
 from app.modules.authorization.dependencies import require_capability
 from app.modules.organizations.scope import OrganizationScope
@@ -33,6 +35,7 @@ def build_audit_router() -> APIRouter:
         summary="查詢目前公司的不可變稽核紀錄",
     )
     def audit_list(
+        request: Request,
         page: Annotated[PageParams, Depends()],
         sort: Annotated[AuditSortParams, Depends()],
         filters: Annotated[AuditFilterParams, Depends()],
@@ -61,6 +64,15 @@ def build_audit_router() -> APIRouter:
             sort=sort,
             filters=AuditFilterSummary.model_validate(filters.model_dump()),
         )
+        record_user_audit_event(
+            database_session,
+            scope=scope,
+            request_id=require_request_id(request),
+            action="audit.read",
+            entity_type="audit_log",
+            after={"result_count": len(items), "total_items": total_items},
+        )
+        database_session.commit()
         return AuditLogListResponse.model_validate(response)
 
     return router
