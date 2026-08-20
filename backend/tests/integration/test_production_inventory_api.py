@@ -7,6 +7,7 @@ from decimal import Decimal
 from uuid import uuid4
 
 import pytest
+from pydantic import SecretStr
 from sqlalchemy import Engine, select
 from sqlalchemy.exc import DBAPIError
 from sqlalchemy.orm import Session
@@ -18,8 +19,8 @@ from app.modules.production.models import (
     InventoryLedgerEntry,
     ProcessEvent,
 )
-from tests.integration.auth_test_support import make_auth_client
-from tests.integration.work_order_test_support import setup_company, work_order_payload
+from tests.integration.auth_test_support import create_auth_member, make_auth_client
+from tests.integration.work_order_test_support import grant, setup_company, work_order_payload
 
 pytestmark = [
     pytest.mark.database_integration,
@@ -222,13 +223,19 @@ def test_concurrent_duplicate_completion_is_single_inventory_entry(
     assert _event(first_client, first_csrf, order_id, "start").status_code == 201
     assert _event(first_client, first_csrf, order_id, "complete").status_code == 201
 
+    second_identity = create_auth_member(
+        identity_engine,
+        organization_id=identity.organization_id,
+        password=SecretStr(f"Synthetic-SECOND-{uuid4()}"),
+    )
+    grant(identity_engine, second_identity, "production.complete")
     second_client = make_auth_client(identity_engine)
     login = second_client.post(
         "/api/v1/auth/login",
         json={
-            "organization_id": str(identity.organization_id),
-            "login_name": identity.login_name,
-            "password": identity.password.get_secret_value(),
+            "organization_id": str(second_identity.organization_id),
+            "login_name": second_identity.login_name,
+            "password": second_identity.password.get_secret_value(),
         },
     )
     assert login.status_code == 200

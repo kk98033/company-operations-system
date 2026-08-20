@@ -5,10 +5,10 @@ from __future__ import annotations
 from collections.abc import Callable
 from dataclasses import dataclass
 from datetime import UTC, datetime, timedelta
-from uuid import UUID
+from uuid import UUID, uuid4
 
 from pydantic import SecretStr
-from sqlalchemy import and_, func, select
+from sqlalchemy import and_, func, select, update
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session as OrmSession
 
@@ -158,25 +158,54 @@ def create_login_session(
                     )
                 else:
                     previous_failures = clear_login_throttle(session, throttle)
+                    locked_membership_id = session.scalar(
+                        select(OrganizationMember.id)
+                        .where(OrganizationMember.id == membership.id)
+                        .with_for_update()
+                    )
+                    assert locked_membership_id == membership.id
+                    session_timestamp = now()
+                    replaced_session_ids = session.scalars(
+                        update(Session)
+                        .where(
+                            Session.organization_member_id == membership.id,
+                            Session.revoked_at.is_(None),
+                        )
+                        .values(revoked_at=session_timestamp)
+                        .returning(Session.id)
+                    ).all()
+                    expires_at = session_timestamp + session_ttl
+                    issued_token = token_issuer()
+                    new_session_id = uuid4()
+                    session.add(
+                        Session(
+                            id=new_session_id,
+                            organization_member_id=membership.id,
+                            token_digest=issued_token.digest,
+                            created_at=session_timestamp,
+                            expires_at=expires_at,
+                        )
+                    )
+                    session.flush()
+                    for replaced_session_id in replaced_session_ids:
+                        record_login_event(
+                            session,
+                            event_type="session_replaced",
+                            fingerprint=fingerprint,
+                            request_id=request_id,
+                            session_id=replaced_session_id,
+                            timestamp=session_timestamp,
+                        )
                     record_login_event(
                         session,
                         event_type="login_succeeded",
                         fingerprint=fingerprint,
                         request_id=request_id,
+                        session_id=new_session_id,
                         failure_count=previous_failures,
-                        timestamp=timestamp,
+                        timestamp=session_timestamp,
                     )
-                    expires_at = timestamp + session_ttl
-                    issued_token = token_issuer()
-                    session.add(
-                        Session(
-                            organization_member_id=membership.id,
-                            token_digest=issued_token.digest,
-                            created_at=timestamp,
-                            expires_at=expires_at,
-                        )
-                    )
-                    user.last_login_at = timestamp
+                    user.last_login_at = session_timestamp
     except IntegrityError:
         raise SessionCreationError from None
 

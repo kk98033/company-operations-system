@@ -38,10 +38,6 @@ def create_auth_identity(
     password: SecretStr,
 ) -> SyntheticAuthIdentity:
     organization_id = uuid4()
-    user_id = uuid4()
-    membership_id = uuid4()
-    login_name = f"synthetic.login.{user_id.hex}"
-    password_hash = hash_password(password)
     with engine.begin() as connection:
         connection.execute(
             Organization.__table__.insert(),
@@ -54,6 +50,26 @@ def create_auth_identity(
             OrganizationSettings.__table__.insert(),
             {"organization_id": organization_id},
         )
+    return create_auth_member(
+        engine,
+        organization_id=organization_id,
+        password=password,
+    )
+
+
+def create_auth_member(
+    engine: Engine,
+    *,
+    organization_id: UUID,
+    password: SecretStr,
+) -> SyntheticAuthIdentity:
+    """Create another synthetic account inside an existing organization."""
+
+    user_id = uuid4()
+    membership_id = uuid4()
+    login_name = f"synthetic.login.{user_id.hex}"
+    password_hash = hash_password(password)
+    with engine.begin() as connection:
         connection.execute(
             User.__table__.insert(),
             {

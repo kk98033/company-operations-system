@@ -69,27 +69,6 @@ def test_login_normalizes_name_and_persists_only_digest_atomically(
     assert identity.password.get_secret_value() not in response.text
 
 
-def test_each_successful_login_creates_a_distinct_active_session(
-    identity_engine: Engine,
-) -> None:
-    identity = create_auth_identity(
-        identity_engine,
-        password=SecretStr(token_urlsafe(24)),
-    )
-    client = make_auth_client(identity_engine)
-
-    first = client.post("/api/v1/auth/login", json=_payload(identity))
-    second = client.post("/api/v1/auth/login", json=_payload(identity))
-
-    assert first.status_code == 200
-    assert second.status_code == 200
-    assert first.cookies[SESSION_COOKIE_NAME] != second.cookies[SESSION_COOKIE_NAME]
-    with identity_engine.connect() as connection:
-        digests = connection.scalars(select(Session.token_digest)).all()
-    assert len(digests) == 2
-    assert len(set(digests)) == 2
-
-
 def test_login_binds_the_explicit_membership_for_a_multi_organization_user(
     identity_engine: Engine,
 ) -> None:
@@ -126,7 +105,9 @@ def test_login_binds_the_explicit_membership_for_a_multi_organization_user(
     assert response.status_code == 200
     assert response.json()["organization"]["id"] == str(second_organization_id)
     with identity_engine.connect() as connection:
-        assert connection.scalar(select(Session.organization_member_id)) == (second_membership_id)
+        assert connection.scalar(select(Session.organization_member_id)) == (
+            second_membership_id
+        )
 
 
 def test_database_normalization_keeps_tab_wrapped_login_distinct(

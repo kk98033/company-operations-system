@@ -242,6 +242,40 @@ def test_concurrent_failures_do_not_lose_counts(identity_engine: Engine) -> None
         assert connection.scalar(select(func.count()).select_from(LoginSecurityEvent)) == 6
 
 
+def test_concurrent_successful_logins_leave_one_active_session(
+    identity_engine: Engine,
+) -> None:
+    identity = create_auth_identity(
+        identity_engine,
+        password=SecretStr(token_urlsafe(24)),
+    )
+    barrier = Barrier(2)
+
+    def attempt_login() -> str:
+        barrier.wait()
+        with OrmSession(identity_engine) as session:
+            return create_login_session(
+                session,
+                login_name=identity.login_name,
+                password=identity.password,
+                organization_id=identity.organization_id,
+                request_id=uuid4(),
+                security_hmac_key=make_test_settings().auth_security_hmac_key_value(),
+            ).raw_session_token.get_secret_value()
+
+    with ThreadPoolExecutor(max_workers=2) as executor:
+        raw_tokens = list(executor.map(lambda _: attempt_login(), range(2)))
+
+    assert raw_tokens[0] != raw_tokens[1]
+    with identity_engine.connect() as connection:
+        rows = connection.execute(select(Session.id, Session.revoked_at)).all()
+        event_types = connection.scalars(select(LoginSecurityEvent.event_type)).all()
+    assert len(rows) == 2
+    assert sum(row.revoked_at is None for row in rows) == 1
+    assert event_types.count("login_succeeded") == 2
+    assert event_types.count("session_replaced") == 1
+
+
 def test_login_security_events_are_append_only(identity_engine: Engine) -> None:
     identity = create_auth_identity(
         identity_engine,

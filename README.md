@@ -55,18 +55,20 @@
 | 項目 | 目前狀態 |
 |---|---|
 | 最後更新日期 | 2026-08-20 |
-| 計畫版本 | v1.29（同帳號 Session、分層日誌與可還原備份 Gate） |
-| 架構版本 | v1.27（個人帳號、操作追蹤與 3-2-1／PITR 備份） |
-| 目前階段 | Phase 10 進行中；10.2 完成，10.3 正式 apply 被 11 類高風險例外阻擋 |
-| 目前切片 | PHASE10-FULL-DRY-RUN-001：全新隔離 DB 串接全模組 aggregate dry-run，登錄 106 個來源與 11 類例外，業務／staging 寫入皆為 0 |
-| 實作完成度 | Phase 0：完成；Import I-0：3／3；Phase 1：9／9；Phase 2：10／10；Phase 3：8／8；Phase 4：18／18；Phase 5：12／12；Phase 6：10／10；Phase 7：9／9；Phase 8：10／10；Phase 9：6／6；Phase 10：2／9 |
+| 計畫版本 | v1.30（Phase 11.2 單一有效 Session 已完成） |
+| 架構版本 | v1.28（DB 強制單一 Session 與取代事件） |
+| 目前階段 | Phase 10 的 10.3 apply 被 11 類來源例外阻擋；並行執行 Phase 11 安全工作，已完成 11.2 |
+| 目前切片 | SEC-SESSION-SINGLE-001：每 membership 最多 1 個未撤銷 Session，下一步 11.3 Session 管理與遠端撤銷 |
+| 實作完成度 | Phase 0：完成；Import I-0：3／3；Phase 1：9／9；Phase 2：10／10；Phase 3：8／8；Phase 4：18／18；Phase 5：12／12；Phase 6：10／10；Phase 7：9／9；Phase 8：10／10；Phase 9：6／6；Phase 10：2／9；Phase 11：1／13 |
 | 規劃文件完成度 | 100% |
-| 最新中型進度備份 | 本次提交後建立 Git tag `checkpoint-phase-9` 與專案外 bundle |
+| 最新中型進度備份 | Git tag `checkpoint-phase-9` 與專案外 bundle；Phase 11 Gate 尚未完成 |
 | 正式遠端 Git 備份 | 尚未設定；R-11 維持 Open，正式部署前必須建立私人 repository |
 
 ### 已完成
 
-- 完成 SEC-OPS-PLAN-001 現況差距與正式 Gate：確認現有 Argon2id、Cookie／CSRF、登入限制、公司權限及交易式 audit 基礎可沿用，但同帳號目前仍可有多個有效 Session、登出／Session／每個 request 尚未完整串接、正式備份仍只有規劃。新增 ADR-025～027 與 [資安、Session、稽核與備份計畫](docs/資安Session稽核與備份計畫.md)：建議每位員工獨立帳號、同 membership 預設 1 個有效 Session；操作紀錄分成業務 audit／資安事件／access log；正式備份採 3-2-1、PITR／WAL、公司異地副本及定期乾淨還原。這是已納入 Phase 11 的規格，不誤稱功能或備份已完成。
+- 完成 Phase 11 Slice 11.2／SEC-SESSION-SINGLE-001：第一版每個 organization membership 最多 1 個未撤銷 Session。登入會在同一交易鎖定 membership、撤銷舊 Session、建立新 Session、更新最後登入並保存 `session_replaced`／`login_succeeded` 事件；PostgreSQL 部分唯一索引阻止繞過服務層。不同員工及同一 user 的不同公司 membership 仍可並行。193 個非 DB 與 121 個隔離 PostgreSQL integration tests 通過；Session 清單／管理撤銷留 11.3，完整 access log 與備份仍未完成。
+
+- 完成 SEC-OPS-PLAN-001 現況差距與正式 Gate：規劃當時確認 Argon2id、Cookie／CSRF、登入限制、公司權限及交易式 audit 基礎可沿用，但同帳號仍可有多個有效 Session、登出／Session／每個 request 尚未完整串接、正式備份仍只有規劃。新增 ADR-025～027 與 [資安、Session、稽核與備份計畫](docs/資安Session稽核與備份計畫.md)；其中 ADR-025 的單一 Session 已由 11.2 完成，分層日誌與可還原備份仍待後續 Slice。
 
 - 完成 Phase 10.2／PHASE10-FULL-DRY-RUN-001：以更新後 catalog `2026-08-20.2` 重新凍結相同 106 個來源與 212,556 筆邏輯資料列；來源 manifest 維持 `cfb04f21…ab8f`，整合程式 fingerprint 更新為 `0b67e6f9…6a42`，對應 commit `eec9a84`。全新隔離 PostgreSQL 只建立 1 筆 `ImportRun`、106 筆來源登錄與 11 筆 aggregate 例外，`import_staging_records` 與正式業務資料皆為 0；狀態為 `awaiting_approval`、`apply_performed=false`。11 類高風險問題包含轉碼修復、工單／製程／庫存／出貨孤兒、1 筆計價與 1 筆收款未匹配，以及 24 個尚只有 manifest 分類的 active tables；因此 10.3 不得開始。
 
@@ -146,8 +148,8 @@
 
 ### 接下來要做
 
-1. 公司確認 ADR-025 的同一 membership 有效 Session 上限採建議 1，或因單人多裝置採 2；不得用共用帳號滿足多人操作。
-2. Phase 10 mapping 等待核對期間可先執行 Phase 11.1～11.6：安全設定掃描、Session 取代／管理、完整日誌與正式備份方案；仍不能跳過舊資料 apply Gate。
+1. 執行 Phase 11.3：建立本人／公司 Session 清單、專用 capability、遠端撤銷與停用帳號時同步撤銷；不得顯示 raw token。
+2. Phase 10 mapping 等待核對期間繼續 Phase 11.1、11.3～11.6：安全設定掃描、Session 管理、完整日誌與正式備份方案；仍不能跳過舊資料 apply Gate。
 3. 逐類處理 Phase 10.2 的 11 類高風險例外；每一類必須有可重現修復、公司核對 mapping、唯讀封存或明確排除理由，未降為 0 前不得進入 10.3 apply。
 4. 優先回查 `quote.subpoenaid`、歷史製程、`merchandise.subpoenaid`、出貨明細與工單父鍵；現有匯出無可靠直接關聯，在取得舊程式 join 或可核對匯出前不得猜測。
 5. 同時處理 29,213 筆來源文字修復事件、`wpa` 189 筆客戶孤兒，以及 24 個尚只有 manifest 分類的 active tables；修復後必須從全新 DB 重跑相同 dry-run。

@@ -2,7 +2,7 @@
 
 > 文件版本：v1.0
 > 日期：2026-08-20
-> 狀態：已納入正式實作計畫；Session 精確上限與正式部署方案於對應 Slice 驗收
+> 狀態：已納入正式實作計畫；Session 上限已完成，管理 UI、完整日誌與正式備份於後續 Slice 驗收
 
 ## 1. 現況結論
 
@@ -10,8 +10,8 @@
 
 仍有四個明確缺口：
 
-1. 每次成功登入都會建立新 Session；同一帳號目前可同時保有多個有效 Session。
-2. 登入成功／失敗已有安全事件，業務異動大多有 audit，但登出、Session 被取代、敏感查詢與每個 HTTP request 尚未形成完整可歸責鏈。
+1. 每次成功登入都會建立新 Session；同一 membership 的舊 Session 已會在同交易撤銷，資料庫只允許 1 個未撤銷 Session。
+2. 登入成功／失敗／Session 取代已有安全事件，業務異動大多有 audit，但登出、遠端撤銷、敏感查詢與每個 HTTP request 尚未形成完整可歸責鏈。
 3. `audit_logs` 適合保存業務事實，不適合把每個 GET 都寫進同一張表；否則資料量與敏感資訊風險會失控。
 4. 資料庫、附件、列印快照與 Secret 備份目前只有設計，尚未有可執行、自動告警及乾淨環境還原證據。
 
@@ -25,7 +25,7 @@
 
 ### 2.2 同帳號 Session
 
-第一版建議每個 organization membership 只允許一個有效互動 Session：
+第一版每個 organization membership 只允許一個未撤銷互動 Session：
 
 1. 新登入在同一資料庫交易鎖定 membership。
 2. 密碼與狀態驗證成功後，撤銷該 membership 其他未到期 Session。
@@ -33,7 +33,7 @@
 4. 舊瀏覽器下一次 request 收到統一 401，前端顯示「此帳號已在其他裝置重新登入」並回登入頁。
 5. 不以覆蓋 Cookie 假裝撤銷；伺服器資料庫必須讓舊 token 真正失效。
 
-若公司後續證明同一員工確實需要桌機與行動裝置並存，可將上限改成 2；不得設定無上限。管理者必須能檢視帳號的有效 Session，撤銷單一或全部 Session，使用者可看自己的登入時間與裝置摘要。
+若公司後續證明同一員工確實需要桌機與行動裝置並存，必須另立 ADR、風險與並行測試後才可改變上限；不得設定無上限。管理者必須能檢視帳號的有效 Session，撤銷單一或全部 Session，使用者可看自己的登入時間與裝置摘要。
 
 ## 3. 三層日誌，不把所有內容塞進同一張表
 
@@ -102,7 +102,7 @@
 
 ## 7. 實作順序與 Gate
 
-1. Session 單一登入政策、Session 管理 API／UI、同交易撤銷及並行測試。
+1. Session 單一登入政策、同交易撤銷及並行測試已完成；下一步建立 Session 管理 API／UI。
 2. 認證／Session／權限事件補齊，audit 加入 Session reference。
 3. HTTP structured access log、可信 proxy、遮罩、集中保存與告警。
 4. 備份 inventory、加密、manifest、DB／附件工具與錯誤告警。

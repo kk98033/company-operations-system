@@ -47,8 +47,9 @@ def record_login_event(
     event_type: str,
     fingerprint: str,
     request_id: UUID,
-    failure_count: int,
     timestamp: datetime,
+    session_id: UUID | None = None,
+    failure_count: int | None = None,
     blocked_until: datetime | None = None,
 ) -> None:
     """Stage one append-only privacy-preserving security event."""
@@ -58,6 +59,7 @@ def record_login_event(
             event_type=event_type,
             credential_fingerprint=fingerprint,
             request_id=request_id,
+            session_id=session_id,
             failure_count=failure_count,
             blocked_until=blocked_until,
             created_at=timestamp,

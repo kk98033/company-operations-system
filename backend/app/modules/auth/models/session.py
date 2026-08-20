@@ -13,6 +13,7 @@ from sqlalchemy import (
     String,
     UniqueConstraint,
     func,
+    text,
 )
 from sqlalchemy.orm import Mapped, mapped_column
 
@@ -47,6 +48,12 @@ class Session(Base):
             "expires_at",
         ),
         Index("ix_sessions_expires_at", "expires_at"),
+        Index(
+            "uq_sessions_one_unrevoked_per_membership",
+            "organization_member_id",
+            unique=True,
+            postgresql_where=text("revoked_at IS NULL"),
+        ),
     )
 
     id: Mapped[UUID] = mapped_column(primary_key=True, default=uuid4)
