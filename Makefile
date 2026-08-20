@@ -4,6 +4,7 @@ PYTHON ?= python3.12
 PROJECT_NPM ?= ../scripts/npm11.sh
 LEGACY_SOURCE_DIR ?= ../extraction/export/uv_print_full/tables
 IMPORT_PROFILE_OUTPUT ?= artifacts/import/profile
+IMPORT_FREEZE_OUTPUT ?= artifacts/import/freeze/legacy_import_freeze.json
 COMPOSE_PARSE_ENV = POSTGRES_PASSWORD=company-system-compose-parse-only
 
 .PHONY: bootstrap env-check dev down lint test build audit check shell-check \
@@ -12,6 +13,7 @@ COMPOSE_PARSE_ENV = POSTGRES_PASSWORD=company-system-compose-parse-only
 	import-profile import-profile-test backend-test backend-check frontend-test \
 	frontend-lint frontend-build frontend-audit frontend-check backend-build \
 	seed-test-identity import-customers-dry-run import-master-data-dry-run \
+	import-freeze \
 	import-work-items-dry-run import-quotations-dry-run \
 	import-work-orders-dry-run import-inventory-dry-run \
 	import-shipments-dry-run import-pricing-dry-run import-billing-dry-run
@@ -92,6 +94,11 @@ import-profile:
 
 import-profile-test:
 	$(PYTHON) -m unittest discover -s scripts/tests -p 'test_*.py' -v
+
+import-freeze:
+	$(PYTHON) scripts/legacy_import_freeze.py \
+		--source-dir "$(LEGACY_SOURCE_DIR)" \
+		--output-file "$(IMPORT_FREEZE_OUTPUT)"
 
 import-customers-dry-run:
 	$(PYTHON) scripts/legacy_customer_dry_run.py \

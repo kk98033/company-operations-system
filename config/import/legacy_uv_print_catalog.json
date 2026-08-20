@@ -1,0 +1,100 @@
+{
+  "schema_version": 1,
+  "catalog_version": "2026-08-20.1",
+  "source_system": "uv_print",
+  "expected_source_file_count": 106,
+  "program_files": [
+    "config/import/legacy_uv_print_catalog.json",
+    "scripts/legacy_import_profile.py",
+    "scripts/legacy_import_freeze.py",
+    "scripts/legacy_customer_dry_run.py",
+    "scripts/legacy_master_data_dry_run.py",
+    "scripts/legacy_work_items_dry_run.py",
+    "scripts/legacy_quotation_dry_run.py",
+    "scripts/legacy_work_order_dry_run.py",
+    "scripts/legacy_inventory_dry_run.py",
+    "scripts/legacy_shipment_dry_run.py",
+    "scripts/legacy_pricing_dry_run.py",
+    "scripts/legacy_billing_dry_run.py"
+  ],
+  "table_groups": [
+    {
+      "name": "system_metadata",
+      "patterns": ["pbcat*", "sys*"],
+      "disposition": "excluded_non_business_metadata",
+      "reason": "SQL Server and PowerBuilder catalog metadata is retained in the immutable source snapshot but is not business data."
+    },
+    {
+      "name": "legacy_authorization_reference",
+      "tables": ["be_right", "belong", "p_user", "ur_right"],
+      "disposition": "excluded_security_reference",
+      "reason": "Old accounts, passwords and rights are not imported; new identities and roles are recreated."
+    },
+    {
+      "name": "organization_and_customers",
+      "tables": ["company", "cust", "cust_sna"],
+      "disposition": "active_mapping_pending_approval",
+      "reason": "Organization and customer mapping is available, but source text repair and company approval remain required."
+    },
+    {
+      "name": "master_data",
+      "tables": ["colorset", "cut_set", "fact", "factgloss", "factkind_set", "factpaper", "factpaste", "fno_set", "gloss", "paper", "paste", "plant_na", "qly_set", "qty_set", "trun_na"],
+      "disposition": "active_or_archive_mapping_pending_approval",
+      "reason": "Active master rows, merged duplicates and historical-only options require company mapping approval."
+    },
+    {
+      "name": "customer_work_items",
+      "tables": ["wpa"],
+      "disposition": "active_mapping_blocked_by_exceptions",
+      "reason": "Orphan and missing-customer rows must be repaired or explicitly classified before apply."
+    },
+    {
+      "name": "quotations",
+      "tables": ["b_replay1", "b_replay2"],
+      "disposition": "active_mapping_blocked_by_relationships",
+      "reason": "Header and item identifiers do not currently reconcile; no relationship may be guessed."
+    },
+    {
+      "name": "work_orders",
+      "tables": ["quote", "quote_his", "subpoena", "subpoena_his"],
+      "disposition": "active_mapping_blocked_by_relationships",
+      "reason": "Current and historical work-order process parent keys require a verified join."
+    },
+    {
+      "name": "production_auxiliary_archive",
+      "tables": ["mail", "poster", "pp_io", "pp_tmp", "pp_tmp_copy", "pproc", "prod", "produce"],
+      "disposition": "read_only_archive_pending_semantics",
+      "reason": "Auxiliary production and communication tables remain preserved until their business semantics are verified."
+    },
+    {
+      "name": "inventory",
+      "tables": ["merchandise", "stk", "stkdraw", "stkdraw_det", "stkin", "stkin_det", "stkpur", "stkpur_det", "subp_replenish"],
+      "disposition": "opening_or_archive_mapping_blocked_by_relationships",
+      "reason": "Opening inventory and adjustment rows require verified work-order relationships."
+    },
+    {
+      "name": "paper_procurement_archive",
+      "tables": ["subp_paperprein", "subp_paperpru"],
+      "disposition": "read_only_archive",
+      "reason": "Paper procurement history is in full-scope retention but has no active first-release module."
+    },
+    {
+      "name": "shipments",
+      "tables": ["subp_sale", "subp_sale1", "subp_sale2"],
+      "disposition": "active_mapping_blocked_by_relationships",
+      "reason": "Shipment header and work-order relationships contain unresolved orphans."
+    },
+    {
+      "name": "pricing",
+      "tables": ["sal", "sal2", "sal_copy"],
+      "disposition": "active_or_archive_mapping_blocked_by_relationships",
+      "reason": "Pricing source links and duplicate-copy semantics require reconciliation."
+    },
+    {
+      "name": "billing",
+      "tables": ["expense", "income", "lsm", "payment", "rec", "rece"],
+      "disposition": "opening_or_archive_mapping_pending_semantics",
+      "reason": "Negative values, opening balances and monthly summary semantics require approval."
+    }
+  ]
+}
