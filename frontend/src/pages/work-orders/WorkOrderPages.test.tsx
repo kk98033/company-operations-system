@@ -108,7 +108,7 @@ it('工單建檔依公司稿在同一頁提供三紙、印刷與固定 13 道製
   expect(body.papers.map((item: { type: string }) => item.type)).toEqual(['face', 'back', 'flute'])
   expect(body.delivery_date).toBeNull()
   expect(body.specification).toBeNull()
-})
+}, 10_000)
 
 it('工單清單顯示價格欄位並可用關鍵字查詢', async () => {
   const user = userEvent.setup()

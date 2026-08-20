@@ -803,9 +803,45 @@ export interface LoginResponse {
   user: AuthenticatedUserResponse;
 }
 
+export type ManagedSessionResponseStatus = typeof ManagedSessionResponseStatus[keyof typeof ManagedSessionResponseStatus];
+
+
+export const ManagedSessionResponseStatus = {
+  active: 'active',
+  expired: 'expired',
+  revoked: 'revoked',
+  identity_inactive: 'identity_inactive',
+} as const;
+
+export interface ManagedSessionResponse {
+  client_summary: string;
+  created_at: string;
+  expires_at: string;
+  id: string;
+  is_current: boolean;
+  organization_member_id: string;
+  revoked_at: string | null;
+  status: ManagedSessionResponseStatus;
+  user: AuthenticatedUserResponse;
+}
+
+export interface ManagedSessionListResponse {
+  items: ManagedSessionResponse[];
+  total_items: number;
+}
+
 export interface MasterStatusUpdate {
   expected_updated_at: string;
   status: MasterStatus;
+}
+
+export interface MembershipSessionRevocationRequest {
+  organization_member_id: string;
+  /**
+     * @minLength 2
+     * @maxLength 500
+     */
+  reason: string;
 }
 
 export interface OrganizationLogoMetadata {
@@ -1536,6 +1572,14 @@ export interface SearchResponse {
   truncated: boolean;
 }
 
+export interface SessionRevocationRequest {
+  /**
+     * @minLength 2
+     * @maxLength 500
+     */
+  reason: string;
+}
+
 export interface ShipmentCancel {
   /** @exclusiveMinimum 0 */
   expected_version: number;
@@ -2064,6 +2108,22 @@ entity_type?: string | null;
 request_id?: string | null;
 };
 
+export type AuthListCompanySessionsParams = {
+/**
+ * @minimum 1
+ * @maximum 200
+ */
+limit?: number;
+};
+
+export type AuthListPersonalSessionsParams = {
+/**
+ * @minimum 1
+ * @maximum 100
+ */
+limit?: number;
+};
+
 export type CaseListParams = {
 status?: CaseStatus | null;
 /**
@@ -2426,6 +2486,284 @@ export const auditList = async (params?: AuditListParams, options?: RequestInit)
 
 
 
+export type authListCompanySessionsResponse200 = {
+  data: ManagedSessionListResponse
+  status: 200
+}
+
+export type authListCompanySessionsResponse400 = {
+  data: ErrorResponse
+  status: 400
+}
+
+export type authListCompanySessionsResponse401 = {
+  data: ErrorResponse
+  status: 401
+}
+
+export type authListCompanySessionsResponse403 = {
+  data: ErrorResponse
+  status: 403
+}
+
+export type authListCompanySessionsResponse404 = {
+  data: ErrorResponse
+  status: 404
+}
+
+export type authListCompanySessionsResponse405 = {
+  data: ErrorResponse
+  status: 405
+}
+
+export type authListCompanySessionsResponse409 = {
+  data: ErrorResponse
+  status: 409
+}
+
+export type authListCompanySessionsResponse422 = {
+  data: ErrorResponse
+  status: 422
+}
+
+export type authListCompanySessionsResponse429 = {
+  data: ErrorResponse
+  status: 429
+}
+
+export type authListCompanySessionsResponse500 = {
+  data: ErrorResponse
+  status: 500
+}
+
+export type authListCompanySessionsResponseSuccess = (authListCompanySessionsResponse200) & {
+  headers: Headers;
+};
+export type authListCompanySessionsResponseError = (authListCompanySessionsResponse400 | authListCompanySessionsResponse401 | authListCompanySessionsResponse403 | authListCompanySessionsResponse404 | authListCompanySessionsResponse405 | authListCompanySessionsResponse409 | authListCompanySessionsResponse422 | authListCompanySessionsResponse429 | authListCompanySessionsResponse500) & {
+  headers: Headers;
+};
+
+export type authListCompanySessionsResponse = (authListCompanySessionsResponseSuccess | authListCompanySessionsResponseError)
+
+export const getAuthListCompanySessionsUrl = (params?: AuthListCompanySessionsParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `${import.meta.env.VITE_API_ORIGIN || ''}/api/v1/auth/company-sessions?${stringifiedParams}` : `${import.meta.env.VITE_API_ORIGIN || ''}/api/v1/auth/company-sessions`
+}
+
+/**
+ * @summary 列出目前公司尚未撤銷的登入工作階段
+ */
+export const authListCompanySessions = async (params?: AuthListCompanySessionsParams, options?: RequestInit): Promise<authListCompanySessionsResponse> => {
+
+  const res = await fetch(getAuthListCompanySessionsUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+)
+
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+
+  const data: authListCompanySessionsResponse['data'] = body ? JSON.parse(body) : {}
+  return { data, status: res.status, headers: res.headers } as authListCompanySessionsResponse
+}
+
+
+
+export type authRevokeMembershipSessionsResponse204 = {
+  data: void
+  status: 204
+}
+
+export type authRevokeMembershipSessionsResponse400 = {
+  data: ErrorResponse
+  status: 400
+}
+
+export type authRevokeMembershipSessionsResponse401 = {
+  data: ErrorResponse
+  status: 401
+}
+
+export type authRevokeMembershipSessionsResponse403 = {
+  data: ErrorResponse
+  status: 403
+}
+
+export type authRevokeMembershipSessionsResponse404 = {
+  data: ErrorResponse
+  status: 404
+}
+
+export type authRevokeMembershipSessionsResponse405 = {
+  data: ErrorResponse
+  status: 405
+}
+
+export type authRevokeMembershipSessionsResponse409 = {
+  data: ErrorResponse
+  status: 409
+}
+
+export type authRevokeMembershipSessionsResponse422 = {
+  data: ErrorResponse
+  status: 422
+}
+
+export type authRevokeMembershipSessionsResponse429 = {
+  data: ErrorResponse
+  status: 429
+}
+
+export type authRevokeMembershipSessionsResponse500 = {
+  data: ErrorResponse
+  status: 500
+}
+
+export type authRevokeMembershipSessionsResponseSuccess = (authRevokeMembershipSessionsResponse204) & {
+  headers: Headers;
+};
+export type authRevokeMembershipSessionsResponseError = (authRevokeMembershipSessionsResponse400 | authRevokeMembershipSessionsResponse401 | authRevokeMembershipSessionsResponse403 | authRevokeMembershipSessionsResponse404 | authRevokeMembershipSessionsResponse405 | authRevokeMembershipSessionsResponse409 | authRevokeMembershipSessionsResponse422 | authRevokeMembershipSessionsResponse429 | authRevokeMembershipSessionsResponse500) & {
+  headers: Headers;
+};
+
+export type authRevokeMembershipSessionsResponse = (authRevokeMembershipSessionsResponseSuccess | authRevokeMembershipSessionsResponseError)
+
+export const getAuthRevokeMembershipSessionsUrl = () => {
+
+
+
+
+  return `${import.meta.env.VITE_API_ORIGIN || ''}/api/v1/auth/company-sessions/revoke-membership`
+}
+
+/**
+ * @summary 撤銷公司成員的全部登入工作階段
+ */
+export const authRevokeMembershipSessions = async (membershipSessionRevocationRequest: MembershipSessionRevocationRequest, options?: RequestInit): Promise<authRevokeMembershipSessionsResponse> => {
+
+  const res = await fetch(getAuthRevokeMembershipSessionsUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(membershipSessionRevocationRequest)
+  }
+)
+
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+
+  const data: authRevokeMembershipSessionsResponse['data'] = body ? JSON.parse(body) : undefined
+  return { data, status: res.status, headers: res.headers } as authRevokeMembershipSessionsResponse
+}
+
+
+
+export type authRevokeCompanySessionResponse204 = {
+  data: void
+  status: 204
+}
+
+export type authRevokeCompanySessionResponse400 = {
+  data: ErrorResponse
+  status: 400
+}
+
+export type authRevokeCompanySessionResponse401 = {
+  data: ErrorResponse
+  status: 401
+}
+
+export type authRevokeCompanySessionResponse403 = {
+  data: ErrorResponse
+  status: 403
+}
+
+export type authRevokeCompanySessionResponse404 = {
+  data: ErrorResponse
+  status: 404
+}
+
+export type authRevokeCompanySessionResponse405 = {
+  data: ErrorResponse
+  status: 405
+}
+
+export type authRevokeCompanySessionResponse409 = {
+  data: ErrorResponse
+  status: 409
+}
+
+export type authRevokeCompanySessionResponse422 = {
+  data: ErrorResponse
+  status: 422
+}
+
+export type authRevokeCompanySessionResponse429 = {
+  data: ErrorResponse
+  status: 429
+}
+
+export type authRevokeCompanySessionResponse500 = {
+  data: ErrorResponse
+  status: 500
+}
+
+export type authRevokeCompanySessionResponseSuccess = (authRevokeCompanySessionResponse204) & {
+  headers: Headers;
+};
+export type authRevokeCompanySessionResponseError = (authRevokeCompanySessionResponse400 | authRevokeCompanySessionResponse401 | authRevokeCompanySessionResponse403 | authRevokeCompanySessionResponse404 | authRevokeCompanySessionResponse405 | authRevokeCompanySessionResponse409 | authRevokeCompanySessionResponse422 | authRevokeCompanySessionResponse429 | authRevokeCompanySessionResponse500) & {
+  headers: Headers;
+};
+
+export type authRevokeCompanySessionResponse = (authRevokeCompanySessionResponseSuccess | authRevokeCompanySessionResponseError)
+
+export const getAuthRevokeCompanySessionUrl = (sessionId: string,) => {
+
+
+
+
+  return `${import.meta.env.VITE_API_ORIGIN || ''}/api/v1/auth/company-sessions/${sessionId}/revoke`
+}
+
+/**
+ * @summary 撤銷目前公司的一個登入工作階段
+ */
+export const authRevokeCompanySession = async (sessionId: string,
+    sessionRevocationRequest: SessionRevocationRequest, options?: RequestInit): Promise<authRevokeCompanySessionResponse> => {
+
+  const res = await fetch(getAuthRevokeCompanySessionUrl(sessionId),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(sessionRevocationRequest)
+  }
+)
+
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+
+  const data: authRevokeCompanySessionResponse['data'] = body ? JSON.parse(body) : undefined
+  return { data, status: res.status, headers: res.headers } as authRevokeCompanySessionResponse
+}
+
+
+
 export type authLoginResponse200 = {
   data: LoginResponse
   status: 200
@@ -2692,6 +3030,103 @@ export const authCurrentSession = async ( options?: RequestInit): Promise<authCu
 
   const data: authCurrentSessionResponse['data'] = body ? JSON.parse(body) : {}
   return { data, status: res.status, headers: res.headers } as authCurrentSessionResponse
+}
+
+
+
+export type authListPersonalSessionsResponse200 = {
+  data: ManagedSessionListResponse
+  status: 200
+}
+
+export type authListPersonalSessionsResponse400 = {
+  data: ErrorResponse
+  status: 400
+}
+
+export type authListPersonalSessionsResponse401 = {
+  data: ErrorResponse
+  status: 401
+}
+
+export type authListPersonalSessionsResponse403 = {
+  data: ErrorResponse
+  status: 403
+}
+
+export type authListPersonalSessionsResponse404 = {
+  data: ErrorResponse
+  status: 404
+}
+
+export type authListPersonalSessionsResponse405 = {
+  data: ErrorResponse
+  status: 405
+}
+
+export type authListPersonalSessionsResponse409 = {
+  data: ErrorResponse
+  status: 409
+}
+
+export type authListPersonalSessionsResponse422 = {
+  data: ErrorResponse
+  status: 422
+}
+
+export type authListPersonalSessionsResponse429 = {
+  data: ErrorResponse
+  status: 429
+}
+
+export type authListPersonalSessionsResponse500 = {
+  data: ErrorResponse
+  status: 500
+}
+
+export type authListPersonalSessionsResponseSuccess = (authListPersonalSessionsResponse200) & {
+  headers: Headers;
+};
+export type authListPersonalSessionsResponseError = (authListPersonalSessionsResponse400 | authListPersonalSessionsResponse401 | authListPersonalSessionsResponse403 | authListPersonalSessionsResponse404 | authListPersonalSessionsResponse405 | authListPersonalSessionsResponse409 | authListPersonalSessionsResponse422 | authListPersonalSessionsResponse429 | authListPersonalSessionsResponse500) & {
+  headers: Headers;
+};
+
+export type authListPersonalSessionsResponse = (authListPersonalSessionsResponseSuccess | authListPersonalSessionsResponseError)
+
+export const getAuthListPersonalSessionsUrl = (params?: AuthListPersonalSessionsParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `${import.meta.env.VITE_API_ORIGIN || ''}/api/v1/auth/sessions?${stringifiedParams}` : `${import.meta.env.VITE_API_ORIGIN || ''}/api/v1/auth/sessions`
+}
+
+/**
+ * @summary 列出自己的登入工作階段
+ */
+export const authListPersonalSessions = async (params?: AuthListPersonalSessionsParams, options?: RequestInit): Promise<authListPersonalSessionsResponse> => {
+
+  const res = await fetch(getAuthListPersonalSessionsUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+)
+
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+
+  const data: authListPersonalSessionsResponse['data'] = body ? JSON.parse(body) : {}
+  return { data, status: res.status, headers: res.headers } as authListPersonalSessionsResponse
 }
 
 

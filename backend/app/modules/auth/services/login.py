@@ -86,6 +86,7 @@ def create_login_session(
     organization_id: UUID,
     request_id: UUID,
     security_hmac_key: bytes,
+    client_summary: str | None = None,
     now: Callable[[], datetime] = lambda: datetime.now(UTC),
     token_issuer: Callable[[], IssuedSessionToken] = issue_session_token,
     session_ttl: timedelta = DEFAULT_SESSION_TTL,
@@ -182,6 +183,7 @@ def create_login_session(
                             id=new_session_id,
                             organization_member_id=membership.id,
                             token_digest=issued_token.digest,
+                            client_summary=client_summary,
                             created_at=session_timestamp,
                             expires_at=expires_at,
                         )

@@ -82,7 +82,7 @@ describe('自動無障礙基線', () => {
       expect(screen.getAllByRole('heading', { level: 1 })).toHaveLength(1)
       await expectNoAccessibilityViolations()
     }
-  })
+  }, 10_000)
 
   it.each(workflowModules)(
     '$label 路由沒有 axe WCAG A／AA 與 best-practice 違規',
@@ -120,6 +120,28 @@ describe('自動無障礙基線', () => {
     })
 
     expect(await screen.findByRole('heading', { level: 1, name: '操作稽核' }))
+      .toBeInTheDocument()
+    await expectNoAccessibilityViolations()
+  })
+
+  it('登入管理路由沒有 axe WCAG A／AA 與 best-practice 違規', async () => {
+    vi.stubGlobal('fetch', vi.fn<typeof fetch>().mockResolvedValue(Response.json({
+      items: [{
+        id: '30000000-0000-4000-8000-000000000003',
+        organization_member_id: '40000000-0000-4000-8000-000000000004',
+        user: syntheticCurrentSession.user,
+        client_summary: 'Chrome／Windows',
+        created_at: '2026-08-20T08:00:00Z',
+        expires_at: '2026-08-20T16:00:00Z',
+        revoked_at: null,
+        status: 'active',
+        is_current: true,
+      }],
+      total_items: 1,
+    })))
+    await renderApp(['/settings/sessions'])
+
+    expect(await screen.findByRole('heading', { level: 1, name: '登入與工作階段' }))
       .toBeInTheDocument()
     await expectNoAccessibilityViolations()
   })

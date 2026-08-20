@@ -25,6 +25,7 @@ class AuthenticatedSession:
     display_name: str
     organization_id: UUID
     organization_name: str
+    session_id: UUID | None = None
 
 
 def get_active_session(
@@ -67,6 +68,7 @@ def get_active_session(
         display_name=user.display_name,
         organization_id=organization.id,
         organization_name=organization.name,
+        session_id=login_session.id,
     )
 
 

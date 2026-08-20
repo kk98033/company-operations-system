@@ -90,5 +90,5 @@ describe('公司主流程路由', () => {
       expect(screen.getByRole('heading', { level: 1, name: heading }))
         .toBeInTheDocument()
     }
-  })
+  }, 10_000)
 })

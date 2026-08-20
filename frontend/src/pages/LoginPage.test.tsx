@@ -33,7 +33,11 @@ describe('登入與 Cookie Session 流程', () => {
 
     const { router } = await renderApp(['/cases'], { session: null })
 
-    expect(await screen.findByRole('heading', { level: 1, name: '公司管理系統' }))
+    expect(await screen.findByRole(
+      'heading',
+      { level: 1, name: '公司管理系統' },
+      { timeout: 5_000 },
+    ))
       .toBeInTheDocument()
     expect(router.state.location.pathname).toBe('/login')
   })

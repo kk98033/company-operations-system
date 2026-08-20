@@ -10,6 +10,7 @@ import { AuthenticatedBoundary } from '../auth/AuthenticatedBoundary'
 import { HomePage } from '../pages/HomePage'
 import { LoginPage } from '../pages/LoginPage'
 import { AuditLogPage } from '../pages/audit/AuditLogPage'
+import { SessionManagementPage } from '../pages/auth/SessionManagementPage'
 import { CaseDetailPage, CasePrototypePage } from '../pages/cases/CasePrototypePage'
 import { CustomerCreatePage } from '../pages/customers/CustomerCreatePage'
 import { CustomerEditPage } from '../pages/customers/CustomerEditPage'
@@ -85,6 +86,12 @@ const auditLogsRoute = createRoute({
   getParentRoute: () => authenticatedRoute,
   path: '/audit-logs',
   component: AuditLogPage,
+})
+
+const sessionManagementRoute = createRoute({
+  getParentRoute: () => authenticatedRoute,
+  path: '/settings/sessions',
+  component: SessionManagementPage,
 })
 
 const companyProfileRoute = createRoute({
@@ -254,6 +261,7 @@ const routeTree = rootRoute.addChildren([
     statementDetailRoute,
     statementPrintRoute,
     auditLogsRoute,
+    sessionManagementRoute,
     companyProfileRoute,
     companyDefaultsRoute,
     masterDataRoute,

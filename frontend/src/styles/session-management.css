@@ -1,0 +1,54 @@
+.session-current {
+  display: block;
+  margin-top: var(--space-1);
+  color: var(--color-brand-700);
+  font-size: 0.75rem;
+}
+
+.session-management-page .ui-data-table th small {
+  display: block;
+  margin-top: var(--space-1);
+  color: var(--color-ink-500);
+  font-weight: 400;
+}
+
+.session-actions {
+  display: flex;
+  min-width: 19rem;
+  gap: var(--space-2);
+}
+
+.session-revoke-reason {
+  display: grid;
+  grid-template-columns: auto minmax(16rem, 32rem) 1fr;
+  align-items: center;
+  gap: var(--space-3);
+  margin-bottom: var(--space-4);
+}
+
+.session-revoke-reason span,
+.session-error {
+  color: var(--color-ink-600);
+  font-size: 0.78rem;
+}
+
+.session-error {
+  color: var(--color-danger-700);
+}
+
+@media (max-width: 64rem) {
+  .session-revoke-reason {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 46rem) {
+  .session-actions {
+    min-width: 12rem;
+    flex-direction: column;
+  }
+
+  .session-actions .ui-button {
+    width: 100%;
+  }
+}

@@ -3,9 +3,10 @@
 from __future__ import annotations
 
 from datetime import datetime
+from typing import Literal
 from uuid import UUID
 
-from pydantic import BaseModel, Field, SecretStr
+from pydantic import BaseModel, Field, SecretStr, field_validator
 
 
 class LoginRequest(BaseModel):
@@ -34,3 +35,36 @@ class CurrentSessionResponse(BaseModel):
 
 class LoginResponse(CurrentSessionResponse):
     pass
+
+
+class ManagedSessionResponse(BaseModel):
+    id: UUID
+    organization_member_id: UUID
+    user: AuthenticatedUserResponse
+    client_summary: str
+    created_at: datetime
+    expires_at: datetime
+    revoked_at: datetime | None
+    status: Literal["active", "expired", "revoked", "identity_inactive"]
+    is_current: bool
+
+
+class ManagedSessionListResponse(BaseModel):
+    items: list[ManagedSessionResponse]
+    total_items: int
+
+
+class SessionRevocationRequest(BaseModel):
+    reason: str = Field(min_length=2, max_length=500)
+
+    @field_validator("reason")
+    @classmethod
+    def normalize_reason(cls, value: str) -> str:
+        normalized = value.strip()
+        if len(normalized) < 2:
+            raise ValueError("reason must contain at least two nonblank characters")
+        return normalized
+
+
+class MembershipSessionRevocationRequest(SessionRevocationRequest):
+    organization_member_id: UUID

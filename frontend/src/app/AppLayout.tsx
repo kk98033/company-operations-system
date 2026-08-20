@@ -91,6 +91,17 @@ export function AppLayout() {
             </Link>
           ))}
 
+          <p className="sidebar__section-label sidebar__section-label--modules">帳號安全</p>
+          <Link
+            activeOptions={{ exact: true }}
+            activeProps={{ className: 'sidebar__link--active' }}
+            className="sidebar__link"
+            to="/settings/sessions"
+          >
+            <span className="sidebar__link-icon" aria-hidden="true">安</span>
+            <span className="sidebar__link-label">登入管理</span>
+          </Link>
+
           {canSeeSystemManagement ? (
             <>
               <p className="sidebar__section-label sidebar__section-label--modules">系統管理</p>

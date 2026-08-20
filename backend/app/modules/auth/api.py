@@ -11,6 +11,7 @@ from sqlalchemy.orm import Session as OrmSession
 from app.core.database.session import get_database_session
 from app.core.errors import ApplicationError
 from app.core.request_context import require_request_id
+from app.modules.auth.client_summary import summarize_user_agent
 from app.modules.auth.cookies import clear_auth_cookies, set_auth_cookies
 from app.modules.auth.dependencies import (
     optional_logout_session,
@@ -94,6 +95,7 @@ def build_auth_router() -> APIRouter:
                 organization_id=payload.organization_id,
                 request_id=require_request_id(request),
                 security_hmac_key=request.app.state.settings.auth_security_hmac_key_value(),
+                client_summary=summarize_user_agent(request.headers.get("user-agent")),
             )
         except AuthenticationFailedError:
             raise _authentication_error() from None

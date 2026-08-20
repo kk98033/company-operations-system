@@ -48,17 +48,28 @@ def test_auth_openapi_declares_secret_input_and_cookie_transport() -> None:
     login = schema["paths"]["/api/v1/auth/login"]["post"]
     current = schema["paths"]["/api/v1/auth/session"]["get"]
     logout = schema["paths"]["/api/v1/auth/logout"]["post"]
+    personal_sessions = schema["paths"]["/api/v1/auth/sessions"]["get"]
+    company_sessions = schema["paths"]["/api/v1/auth/company-sessions"]["get"]
+    revoke_session = schema["paths"][
+        "/api/v1/auth/company-sessions/{session_id}/revoke"
+    ]["post"]
     login_request = schema["components"]["schemas"]["LoginRequest"]
 
     assert login["operationId"] == "auth_login"
     assert logout["operationId"] == "auth_logout"
     assert current["operationId"] == "auth_current_session"
+    assert personal_sessions["operationId"] == "auth_list_personal_sessions"
+    assert company_sessions["operationId"] == "auth_list_company_sessions"
+    assert revoke_session["operationId"] == "auth_revoke_company_session"
     assert login["tags"] == ["auth"]
     assert logout["tags"] == ["auth"]
     assert current["tags"] == ["auth"]
     assert "security" not in login
     assert logout["security"] == [{"SessionCookie": []}]
     assert current["security"] == [{"SessionCookie": []}]
+    assert personal_sessions["security"] == [{"SessionCookie": []}]
+    assert company_sessions["security"] == [{"SessionCookie": []}]
+    assert revoke_session["security"] == [{"SessionCookie": []}]
     assert schema["components"]["securitySchemes"] == {
         "SessionCookie": {
             "type": "apiKey",
@@ -82,6 +93,9 @@ def test_auth_openapi_declares_secret_input_and_cookie_transport() -> None:
     }
     assert "session_token" not in login_response["properties"]
     assert "token_type" not in login_response["properties"]
+    managed_session = schema["components"]["schemas"]["ManagedSessionResponse"]
+    assert "token_digest" not in managed_session["properties"]
+    assert "token" not in managed_session["properties"]
     assert login["responses"]["429"]["content"]["application/json"]["schema"] == {
         "$ref": "#/components/schemas/ErrorResponse"
     }

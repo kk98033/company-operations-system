@@ -64,6 +64,8 @@ describe('應用程式骨架', () => {
     }
 
     await user.tab()
+    expect(screen.getByRole('link', { name: '登入管理' })).toHaveFocus()
+    await user.tab()
     expect(screen.getByRole('link', { name: '統一 UI 版型' })).toHaveFocus()
     await user.tab()
     expect(screen.getByRole('link', { name: '設計比較紀錄' })).toHaveFocus()
