@@ -5,6 +5,7 @@ PROJECT_NPM ?= ../scripts/npm11.sh
 LEGACY_SOURCE_DIR ?= ../extraction/export/uv_print_full/tables
 IMPORT_PROFILE_OUTPUT ?= artifacts/import/profile
 IMPORT_FREEZE_OUTPUT ?= artifacts/import/freeze/legacy_import_freeze.json
+IMPORT_FULL_DRY_RUN_OUTPUT ?= artifacts/import/full-dry-run/legacy_full_dry_run.json
 COMPOSE_PARSE_ENV = POSTGRES_PASSWORD=company-system-compose-parse-only
 
 .PHONY: bootstrap env-check dev down lint test build audit check shell-check \
@@ -14,6 +15,7 @@ COMPOSE_PARSE_ENV = POSTGRES_PASSWORD=company-system-compose-parse-only
 	frontend-lint frontend-build frontend-audit frontend-check backend-build \
 	seed-test-identity import-customers-dry-run import-master-data-dry-run \
 	import-freeze \
+	import-full-dry-run import-full-dry-run-test \
 	import-work-items-dry-run import-quotations-dry-run \
 	import-work-orders-dry-run import-inventory-dry-run \
 	import-shipments-dry-run import-pricing-dry-run import-billing-dry-run
@@ -99,6 +101,18 @@ import-freeze:
 	$(PYTHON) scripts/legacy_import_freeze.py \
 		--source-dir "$(LEGACY_SOURCE_DIR)" \
 		--output-file "$(IMPORT_FREEZE_OUTPUT)"
+
+import-full-dry-run:
+	$(PYTHON) scripts/legacy_full_dry_run.py \
+		--source-dir "$(LEGACY_SOURCE_DIR)" \
+		--freeze-report "$(IMPORT_FREEZE_OUTPUT)" \
+		--output-file "$(IMPORT_FULL_DRY_RUN_OUTPUT)"
+
+import-full-dry-run-test: db-test-up
+	cd backend && .venv/bin/python scripts/run_legacy_full_dry_run.py \
+		--source-dir "../../extraction/export/uv_print_full/tables" \
+		--freeze-report "../$(IMPORT_FREEZE_OUTPUT)" \
+		--output-file "../$(IMPORT_FULL_DRY_RUN_OUTPUT)"
 
 import-customers-dry-run:
 	$(PYTHON) scripts/legacy_customer_dry_run.py \
