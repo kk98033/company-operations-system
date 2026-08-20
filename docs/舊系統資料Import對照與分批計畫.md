@@ -1,6 +1,6 @@
 # 舊系統資料 Import 對照與分批計畫
 
-> 文件版本：v1.3
+> 文件版本：v1.4
 > 日期：2026-08-20
 > 用途：把已提取的真實舊表對應到新版模組，規定每一批何時匯入、如何 dry-run、如何核對，以及何時才允許寫入正式資料。
 
@@ -236,6 +236,14 @@ P0-04 新版「基礎計價只取正式量」不回溯改寫舊金額。舊備�
 - Manifest 合計 212,556 筆非空 CSV 邏輯資料列；其中包含 46 個非業務系統目錄表，不能把總數誤稱為 212,556 筆正式公司交易。
 - Freeze artifact 位於本機 ignored `artifacts/import/freeze/legacy_import_freeze.json`，不提交 Git；它不含客戶、品名、地址、備註或逐列資料值。
 - Catalog／reader／domain dry-run 程式有未提交修改時，`make import-freeze` 會拒絕產生正式凍結報告。
+
+### Phase 10.2 全模組隔離 dry-run 結果
+
+- 全模組 orchestrator 納入客戶、主檔、報價、現行／歷史工單與製程、庫存、出貨、計價及帳務 aggregate 檢查；它不輸出客戶、品名、地址、備註或逐列值。
+- 新版 catalog `2026-08-20.2` 將整合 orchestrator、test-only DB registry 與 CLI 納入程式 fingerprint；來源 manifest 仍為 `cfb04f21…ab8f`，新 fingerprint 為 `0b67e6f9…6a42`，對應 commit `eec9a84`。
+- 全新隔離 PostgreSQL 實際登錄 1 筆 run、106 筆 source files、11 筆 aggregate errors；`import_staging_records` 為 0，正式業務資料寫入為 0，且 `apply_performed=false`。
+- 11 類高風險例外為：來源文字修復 29,213、工作項目客戶孤兒 189、報價明細孤兒 7、現行製程孤兒 1,451、歷史製程孤兒 18,630、庫存工單孤兒 1,451、出貨主檔孤兒 31,152、出貨工單孤兒 18,561、計價出貨孤兒 1、未匹配收款 1，以及 24 個 manifest-only active tables。
+- `ImportRun.status=awaiting_approval` 且 `ready_for_apply=false`；以上問題沒有逐類修復／mapping／封存／排除簽認前，不得進入 10.3。
 
 I-2.1 已於 2026-08-13 完成 aggregate-only dry-run：目前 CSV 讀得 `subpoena` 1,431 筆、`quote` 1,451 筆；`quote.subpoenaid` 對 `subpoena.id`、`idbuffer`、`ordernumber`、`orderid` 的直接命中皆為 0。報告沒有輸出客戶、品名或製程內容，且 `apply_performed=false`。下一步必須回查舊程式實際 join／另一版匯出或請公司提供可核對樣本，不能以列序或相似文字臆造父子關係。
 

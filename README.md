@@ -54,17 +54,19 @@
 
 | 項目 | 目前狀態 |
 |---|---|
-| 最後更新日期 | 2026-08-15 |
-| 計畫版本 | v1.27（Phase 10.1 Import 來源與程式版本凍結） |
+| 最後更新日期 | 2026-08-20 |
+| 計畫版本 | v1.28（Phase 10.2 全模組隔離 dry-run） |
 | 架構版本 | v1.26（權限感知 operations read model 與安全 CSV） |
-| 目前階段 | Phase 10 進行中；10.1 完成，下一步為 10.2 全新 DB 全模組 dry-run |
-| 目前切片 | PHASE10-IMPORT-FREEZE-001：106 個來源 manifest、處理分類、Import 程式 fingerprint 與 Git commit 凍結 |
-| 實作完成度 | Phase 0：完成；Import I-0：3／3；Phase 1：9／9；Phase 2：10／10；Phase 3：8／8；Phase 4：18／18；Phase 5：12／12；Phase 6：10／10；Phase 7：9／9；Phase 8：10／10；Phase 9：6／6；Phase 10：1／9 |
+| 目前階段 | Phase 10 進行中；10.2 完成，10.3 正式 apply 被 11 類高風險例外阻擋 |
+| 目前切片 | PHASE10-FULL-DRY-RUN-001：全新隔離 DB 串接全模組 aggregate dry-run，登錄 106 個來源與 11 類例外，業務／staging 寫入皆為 0 |
+| 實作完成度 | Phase 0：完成；Import I-0：3／3；Phase 1：9／9；Phase 2：10／10；Phase 3：8／8；Phase 4：18／18；Phase 5：12／12；Phase 6：10／10；Phase 7：9／9；Phase 8：10／10；Phase 9：6／6；Phase 10：2／9 |
 | 規劃文件完成度 | 100% |
 | 最新中型進度備份 | 本次提交後建立 Git tag `checkpoint-phase-9` 與專案外 bundle |
 | 正式遠端 Git 備份 | 尚未設定；R-11 維持 Open，正式部署前必須建立私人 repository |
 
 ### 已完成
+
+- 完成 Phase 10.2／PHASE10-FULL-DRY-RUN-001：以更新後 catalog `2026-08-20.2` 重新凍結相同 106 個來源與 212,556 筆邏輯資料列；來源 manifest 維持 `cfb04f21…ab8f`，整合程式 fingerprint 更新為 `0b67e6f9…6a42`，對應 commit `eec9a84`。全新隔離 PostgreSQL 只建立 1 筆 `ImportRun`、106 筆來源登錄與 11 筆 aggregate 例外，`import_staging_records` 與正式業務資料皆為 0；狀態為 `awaiting_approval`、`apply_performed=false`。11 類高風險問題包含轉碼修復、工單／製程／庫存／出貨孤兒、1 筆計價與 1 筆收款未匹配，以及 24 個尚只有 manifest 分類的 active tables；因此 10.3 不得開始。
 
 - 完成 Phase 10.1／PHASE10-IMPORT-FREEZE-001：新增版本化 Import catalog，106 個 CSV 全部且只能對應一個處理群組；正式 mapping、唯讀封存、舊安全資料排除及待釐清例外都有明確理由。凍結報告記錄 106 個來源檔、212,556 筆邏輯資料列、逐檔 SHA-256、程式 fingerprint `2591b308…33fa` 與程式 commit `0221677`；來源 manifest SHA-256 為 `cfb04f21…ab8f`。報告只含雜湊、筆數、異常統計與分類，不含客戶或交易欄位值；18 個 Import／環境腳本測試及完整 lint 通過。
 
@@ -135,17 +137,18 @@
 ### 進行中
 
 - Phase 0～Phase 9 工程已完成；公司資料、客戶、主檔、報價、案件、工單、生產、庫存、出貨、計價、對帳、收款及營運工作台已形成可操作垂直流程。舊資料目前只有 dry-run，尚未正式 apply；報價／工單／出貨／對帳 A4 仍需公司實際印表機簽認不截字。
-- 生產到帳務已接正式 API／資料表；首頁工作台、跨模組搜尋、客戶 360 與安全 CSV 已接正式 read model，下一階段集中處理全量 Import。
+- 生產到帳務已接正式 API／資料表；首頁工作台、跨模組搜尋、客戶 360 與安全 CSV 已接正式 read model。全量 Import 演練已能一次執行並留下稽核紀錄，目前集中處理 dry-run 發現的來源關聯與轉碼例外。
 - 介面正式方向已定案；`/style-preview` 只保留為歷史比較與 ADR-010 決策證據，不是正式業務頁。
 - 公司 P0 已確認 10／10。正式 migration、API 與舊客戶資料 apply 仍只會在對應 Phase／Import Slice 通過測試後逐批建立，不因 Gate 通過而提前寫入。
 - `import_staging_records` 目前只是 raw／normalized 通用 envelope；客戶 typed mapping、dry-run、apply、個資 access／retention 與錯誤訊息遮罩留在 I-1.x，不得提前把 JSONB 當正式業務模型。
 
 ### 接下來要做
 
-1. 執行 Phase 10.2：在全新隔離 DB 串接 I-1～I-6 全模組 dry-run，使用已凍結 manifest 與 importer fingerprint，輸出筆數、錯誤、orphan 及 Decimal 摘要；在公司簽認 mapping 前仍不得 apply 真實資料。
-2. 回查 `quote.subpoenaid`、`merchandise.subpoenaid` 與工單父鍵；現有匯出無可靠直接關聯，在取得舊程式 join 或可核對匯出前不得 apply。
-3. 舊資料 apply 前同時處理 `cust` 轉碼替代字元及 `wpa` 的 189 筆孤兒／6 筆缺客戶代號；修復後重跑相同 dry-run，不能跳過公司抽查。
-4. 以公司實際印表機驗收報價 A4 橫向及工單 A4 直向；程式端欄位、列印 CSS、隱藏操作、快照與圖片測試已完成。
+1. 先處理 Phase 10.2 報告的 11 類高風險例外；每一類必須有可重現修復、公司核對 mapping、唯讀封存或明確排除理由，未降為 0 前不得進入 10.3 apply。
+2. 優先回查 `quote.subpoenaid`、歷史製程、`merchandise.subpoenaid`、出貨明細與工單父鍵；現有匯出無可靠直接關聯，在取得舊程式 join 或可核對匯出前不得猜測。
+3. 同時處理 29,213 筆來源文字修復事件、`wpa` 189 筆客戶孤兒，以及 24 個尚只有 manifest 分類的 active tables；修復後必須從全新 DB 重跑相同 dry-run。
+4. 高風險例外清零並經公司摘要抽查後，才執行 Phase 10.3 分 wave apply；仍須保留 transaction、來源追蹤與隨時停止能力。
+5. 以公司實際印表機驗收報價 A4 橫向及工單 A4 直向；程式端欄位、列印 CSS、隱藏操作、快照與圖片測試已完成。
 
 ### 後續 Phase／UAT 仍待確認
 
