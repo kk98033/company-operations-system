@@ -1,7 +1,7 @@
 # 舊系統資料 Import 對照與分批計畫
 
-> 文件版本：v1.2
-> 日期：2026-08-13
+> 文件版本：v1.3
+> 日期：2026-08-20
 > 用途：把已提取的真實舊表對應到新版模組，規定每一批何時匯入、如何 dry-run、如何核對，以及何時才允許寫入正式資料。
 
 ## 1. Import 不是最後才做
@@ -225,6 +225,17 @@ P0-04 新版「基礎計價只取正式量」不回溯改寫舊金額。舊備�
 | I-7.1 | Phase 10 | 不限年份全模組整合 dry-run，含只讀封存與例外清單 | 零未解高風險錯誤，所有來源列皆有去向 |
 | I-7.2 | Phase 10 | 第二次完全重跑 | idempotent，不新增重複資料 |
 | I-8.1 | Phase 12 | 最終差異匯入 | 公司簽認筆數、數量、金額 |
+
+### Phase 10.1 版本凍結結果
+
+- Catalog：`config/import/legacy_uv_print_catalog.json`，版本 `2026-08-20.1`。
+- 106 個來源 CSV 已全數且唯一分類，沒有未分類或同時落入兩個群組的表。
+- 來源 manifest SHA-256：`cfb04f21c062fc72f62bc302bdc3447b926e8b546fc8eb27c9ba0b3d8f65ab8f`。
+- Importer fingerprint SHA-256：`2591b30802fd2c3c58c2fcea17c533352eee00b104d9e3ec904ad9007d4033fa`。
+- 對應程式 commit：`022167774df746295b753a03829a37f17b0287ff`。
+- Manifest 合計 212,556 筆非空 CSV 邏輯資料列；其中包含 46 個非業務系統目錄表，不能把總數誤稱為 212,556 筆正式公司交易。
+- Freeze artifact 位於本機 ignored `artifacts/import/freeze/legacy_import_freeze.json`，不提交 Git；它不含客戶、品名、地址、備註或逐列資料值。
+- Catalog／reader／domain dry-run 程式有未提交修改時，`make import-freeze` 會拒絕產生正式凍結報告。
 
 I-2.1 已於 2026-08-13 完成 aggregate-only dry-run：目前 CSV 讀得 `subpoena` 1,431 筆、`quote` 1,451 筆；`quote.subpoenaid` 對 `subpoena.id`、`idbuffer`、`ordernumber`、`orderid` 的直接命中皆為 0。報告沒有輸出客戶、品名或製程內容，且 `apply_performed=false`。下一步必須回查舊程式實際 join／另一版匯出或請公司提供可核對樣本，不能以列序或相似文字臆造父子關係。
 

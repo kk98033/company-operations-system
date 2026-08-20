@@ -55,16 +55,18 @@
 | 項目 | 目前狀態 |
 |---|---|
 | 最後更新日期 | 2026-08-15 |
-| 計畫版本 | v1.26（跨表單欄位驗證與錯誤摘要補強） |
+| 計畫版本 | v1.27（Phase 10.1 Import 來源與程式版本凍結） |
 | 架構版本 | v1.26（權限感知 operations read model 與安全 CSV） |
-| 目前階段 | Phase 9 完成；下一階段為 Phase 10 全量 Import 整合 |
-| 目前切片 | UX-FORM-VALIDATION-001：工單／報價必填契約、錯誤摘要、欄位跳轉與全站 422 欄位訊息 |
-| 實作完成度 | Phase 0：完成；Import I-0：3／3；Phase 1：9／9；Phase 2：10／10；Phase 3：8／8；Phase 4：18／18；Phase 5：12／12；Phase 6：10／10；Phase 7：9／9；Phase 8：10／10；Phase 9：6／6 |
+| 目前階段 | Phase 10 進行中；10.1 完成，下一步為 10.2 全新 DB 全模組 dry-run |
+| 目前切片 | PHASE10-IMPORT-FREEZE-001：106 個來源 manifest、處理分類、Import 程式 fingerprint 與 Git commit 凍結 |
+| 實作完成度 | Phase 0：完成；Import I-0：3／3；Phase 1：9／9；Phase 2：10／10；Phase 3：8／8；Phase 4：18／18；Phase 5：12／12；Phase 6：10／10；Phase 7：9／9；Phase 8：10／10；Phase 9：6／6；Phase 10：1／9 |
 | 規劃文件完成度 | 100% |
 | 最新中型進度備份 | 本次提交後建立 Git tag `checkpoint-phase-9` 與專案外 bundle |
 | 正式遠端 Git 備份 | 尚未設定；R-11 維持 Open，正式部署前必須建立私人 repository |
 
 ### 已完成
+
+- 完成 Phase 10.1／PHASE10-IMPORT-FREEZE-001：新增版本化 Import catalog，106 個 CSV 全部且只能對應一個處理群組；正式 mapping、唯讀封存、舊安全資料排除及待釐清例外都有明確理由。凍結報告記錄 106 個來源檔、212,556 筆邏輯資料列、逐檔 SHA-256、程式 fingerprint `2591b308…33fa` 與程式 commit `0221677`；來源 manifest SHA-256 為 `cfb04f21…ab8f`。報告只含雜湊、筆數、異常統計與分類，不含客戶或交易欄位值；18 個 Import／環境腳本測試及完整 lint 通過。
 
 - 完成 UX-FORM-VALIDATION-001：工單存檔前會一次列出未完成欄位、標紅並將焦點移到第一個錯誤；錯誤摘要可點擊跳到欄位。工單新建只要求客戶、訂購日期、品名、訂單數量，交期、客戶單號、規格、價格、三紙內容、印刷、13 道製程內容與備註均可留空。報價動態明細套用相同摘要；全站後端 422 不再只顯示「請檢查輸入資料」，會顯示中文欄位與明細序號。83 個 React 測試、lint、TypeScript 與 production build 通過。
 
@@ -140,7 +142,7 @@
 
 ### 接下來要做
 
-1. 下一個垂直批次進入 Phase 10：全模組舊資料 dry-run、關聯核對、冪等重跑與正式移轉工具；在公司簽認 mapping 前仍不得 apply 真實資料。
+1. 執行 Phase 10.2：在全新隔離 DB 串接 I-1～I-6 全模組 dry-run，使用已凍結 manifest 與 importer fingerprint，輸出筆數、錯誤、orphan 及 Decimal 摘要；在公司簽認 mapping 前仍不得 apply 真實資料。
 2. 回查 `quote.subpoenaid`、`merchandise.subpoenaid` 與工單父鍵；現有匯出無可靠直接關聯，在取得舊程式 join 或可核對匯出前不得 apply。
 3. 舊資料 apply 前同時處理 `cust` 轉碼替代字元及 `wpa` 的 189 筆孤兒／6 筆缺客戶代號；修復後重跑相同 dry-run，不能跳過公司抽查。
 4. 以公司實際印表機驗收報價 A4 橫向及工單 A4 直向；程式端欄位、列印 CSS、隱藏操作、快照與圖片測試已完成。
