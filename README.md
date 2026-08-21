@@ -55,16 +55,18 @@
 | 項目 | 目前狀態 |
 |---|---|
 | 最後更新日期 | 2026-08-21 |
-| 計畫版本 | v1.32（Phase 11.4 事件完整性矩陣已完成） |
-| 架構版本 | v1.30（認證／權限事件與敏感讀取稽核） |
-| 目前階段 | Phase 10 的 10.3 apply 被 11 類來源例外阻擋；並行執行 Phase 11 安全工作，已完成 11.2～11.4 |
-| 目前切片 | SEC-EVENT-COMPLETENESS-001：安全事件與敏感讀取稽核已完成，下一步 11.5 structured access log |
-| 實作完成度 | Phase 0：完成；Import I-0：3／3；Phase 1：9／9；Phase 2：10／10；Phase 3：8／8；Phase 4：18／18；Phase 5：12／12；Phase 6：10／10；Phase 7：9／9；Phase 8：10／10；Phase 9：6／6；Phase 10：2／9；Phase 11：3／13 |
+| 計畫版本 | v1.33（Phase 11.5 access log 與 11.6 正式部署／備份基線） |
+| 架構版本 | v1.31（structured access log 與正式 Cloud SQL／備份基線） |
+| 目前階段 | Phase 10 的 10.3 apply 被 11 類來源例外阻擋；並行執行 Phase 11 安全工作，已完成 11.2～11.5，11.6 技術基線完成但付費成本簽認未執行 |
+| 目前切片 | SEC-ACCESS-BACKUP-BASELINE-001：structured access log 已完成；Cloud SQL HA／RPO／RTO／inventory 已定，未建立付費資源 |
+| 實作完成度 | Phase 0：完成；Import I-0：3／3；Phase 1：9／9；Phase 2：10／10；Phase 3：8／8；Phase 4：18／18；Phase 5：12／12；Phase 6：10／10；Phase 7：9／9；Phase 8：10／10；Phase 9：6／6；Phase 10：2／9；Phase 11：4／13（11.6 technical baseline ready） |
 | 規劃文件完成度 | 100% |
 | 最新中型進度備份 | Git tag `checkpoint-phase-9` 與專案外 bundle；Phase 11 Gate 尚未完成 |
 | 正式遠端 Git 備份 | 尚未設定；R-11 維持 Open，正式部署前必須建立私人 repository |
 
 ### 已完成
+
+- 完成 Phase 11 Slice 11.5／SEC-ACCESS-BACKUP-BASELINE-001：每個 HTTP request 都由全域 middleware 輸出一筆 machine-parseable JSON，allowlist 只有 timestamp、server Request ID、method、route template、status、duration、response size、slow flag、穩定 error code 與已驗證的 organization／user／membership／internal Session reference。404 使用 `<unmatched>`；不讀實際 path value、query、body、Cookie、CSRF、token、密碼、DSN、附件或 exception message。未固定 trusted proxy 前不採信 forwarded IP，中央 collector／通知 channel 留 11.8。另完成 11.6 [正式部署與備份技術基線](docs/正式部署與備份基線.md)：同一 release、每家公司獨立 project／部署／DB／object storage／Secret／備份，A 公司採 Cloud SQL PostgreSQL regional HA＋PITR＋每日加密 logical dump；機器可讀 inventory 不含 Secret value。209 個非 DB 與 125 個隔離 PostgreSQL tests 通過。RPO 15 分鐘／RTO 4 小時仍待 11.12 實測，尚未建立或計費任何雲端資源。
 
 - 完成 Phase 11 Slice 11.4／SEC-EVENT-COMPLETENESS-001：一般登出、遠端 Session 撤銷、全部撤銷與 capability 拒絕均保存 actor／internal Session／Request ID 安全事件；附件、正式 PDF、CSV、audit 查閱與公司 Session 清單保存最小化敏感讀取 audit。57 個 mutating API＋5 個敏感讀取由 [事件完整性矩陣](docs/事件完整性矩陣.md) 自動守門；PostgreSQL 拒絕 UPDATE、DELETE、TRUNCATE，Cookie、token、CSRF、密碼與附件內容不落事件。驗證期間發現新公告的 `nanoid <3.3.18` high advisory，已用 npm override／lockfile 固定 3.3.18，乾淨安裝後 audit 0。206 個非 DB、125 個 PostgreSQL integration 與 87 個 React 測試通過。帳號／membership 停用 command 尚未建立，未來新增時必須同交易撤銷 Session 並進矩陣；普通 request 留 11.5 structured access log。
 
@@ -152,8 +154,8 @@
 
 ### 接下來要做
 
-1. 執行 Phase 11.5：建立 structured HTTP access／application log，記錄 route template、status、duration、Request ID 與安全 actor 摘要，不記錄 query、body、Cookie、token、密碼或附件內容。
-2. Phase 10 mapping 等待核對期間繼續 Phase 11.1、11.5～11.6：安全設定掃描、access log 與正式備份方案；仍不能跳過舊資料 apply Gate。
+1. 執行尚未完成的 Phase 11.1：production config／header／Cookie／Secret／dependency 安全掃描；不碰正式資料。
+2. 接續 Phase 11.7：建立私人 object storage adapter 與 object manifest；11.6 的付費 Calculator export 在 11.8 真正建資源前由公司簽認。
 3. 逐類處理 Phase 10.2 的 11 類高風險例外；每一類必須有可重現修復、公司核對 mapping、唯讀封存或明確排除理由，未降為 0 前不得進入 10.3 apply。
 4. 優先回查 `quote.subpoenaid`、歷史製程、`merchandise.subpoenaid`、出貨明細與工單父鍵；現有匯出無可靠直接關聯，在取得舊程式 join 或可核對匯出前不得猜測。
 5. 同時處理 29,213 筆來源文字修復事件、`wpa` 189 筆客戶孤兒，以及 24 個尚只有 manifest 分類的 active tables；修復後必須從全新 DB 重跑相同 dry-run。

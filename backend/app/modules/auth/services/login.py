@@ -49,6 +49,7 @@ class LoginResult:
     display_name: str
     organization_id: UUID
     organization_name: str
+    session_id: UUID | None = None
 
 
 def _find_login_candidate(
@@ -230,4 +231,5 @@ def create_login_session(
         display_name=user.display_name,
         organization_id=organization.id,
         organization_name=organization.name,
+        session_id=new_session_id,
     )

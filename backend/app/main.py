@@ -14,6 +14,7 @@ from app.api.contracts.openapi import (
     build_default_error_responses,
 )
 from app.api.v1.router import build_v1_router
+from app.core.access_logging import configure_access_logger
 from app.core.config import AppEnvironment, AppSettings, load_settings
 from app.core.database import (
     DatabaseReadinessCheck,
@@ -39,6 +40,9 @@ def create_app(
         configured_settings
     )
     expose_api_docs = configured_settings.environment is not AppEnvironment.PRODUCTION
+    configure_access_logger(
+        emit_json_to_stderr=configured_settings.environment is not AppEnvironment.TEST
+    )
 
     app = FastAPI(
         title=API_TITLE,

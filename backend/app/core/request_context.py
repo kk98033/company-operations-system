@@ -8,6 +8,8 @@ from uuid import UUID, uuid4
 from fastapi import Request, Response
 from starlette.middleware.base import RequestResponseEndpoint
 
+from app.core.access_logging import emit_access_log, request_started
+
 REQUEST_ID_HEADER = "X-Request-ID"
 _request_id: ContextVar[UUID | None] = ContextVar("request_id", default=None)
 
@@ -33,12 +35,25 @@ async def attach_request_id(
 ) -> Response:
     """Create a fresh UUID for every request and expose it in the response."""
 
+    started_at = request_started()
     request_id = uuid4()
     request.state.request_id = request_id
     token: Token[UUID | None] = _request_id.set(request_id)
+    response: Response | None = None
+    status_code = 500
     try:
         response = await call_next(request)
+        status_code = response.status_code
         response.headers[REQUEST_ID_HEADER] = str(request_id)
         return response
+    except Exception:
+        request.state.error_code = "INTERNAL_SERVER_ERROR"
+        raise
     finally:
+        emit_access_log(
+            request,
+            response=response,
+            status_code=status_code,
+            started_at=started_at,
+        )
         _request_id.reset(token)

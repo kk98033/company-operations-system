@@ -1,17 +1,17 @@
 # 資安、Session、稽核與備份計畫
 
-> 文件版本：v1.2
+> 文件版本：v1.3
 > 日期：2026-08-21
-> 狀態：Session 上限、管理 UI、安全事件與敏感讀取 audit 已完成；access log 與正式備份於後續 Slice 驗收
+> 狀態：Session、事件完整性與 11.5 access log 已完成；11.6 正式部署／備份技術基線已定，實際備份與還原於 11.7～11.12 驗收
 
 ## 1. 現況結論
 
 目前已完成 Argon2id、HttpOnly Cookie、SameSite、CSRF、可信 Origin、八小時 server Session、登入失敗限制、公司隔離、exact capability、Request ID、append-only 業務 audit 與敏感資料遮罩。
 
-目前 Session 政策、管理與 11.4 事件完整性已完成，仍有兩個明確缺口：
+目前 Session 政策、管理、11.4 事件完整性與 11.5 access log 已完成，仍有兩個明確缺口：
 
-1. 登入、登出、Session 取代／撤銷、權限拒絕與五類敏感讀取已由 Request ID 關聯；每個普通 HTTP request 的 structured access log、CSRF／Origin 拒絕與 5xx／慢請求查詢仍待 11.5。
-2. 資料庫、附件、列印快照與 Secret 備份目前只有設計，尚未有可執行、自動告警及乾淨環境還原證據。
+1. 每個 HTTP request 已有安全 JSON，可由 route template、status、duration、Request ID 與 actor reference 搜尋；中央 collector、通知 channel 與可信 proxy topology 留 11.8，未固定前不記 forwarded IP。
+2. Cloud SQL HA、PITR、Cloud Storage、Secret Manager、RPO／RTO 與機器可讀 inventory 已定；尚未有付費資源、可執行備份、自動告警及乾淨環境還原證據。
 
 ## 2. 帳號與多人登入政策
 
@@ -49,13 +49,15 @@
 
 ### 3.3 HTTP access／application log（集中式結構化 log）
 
-每個 request 保存 timestamp、Request ID、route template、method、status、duration、response size、organization／user／membership／session reference（已登入時）、來源與 User-Agent 指紋及錯誤類別。不得保存 request／response body、query 中的敏感值、Authorization、Cookie、CSRF、密碼、Secret、附件內容或完整 DSN。
+每個 request 保存 timestamp、Request ID、route template、method、status、duration、response size、organization／user／membership／session reference（已登入且可取得時）及穩定錯誤代碼。不得保存實際 path value、request／response body、query、Authorization、Cookie、CSRF、密碼、Secret、附件內容、完整 DSN 或 exception message。404 固定記為 `<unmatched>`。
+
+目前未固定 trusted proxy topology，因此不採信或記錄 forwarded IP／raw User-Agent；11.8 若需來源分類，必須先建立可信 proxy 邊界與隱私審查。
 
 這一層涵蓋查詢操作，但不把每次列表翻頁寫進 `audit_logs`。敏感讀取，例如下載附件、匯出 CSV、讀 audit、產生／下載正式 PDF，仍另寫業務 audit。
 
 ### 3.4 保存與查詢
 
-- access／application log：建議線上 90 天，之後依容量加密封存或刪除。
+- access／application log：初始線上 30 天，之後依公司政策、容量與事件需求加密封存或刪除。
 - auth／security event：建議線上 180 天並保留至少一份加密封存。
 - 業務 audit：跟正式業務文件保存年限一致；第一版先不自動刪除。
 - 正式保存年限須由公司與會計／個資政策確認，不能只由程式自行決定。
@@ -73,14 +75,14 @@
 
 ## 5. 建議正式部署方案
 
-### 5.1 推薦：Managed PostgreSQL
+### 5.1 已選技術基線：Managed PostgreSQL
 
 - App 放 GCE／等價主機；PostgreSQL 改用 Cloud SQL PostgreSQL。
 - 開啟 automated backup 與 PITR；每天另產生可攜式 `pg_dump --format=custom` 加密備份。
-- 附件使用私人 Cloud Storage，啟用 object versioning／retention，DB metadata 與 object manifest 每日對帳。
+- 附件使用私人 Cloud Storage，優先啟用 soft delete／retention；只有需要覆寫版本歷史時才另開 Object Versioning＋lifecycle。DB metadata 與 object manifest 每日對帳。
 - Secret 使用 Secret Manager、最小 IAM、固定版本部署與輪替，不把 production `.env` 備份到 Git。
 
-優點是 PITR、備份與磁碟故障處理較可靠；缺點是月費較高。這是正式公司資料的建議方案。
+正式技術基線採 `asia-east1` Cloud SQL PostgreSQL regional HA；優點是 PITR、跨 zone failover、備份與磁碟故障處理較可靠，缺點是月費較高。真正建立付費資源前，公司仍須簽認官方 Calculator export。
 
 ### 5.2 預算方案：VM 自管 PostgreSQL
 
@@ -100,11 +102,10 @@
 
 ## 7. 實作順序與 Gate
 
-1. Session 單一登入政策、同交易取代、本人／公司清單、遠端撤銷、公司隔離及管理 UI 已完成。
-2. 下一步補齊認證／Session／權限事件，audit 加入 Session reference 並建立 completeness matrix。
-3. HTTP structured access log、可信 proxy、遮罩、集中保存與告警。
-4. 備份 inventory、加密、manifest、DB／附件工具與錯誤告警。
-5. 從乾淨環境實際還原並跑登入、客戶、工單、附件、出貨、計價、收款與歷史 PDF smoke。
+1. Session 單一登入、管理 UI、事件 completeness 與 HTTP structured access log 已完成。
+2. 正式 Cloud SQL／RPO／RTO、資料／附件／Secret inventory 技術基線已完成；中央 collector 與付費成本簽認留部署 Gate。
+3. 11.7～11.11 建立 object storage、正式主機、實際備份、manifest、異地副本與錯誤告警。
+4. 11.12 從乾淨環境實際還原並跑登入、客戶、工單、附件、出貨、計價、收款與歷史 PDF smoke。
 
 沒有實際還原報告、RPO／RTO 測量與公司持有的異地副本，不得把「備份已完成」標為 DONE。
 

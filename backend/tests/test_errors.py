@@ -248,7 +248,7 @@ def test_unexpected_error_does_not_expose_exception(
         raise RuntimeError("database password must not leak")
 
     client = TestClient(app, raise_server_exceptions=False)
-    with caplog.at_level(logging.ERROR, logger="app.core.errors"):
+    with caplog.at_level(logging.ERROR, logger="app.application"):
         response = client.get("/_test/crash")
 
     assert response.status_code == 500

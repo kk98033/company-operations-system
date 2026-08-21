@@ -1,0 +1,73 @@
+{
+  "schema_version": 1,
+  "baseline_date": "2026-08-21",
+  "deployment_model": "one_release_isolated_per_company",
+  "target_region": "asia-east1",
+  "recovery_targets": {
+    "rpo_minutes": 15,
+    "rto_hours": 4,
+    "status": "target_pending_restore_drill"
+  },
+  "assets": [
+    {
+      "id": "postgresql-primary",
+      "system_of_record": "Cloud SQL for PostgreSQL",
+      "contains": [
+        "business records",
+        "identity and authorization",
+        "audit and security events",
+        "document export bytes",
+        "work-order attachment bytes"
+      ],
+      "backup": [
+        "automated backup",
+        "point-in-time recovery logs",
+        "daily encrypted custom-format logical dump"
+      ],
+      "retention": "PITR 7 days; daily backups 30 days; company weekly copy",
+      "recovery_dependency": ["database schema release", "migration revision"],
+      "owner": "company production project"
+    },
+    {
+      "id": "private-object-storage",
+      "system_of_record": "Cloud Storage after Phase 11.7",
+      "contains": ["new attachment objects", "new immutable PDF objects"],
+      "backup": ["soft delete", "retention policy", "object manifest and SHA-256"],
+      "retention": "30-day recovery window; lifecycle policy requires approval",
+      "recovery_dependency": ["database object metadata", "object generation"],
+      "owner": "company production project"
+    },
+    {
+      "id": "application-release",
+      "system_of_record": "private Git repository and signed release artifact",
+      "contains": ["source", "migration code", "deployment configuration templates"],
+      "backup": ["remote Git", "release tag", "offline Git bundle"],
+      "retention": "all production releases",
+      "recovery_dependency": ["release tag", "dependency lockfiles"],
+      "owner": "company and maintainer"
+    },
+    {
+      "id": "production-secrets",
+      "system_of_record": "Secret Manager",
+      "contains": [
+        "DATABASE_URL",
+        "CSRF_HMAC_KEY",
+        "AUTH_SECURITY_HMAC_KEY",
+        "backup encryption key reference"
+      ],
+      "backup": ["version metadata", "break-glass recovery and rotation procedure"],
+      "retention": "disabled-before-destroyed; rotation history per procedure",
+      "recovery_dependency": ["least-privilege IAM", "company break-glass owner"],
+      "owner": "company security administrator"
+    },
+    {
+      "id": "structured-operations-logs",
+      "system_of_record": "central cloud log service",
+      "contains": ["safe access logs", "application errors", "backup job results"],
+      "backup": ["central retention and export policy"],
+      "retention": "30 days searchable; longer export requires company approval",
+      "recovery_dependency": ["Request ID correlation"],
+      "owner": "company production project"
+    }
+  ]
+}

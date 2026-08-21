@@ -1,5 +1,6 @@
 """Server-generated request ID contract."""
 
+import json
 import logging
 from typing import Annotated
 from uuid import UUID
@@ -57,13 +58,18 @@ def test_unexpected_error_log_and_response_share_safe_request_id(
 ) -> None:
     client = _client()
 
-    with caplog.at_level(logging.ERROR, logger="app.core.errors"):
+    with caplog.at_level(logging.ERROR, logger="app.application"):
         response = client.get("/_test/unexpected")
 
     request_id = UUID(response.headers[REQUEST_ID_HEADER])
-    record = next(item for item in caplog.records if item.message == "Unhandled API error")
+    record = next(item for item in caplog.records if item.name == "app.application")
+    payload = json.loads(record.message)
     assert response.status_code == 500
-    assert record.request_id == str(request_id)
-    assert record.exception_type == "RuntimeError"
+    assert payload == {
+        "event": "application_error",
+        "exception_type": "RuntimeError",
+        "request_id": str(request_id),
+        "timestamp": payload["timestamp"],
+    }
     assert "synthetic secret" not in caplog.text
     assert "synthetic secret" not in response.text

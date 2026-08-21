@@ -9,6 +9,7 @@ from fastapi.security import APIKeyCookie
 from pydantic import SecretStr
 from sqlalchemy.orm import Session as OrmSession
 
+from app.core.access_logging import AccessActor, attach_access_actor
 from app.core.database.session import get_database_session
 from app.core.errors import ApplicationError
 from app.modules.auth.cookies import CSRF_COOKIE_NAME, SESSION_COOKIE_NAME
@@ -54,6 +55,7 @@ def require_session_cookie(
 
 
 def require_current_session(
+    request: Request,
     raw_session_token: Annotated[SecretStr, Depends(require_session_cookie)],
     database_session: Annotated[OrmSession, Depends(get_database_session)],
 ) -> AuthenticatedSession:
@@ -62,6 +64,15 @@ def require_current_session(
     context = get_active_session(database_session, raw_token=raw_session_token)
     if context is None:
         raise authentication_error()
+    attach_access_actor(
+        request,
+        actor=AccessActor(
+            organization_id=context.organization_id,
+            user_id=context.user_id,
+            organization_member_id=context.organization_member_id,
+            session_id=context.session_id,
+        ),
+    )
     return context
 
 

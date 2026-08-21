@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import logging
 from collections.abc import Mapping
 from typing import Any
 
@@ -13,9 +12,8 @@ from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
+from app.core.access_logging import emit_application_error, mark_request_error
 from app.core.request_context import REQUEST_ID_HEADER, current_request_id
-
-logger = logging.getLogger(__name__)
 
 _PUBLIC_HTTP_HEADERS = frozenset(
     {
@@ -208,9 +206,10 @@ def register_exception_handlers(app: FastAPI) -> None:
 
     @app.exception_handler(ApplicationError)
     async def application_error_handler(
-        _request: Request,
+        request: Request,
         exc: ApplicationError,
     ) -> JSONResponse:
+        mark_request_error(request, error_code=exc.code)
         return error_response(
             status_code=exc.status_code,
             code=exc.code,
@@ -221,9 +220,10 @@ def register_exception_handlers(app: FastAPI) -> None:
 
     @app.exception_handler(RequestValidationError)
     async def request_validation_error_handler(
-        _request: Request,
+        request: Request,
         exc: RequestValidationError,
     ) -> JSONResponse:
+        mark_request_error(request, error_code="VALIDATION_ERROR")
         return error_response(
             status_code=422,
             code="VALIDATION_ERROR",
@@ -233,12 +233,14 @@ def register_exception_handlers(app: FastAPI) -> None:
 
     @app.exception_handler(StarletteHTTPException)
     async def http_error_handler(
-        _request: Request,
+        request: Request,
         exc: StarletteHTTPException,
     ) -> JSONResponse:
+        error_code = _http_error_code(exc.status_code)
+        mark_request_error(request, error_code=error_code)
         return error_response(
             status_code=exc.status_code,
-            code=_http_error_code(exc.status_code),
+            code=error_code,
             message=_http_error_message(exc.status_code),
             headers=_safe_http_headers(exc.headers),
         )
@@ -249,12 +251,10 @@ def register_exception_handlers(app: FastAPI) -> None:
         exc: Exception,
     ) -> JSONResponse:
         request_id = getattr(request.state, "request_id", None)
-        logger.error(
-            "Unhandled API error",
-            extra={
-                "exception_type": type(exc).__name__,
-                "request_id": str(request_id) if request_id is not None else None,
-            },
+        mark_request_error(request, error_code="INTERNAL_SERVER_ERROR")
+        emit_application_error(
+            request_id=request_id,
+            exception_type=type(exc).__name__,
         )
         return error_response(
             status_code=500,

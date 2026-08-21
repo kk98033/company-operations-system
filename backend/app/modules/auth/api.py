@@ -8,6 +8,7 @@ from fastapi import APIRouter, Depends, Request, Response, status
 from pydantic import SecretStr
 from sqlalchemy.orm import Session as OrmSession
 
+from app.core.access_logging import AccessActor, attach_access_actor
 from app.core.database.session import get_database_session
 from app.core.errors import ApplicationError
 from app.core.request_context import require_request_id
@@ -124,6 +125,15 @@ def build_auth_router() -> APIRouter:
             database_session,
             organization_member_id=result.organization_member_id,
             organization_id=result.organization_id,
+        )
+        attach_access_actor(
+            request,
+            actor=AccessActor(
+                organization_id=result.organization_id,
+                user_id=result.user_id,
+                organization_member_id=result.organization_member_id,
+                session_id=result.session_id,
+            ),
         )
         return LoginResponse(
             expires_at=result.expires_at,
