@@ -59,7 +59,7 @@
 | 計畫版本 | v1.33（Phase 11.5 access log 與 11.6 正式部署／備份基線） |
 | 架構版本 | v1.31（structured access log 與正式 Cloud SQL／備份基線） |
 | 目前階段 | Phase 10 的 10.3 apply 被 11 類來源例外阻擋；並行執行 Phase 11 安全工作，已完成 11.2～11.5，11.6 技術基線完成但付費成本簽認未執行 |
-| 目前切片 | DOCS-REFERENCE-REMOTE-001：目前進度與公開安全版參考資料庫已整理，準備建立 GitHub 遠端備份；業務實作基準仍為 SEC-ACCESS-BACKUP-BASELINE-001 |
+| 目前切片 | DOCS-REFERENCE-REMOTE-001：目前進度與公開安全版參考資料庫已整理並推送 GitHub；業務實作基準仍為 SEC-ACCESS-BACKUP-BASELINE-001 |
 | 實作完成度 | Phase 0：完成；Import I-0：3／3；Phase 1：9／9；Phase 2：10／10；Phase 3：8／8；Phase 4：18／18；Phase 5：12／12；Phase 6：10／10；Phase 7：9／9；Phase 8：10／10；Phase 9：6／6；Phase 10：2／9；Phase 11：4／13（11.6 technical baseline ready） |
 | 規劃文件完成度 | 100% |
 | 最新中型進度備份 | Git tag `checkpoint-phase-9` 與專案外 bundle；Phase 11 Gate 尚未完成 |
