@@ -29,6 +29,7 @@
 14. [本機開發與 Git 備份規範](docs/本機開發與Git備份規範.md)
 15. [風險與決策紀錄](docs/風險與決策紀錄.md)
 16. [詳細實作進度紀錄](docs/progress/實作進度紀錄.md)
+17. [公司系統說明與參考資料庫](reference-library/README.md)
 
 原始分析證據保留在專案外層的 `../analysis/` 與 `../extraction/`。新版程式不得直接修改這些原始分析或匯出資料。
 
@@ -54,17 +55,19 @@
 
 | 項目 | 目前狀態 |
 |---|---|
-| 最後更新日期 | 2026-08-21 |
+| 最後更新日期 | 2026-10-12 |
 | 計畫版本 | v1.33（Phase 11.5 access log 與 11.6 正式部署／備份基線） |
 | 架構版本 | v1.31（structured access log 與正式 Cloud SQL／備份基線） |
 | 目前階段 | Phase 10 的 10.3 apply 被 11 類來源例外阻擋；並行執行 Phase 11 安全工作，已完成 11.2～11.5，11.6 技術基線完成但付費成本簽認未執行 |
-| 目前切片 | SEC-ACCESS-BACKUP-BASELINE-001：structured access log 已完成；Cloud SQL HA／RPO／RTO／inventory 已定，未建立付費資源 |
+| 目前切片 | DOCS-REFERENCE-REMOTE-001：目前進度與公開安全版參考資料庫已整理，準備建立 GitHub 遠端備份；業務實作基準仍為 SEC-ACCESS-BACKUP-BASELINE-001 |
 | 實作完成度 | Phase 0：完成；Import I-0：3／3；Phase 1：9／9；Phase 2：10／10；Phase 3：8／8；Phase 4：18／18；Phase 5：12／12；Phase 6：10／10；Phase 7：9／9；Phase 8：10／10；Phase 9：6／6；Phase 10：2／9；Phase 11：4／13（11.6 technical baseline ready） |
 | 規劃文件完成度 | 100% |
 | 最新中型進度備份 | Git tag `checkpoint-phase-9` 與專案外 bundle；Phase 11 Gate 尚未完成 |
-| 正式遠端 Git 備份 | 尚未設定；R-11 維持 Open，正式部署前必須建立私人 repository |
+| 正式遠端 Git 備份 | 已指定公開 GitHub repository `kk98033/company-operations-system`；只允許程式與公開安全資料。正式敏感資料仍不得進 Git，若需保存內部原始素材須另建私人儲存空間 |
 
 ### 已完成
+
+- 完成 DOCS-REFERENCE-REMOTE-001：新增 [公司系統說明與參考資料庫](reference-library/README.md)，集中整理專案基準、系統規格、ADR、舊系統／需求分析、Gmail 版面參考、目前進度摘要與兩支可播放的重建參考 MP4。原始手機錄影不在工作區，影片由既有音軌與畫面索引重新封裝並明確標示限制。因目標 GitHub repository 為公開 repo，正式客戶／交易資料、DB／CSV／XLSX、Secret、原始可辨識影像、模型權重、暫存輸出與 Git bundle 均不收錄。
 
 - 完成 Phase 11 Slice 11.5／SEC-ACCESS-BACKUP-BASELINE-001：每個 HTTP request 都由全域 middleware 輸出一筆 machine-parseable JSON，allowlist 只有 timestamp、server Request ID、method、route template、status、duration、response size、slow flag、穩定 error code 與已驗證的 organization／user／membership／internal Session reference。404 使用 `<unmatched>`；不讀實際 path value、query、body、Cookie、CSRF、token、密碼、DSN、附件或 exception message。未固定 trusted proxy 前不採信 forwarded IP，中央 collector／通知 channel 留 11.8。另完成 11.6 [正式部署與備份技術基線](docs/正式部署與備份基線.md)：同一 release、每家公司獨立 project／部署／DB／object storage／Secret／備份，A 公司採 Cloud SQL PostgreSQL regional HA＋PITR＋每日加密 logical dump；機器可讀 inventory 不含 Secret value。209 個非 DB 與 125 個隔離 PostgreSQL tests 通過。RPO 15 分鐘／RTO 4 小時仍待 11.12 實測，尚未建立或計費任何雲端資源。
 
